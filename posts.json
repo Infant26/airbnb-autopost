@@ -250,14 +250,15 @@
     },
     {
       "id": "2026-11-01-horizon-suite-reel",
-      "status": "scheduled",
+      "status": "posted",
       "type": "reel",
       "publish_at": "2026-10-25T23:13:04+05:30",
       "media": [
         "media/ig/2026-11-01-horizon-suite-reel/reel.mp4"
       ],
       "caption": "Book Horizon Suite at thecoastalcalm.com or call +91 88704 67560.\n\nA whole 2nd floor in White Town, Pondicherry, two minutes' walk from Rock Beach. Two air-conditioned bedrooms, your own kitchen, a deep-soak tub, and the rooftop with string lights upstairs, shared with the floor below.\n\nSleeps 4. Families book it most, and we're couple friendly and pet friendly too.\n\n#pondicherry #whitetown #pondicherrystay",
-      "last_error": "POST 17841439385217373/media failed (400): Cannot call API for app 1617036366574778 on behalf of user 122102437689519012"
+      "media_id": "17977033379935161",
+      "posted_at": "2026-10-25T17:55:50+00:00"
     },
     {
       "id": "2026-11-02-horizon-suite-tub",
