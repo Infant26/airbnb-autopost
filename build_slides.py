@@ -2,6 +2,7 @@
 """Render each post's "slides" in posts.json into 1080x1350 JPEGs.
 
 Each slide is {"photo": "media/...", "kicker": ..., "title": ..., "sub": ...}.
+Leave out "photo" for a text-only slide; add "items": [...] for a numbered list.
 Output goes to media/ig/<post id>/NN.jpg and the post's "media" list is
 rewritten to point at those files. Posts already "posted" are left alone.
 
@@ -23,6 +24,7 @@ QUEUE = os.path.join(HERE, "posts.json")
 OUT = os.path.join(HERE, "media", "ig")
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 HANDLE = "@the_coastal_calm"
+CONTACT = "thecoastalcalm.com · +91 88704 67560"
 
 TEMPLATE = """<!doctype html>
 <html><head><meta charset="utf-8"><style>
@@ -41,25 +43,57 @@ TEMPLATE = """<!doctype html>
     <div class="kicker">{kicker}</div>
     <div class="title">{title}</div>
     <div class="sub">{sub}</div>
-    <div class="foot"><span>{handle}</span><span>{counter}</span></div>
+    <div class="foot"><span>{handle} · {contact}</span><span>{counter}</span></div>
   </div>
 </body></html>
 """
 
 
+TEXT_TEMPLATE = """<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  html, body {{ width: 1080px; height: 1350px; overflow: hidden; }}
+  body {{ background: #f4eee4; color: #22302e; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+         padding: 150px 120px 120px; display: flex; flex-direction: column; }}
+  .rule {{ width: 96px; height: 6px; background: #2f6b64; margin-bottom: 48px; }}
+  .kicker {{ font-size: 30px; letter-spacing: 6px; text-transform: uppercase; color: #2f6b64; font-weight: 600; }}
+  .title {{ font-family: Georgia, "Times New Roman", serif; font-size: 92px; line-height: 1.08; margin-top: 36px; }}
+  .sub {{ font-size: 40px; line-height: 1.4; color: #5b6664; margin-top: 40px; }}
+  ol {{ margin-top: 44px; padding-left: 0; list-style: none; counter-reset: n; }}
+  li {{ counter-increment: n; font-size: 42px; line-height: 1.3; padding: 18px 0; border-bottom: 2px solid #e2d8c8; }}
+  li::before {{ content: counter(n); color: #2f6b64; font-weight: 600; display: inline-block; width: 64px; }}
+  .foot {{ margin-top: auto; display: flex; justify-content: space-between; font-size: 28px; color: #8a8f8b; }}
+</style></head><body>
+  <div class="rule"></div>
+  <div class="kicker">{kicker}</div>
+  <div class="title">{title}</div>
+  <div class="sub">{sub}</div>
+  {items}
+  <div class="foot"><span>{handle} · {contact}</span><span>{counter}</span></div>
+</body></html>
+"""
+
+
 def render(slide, index, total, out_path, tmp):
-    photo = os.path.join(HERE, slide["photo"])
-    if not os.path.exists(photo):
-        raise SystemExit("missing photo: %s" % slide["photo"])
-    page = TEMPLATE.format(
-        photo="file://" + photo.replace('"', "%22"),
+    fields = dict(
         kicker=html.escape(slide.get("kicker", "")),
         title=html.escape(slide["title"]),
         sub=html.escape(slide.get("sub", "")),
         handle=HANDLE,
+        contact=CONTACT,
         counter="%d/%d" % (index, total) if total > 1 else "",
-        title_size=84 if index == 1 else 68,
     )
+    if slide.get("photo"):
+        photo = os.path.join(HERE, slide["photo"])
+        if not os.path.exists(photo):
+            raise SystemExit("missing photo: %s" % slide["photo"])
+        page = TEMPLATE.format(photo="file://" + photo.replace('"', "%22"),
+                               title_size=84 if index == 1 else 68, **fields)
+    else:
+        items = slide.get("items") or []
+        fields["items"] = ("<ol>%s</ol>" % "".join("<li>%s</li>" % html.escape(i) for i in items)
+                           if items else "")
+        page = TEXT_TEMPLATE.format(**fields)
     page_path = os.path.join(tmp, "slide.html")
     png_path = os.path.join(tmp, "slide.png")
     with open(page_path, "w") as f:
