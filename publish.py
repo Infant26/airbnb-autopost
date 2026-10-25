@@ -10,7 +10,7 @@ Env:
   IG_USER_ID        Instagram professional account id
   MEDIA_BASE_URL    Public base URL that relative media paths are joined to
   IG_API_HOST       graph.facebook.com (default) or graph.instagram.com
-  IG_API_VERSION    default v21.0
+  IG_API_VERSION    default v26.0
 
 Usage:
   python3 publish.py              publish the next due post
@@ -39,7 +39,7 @@ MAX_HASHTAGS = 30
 
 def api_base():
     host = os.environ.get("IG_API_HOST", "graph.facebook.com")
-    version = os.environ.get("IG_API_VERSION", "v21.0")
+    version = os.environ.get("IG_API_VERSION", "v26.0")
     return "https://%s/%s" % (host, version)
 
 
