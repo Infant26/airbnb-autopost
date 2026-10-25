@@ -5,3 +5,8 @@ media/ground-floor/
 media/1st-floor/
 media/2nd-floor/
 media/site/
+reels/**/assets/
+reels/**/renders/
+reels/**/.hyperframes/
+reels/**/audio_meta.json
+reels/**/bgm_status.json
