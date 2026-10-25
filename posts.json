@@ -1,0 +1,12 @@
+{
+  "posts": [
+    {
+      "id": "example-welcome",
+      "status": "draft",
+      "type": "image",
+      "publish_at": "2026-11-01T18:00:00+05:30",
+      "media": ["media/example.jpg"],
+      "caption": "Example post. Replace with real photos and captions. Drafts are never published; set status to \"scheduled\" to queue a post."
+    }
+  ]
+}

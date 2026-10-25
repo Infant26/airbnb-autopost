@@ -1,0 +1,38 @@
+name: Post to Instagram
+
+on:
+  schedule:
+    - cron: "15 * * * *"   # hourly; posts go out within ~1h of publish_at
+  workflow_dispatch:
+
+concurrency:
+  group: instagram-post
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Publish next due post
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_API_HOST: ${{ vars.IG_API_HOST || 'graph.facebook.com' }}
+          MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}
+        run: python3 publish.py
+      - name: Save post status
+        if: always()
+        run: |
+          if ! git diff --quiet posts.json; then
+            git config user.name "instagram-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Update post status" posts.json
+            git push
+          fi
