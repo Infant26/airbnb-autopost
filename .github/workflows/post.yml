@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "15 * * * *"   # hourly; posts go out within ~1h of publish_at
   workflow_dispatch:
+    inputs:
+      check:
+        description: "Only test the token and queue, don't post"
+        type: boolean
+        default: false
 
 concurrency:
   group: instagram-post
@@ -26,7 +31,7 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_API_HOST: ${{ vars.IG_API_HOST || 'graph.facebook.com' }}
           MEDIA_BASE_URL: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}
-        run: python3 publish.py
+        run: python3 publish.py ${{ inputs.check && '--check' || '' }}
       - name: Save post status
         if: always()
         run: |
