@@ -1,12 +1,249 @@
 {
   "posts": [
     {
-      "id": "example-welcome",
-      "status": "draft",
+      "id": "2026-10-27-horizon-suite-tour",
+      "status": "scheduled",
+      "type": "carousel",
+      "publish_at": "2026-10-27T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-10-27-horizon-suite-tour/01.jpg",
+        "media/ig/2026-10-27-horizon-suite-tour/02.jpg",
+        "media/ig/2026-10-27-horizon-suite-tour/03.jpg",
+        "media/ig/2026-10-27-horizon-suite-tour/04.jpg",
+        "media/ig/2026-10-27-horizon-suite-tour/05.jpg",
+        "media/ig/2026-10-27-horizon-suite-tour/06.jpg",
+        "media/ig/2026-10-27-horizon-suite-tour/07.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/2nd-floor/2nd floor hall1.jpeg",
+          "kicker": "Horizon Suite · 2nd floor",
+          "title": "A whole floor to yourselves",
+          "sub": "2BHK · up to 4 guests · White Town, Pondicherry"
+        },
+        {
+          "photo": "media/2nd-floor/2nd floor master bedroom2.jpeg",
+          "kicker": "Master bedroom",
+          "title": "Room to spread out",
+          "sub": "Air-conditioned, with a rocking chair for slow mornings"
+        },
+        {
+          "photo": "media/2nd-floor/2nd floor 2nd bedroom2.jpeg",
+          "kicker": "Second bedroom",
+          "title": "One for the kids",
+          "sub": "Or the grandparents. Also air-conditioned."
+        },
+        {
+          "photo": "media/2nd-floor/2nd floor bathroom1.png",
+          "kicker": "Only on this floor",
+          "title": "The deep-soak tub",
+          "sub": "For the evening after a day on the beach"
+        },
+        {
+          "photo": "media/2nd-floor/2nd floor kitchen1.jpeg",
+          "kicker": "Your own kitchen",
+          "title": "Cook if you feel like it",
+          "sub": "Induction, microwave, fridge and water purifier"
+        },
+        {
+          "photo": "media/2nd-floor/Terrace.jpg",
+          "kicker": "Upstairs",
+          "title": "The rooftop terrace",
+          "sub": "String lights and plants, shared with the floor below"
+        },
+        {
+          "photo": "media/2nd-floor/terrace5.jpeg",
+          "kicker": "Location",
+          "title": "2 minutes to Rock Beach",
+          "sub": "Book Horizon Suite at thecoastalcalm.com (link in bio)"
+        }
+      ],
+      "caption": "A whole floor to yourselves, two minutes' walk from Rock Beach.\n\nHorizon Suite is the 2nd floor of our house in White Town, Pondicherry. Two air-conditioned bedrooms, a living hall, your own kitchen. And a deep-soak tub for after the beach.\n\nIt sleeps 4. Families book it most, and we're couple friendly and pet friendly too.\n\nUpstairs you'll find the rooftop terrace with string lights, shared with the floor below.\n\nBook Horizon Suite through the link in bio.\n\n#pondicherry #whitetown #pondicherrystay"
+    },
+    {
+      "id": "2026-10-29-garden-floor-tour",
+      "status": "scheduled",
+      "type": "carousel",
+      "publish_at": "2026-10-29T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-10-29-garden-floor-tour/01.jpg",
+        "media/ig/2026-10-29-garden-floor-tour/02.jpg",
+        "media/ig/2026-10-29-garden-floor-tour/03.jpg",
+        "media/ig/2026-10-29-garden-floor-tour/04.jpg",
+        "media/ig/2026-10-29-garden-floor-tour/05.jpg",
+        "media/ig/2026-10-29-garden-floor-tour/06.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/ground-floor/ground floor hall2.jpeg",
+          "kicker": "Garden Floor · ground floor",
+          "title": "A quiet 1BHK, all yours",
+          "sub": "Up to 3 guests · White Town, Pondicherry"
+        },
+        {
+          "photo": "media/ground-floor/ground floor hall1.jpeg",
+          "kicker": "Living hall",
+          "title": "Teak, jute and quiet",
+          "sub": "Somewhere to sit after the beach"
+        },
+        {
+          "photo": "media/ground-floor/ground floor bedroom1.jpeg",
+          "kicker": "Bedroom",
+          "title": "Sleeps three",
+          "sub": "A double and a single, air-conditioned"
+        },
+        {
+          "photo": "media/ground-floor/ground floor kitchen1.jpeg",
+          "kicker": "Your own kitchen",
+          "title": "Breakfast at your own table",
+          "sub": "Induction, microwave and water purifier"
+        },
+        {
+          "photo": "media/ground-floor/ground floor hall3.jpeg",
+          "kicker": "Good to know",
+          "title": "Couples and pets welcome",
+          "sub": "No smoking indoors, that's the main rule"
+        },
+        {
+          "photo": "media/ground-floor/ground floor bedroom2.jpeg",
+          "kicker": "Location",
+          "title": "2 minutes to Rock Beach",
+          "sub": "Book the Garden Floor at thecoastalcalm.com (link in bio)"
+        }
+      ],
+      "caption": "Our Garden Floor sleeps three, and nobody shares it with you.\n\nIt's the ground floor of our house in White Town, Pondicherry. Rock Beach is two minutes away on foot. You get one air-conditioned bedroom with a double and a single bed, a living hall, and your own kitchen and dining table.\n\nGood for a couple, or a couple with a child. We're couple friendly. Pets are welcome too.\n\nBook the Garden Floor through the link in bio.\n\n#pondicherry #whitetown #pondicherrystay"
+    },
+    {
+      "id": "2026-10-31-verandah-floor-tour",
+      "status": "scheduled",
+      "type": "carousel",
+      "publish_at": "2026-10-31T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-10-31-verandah-floor-tour/01.jpg",
+        "media/ig/2026-10-31-verandah-floor-tour/02.jpg",
+        "media/ig/2026-10-31-verandah-floor-tour/03.jpg",
+        "media/ig/2026-10-31-verandah-floor-tour/04.jpg",
+        "media/ig/2026-10-31-verandah-floor-tour/05.jpg",
+        "media/ig/2026-10-31-verandah-floor-tour/06.jpg",
+        "media/ig/2026-10-31-verandah-floor-tour/07.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/1st-floor/1st floor hall2.jpeg",
+          "kicker": "Verandah Floor · 1st floor",
+          "title": "Two bedrooms, one floor, just you",
+          "sub": "2BHK · up to 4 guests · White Town, Pondicherry"
+        },
+        {
+          "photo": "media/1st-floor/1st floor master bedroom2.jpeg",
+          "kicker": "Master bedroom",
+          "title": "The big room",
+          "sub": "Air-conditioned, with plenty of space for bags and kids"
+        },
+        {
+          "photo": "media/1st-floor/1st floor 2nd bedroom1.jpeg",
+          "kicker": "Second bedroom",
+          "title": "Warm light, green plants",
+          "sub": "Also air-conditioned"
+        },
+        {
+          "photo": "media/1st-floor/1st floor kitchen1.jpeg",
+          "kicker": "Your own kitchen",
+          "title": "Milk, tea, a late snack",
+          "sub": "Induction, microwave and water purifier"
+        },
+        {
+          "photo": "media/1st-floor/1st floor hall1.jpeg",
+          "kicker": "Made for families",
+          "title": "Kids get a room, you get yours",
+          "sub": "Couple friendly and pet friendly too"
+        },
+        {
+          "photo": "media/1st-floor/terrace5.jpeg",
+          "kicker": "Upstairs",
+          "title": "Sunsets on the roof",
+          "sub": "The rooftop terrace, shared with the floor above"
+        },
+        {
+          "photo": "media/1st-floor/1st floor 2nd bedroom2.jpeg",
+          "kicker": "Location",
+          "title": "2 minutes to Rock Beach",
+          "sub": "Book the Verandah Floor at thecoastalcalm.com (link in bio)"
+        }
+      ],
+      "caption": "Two bedrooms, one floor, and no other guests in your hallway.\n\nThe Verandah Floor is the 1st floor of The Coastal Calm in White Town, Pondicherry, two minutes' walk from Rock Beach. Two air-conditioned bedrooms, a living hall and your own kitchen, for up to 4 guests.\n\nFamilies book it most. The kids get their room and you get yours. We're couple friendly and pet friendly too.\n\nEvenings are for the rooftop terrace upstairs, shared with the floor above.\n\nBook the Verandah Floor through the link in bio.\n\n#pondicherry #whitetown #familystay"
+    },
+    {
+      "id": "2026-11-02-horizon-suite-tub",
+      "status": "scheduled",
       "type": "image",
-      "publish_at": "2026-11-01T18:00:00+05:30",
-      "media": ["media/example.jpg"],
-      "caption": "Example post. Replace with real photos and captions. Drafts are never published; set status to \"scheduled\" to queue a post."
+      "publish_at": "2026-11-02T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-11-02-horizon-suite-tub/01.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/2nd-floor/2nd floor bathroom1.png",
+          "kicker": "Horizon Suite · 2nd floor",
+          "title": "Beach in the morning, tub in the evening",
+          "sub": "The deep-soak tub, only on our 2nd floor"
+        }
+      ],
+      "caption": "Beach in the morning, a long soak in the evening.\n\nOur deep-soak tub is on the 2nd floor, in the Horizon Suite. Only one floor has it. Rock Beach is a two-minute walk from the door, so the sand doesn't follow you far.\n\nHorizon Suite sleeps up to 4 across two air-conditioned bedrooms, with its own kitchen and living hall, in White Town, Pondicherry.\n\nBook it through the link in bio.\n\n#pondicherry #whitetown #pondicherrystay"
+    },
+    {
+      "id": "2026-11-04-garden-floor-couples",
+      "status": "scheduled",
+      "type": "image",
+      "publish_at": "2026-11-04T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-11-04-garden-floor-couples/01.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/ground-floor/ground floor bedroom2.jpeg",
+          "kicker": "Garden Floor · ground floor",
+          "title": "Yes, we're couple friendly",
+          "sub": "Your own 1BHK, two minutes from Rock Beach"
+        }
+      ],
+      "caption": "Yes, we're couple friendly.\n\nThe Garden Floor is a quiet 1BHK on the ground floor of The Coastal Calm in White Town, Pondicherry. Your own bedroom, living hall and kitchen, and Rock Beach is two minutes away on foot.\n\nNo shared spaces with other guests. Just the two of you and the walk to the sea.\n\nBook the Garden Floor through the link in bio.\n\n#pondicherry #whitetown #couplefriendly"
+    },
+    {
+      "id": "2026-11-06-verandah-floor-pets",
+      "status": "scheduled",
+      "type": "image",
+      "publish_at": "2026-11-06T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-11-06-verandah-floor-pets/01.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/1st-floor/1st floor master bedroom1.jpeg",
+          "kicker": "Verandah Floor · 1st floor",
+          "title": "Bring your pet",
+          "sub": "The Coastal Calm is pet friendly"
+        }
+      ],
+      "caption": "Your pet is welcome here.\n\nThe Coastal Calm is pet friendly, so the whole family can come to Pondicherry. The Verandah Floor gives you two air-conditioned bedrooms, a living hall and your own kitchen in White Town, two minutes' walk from Rock Beach.\n\nBook the Verandah Floor through the link in bio, and tell us about your pet.\n\n#pondicherry #whitetown #petfriendlystay"
+    },
+    {
+      "id": "2026-11-08-upper-house",
+      "status": "scheduled",
+      "type": "image",
+      "publish_at": "2026-11-08T19:00:00+05:30",
+      "media": [
+        "media/ig/2026-11-08-upper-house/01.jpg"
+      ],
+      "slides": [
+        {
+          "photo": "media/2nd-floor/Terrace.jpg",
+          "kicker": "Whole Upper House",
+          "title": "Book both floors, keep the rooftop",
+          "sub": "4 bedrooms · up to 8 guests · terrace just for your group"
+        }
+      ],
+      "caption": "Book both upper floors and the rooftop is yours alone.\n\nThe Upper House is our Verandah Floor and Horizon Suite together. Four air-conditioned bedrooms, two kitchens, two living halls. And the terrace with string lights, just for your group.\n\nUp to 8 guests. Two minutes' walk from Rock Beach in White Town, Pondicherry. We set it up for big families and friends travelling together.\n\nBook the Upper House through the link in bio.\n\n#pondicherry #whitetown #groupstay"
     }
   ]
 }

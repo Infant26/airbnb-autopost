@@ -1,3 +1,7 @@
 .DS_Store
 .env
 __pycache__/
+media/ground-floor/
+media/1st-floor/
+media/2nd-floor/
+media/site/
