@@ -130,6 +130,16 @@
       "posted_at": "2026-10-26T12:59:52+00:00"
     },
     {
+      "id": "2026-10-31-verandah-floor-reel",
+      "status": "scheduled",
+      "type": "reel",
+      "publish_at": "2026-10-27T12:30:00+05:30",
+      "media": [
+        "media/ig/2026-10-31-verandah-floor-reel/reel.mp4"
+      ],
+      "caption": "Book the Verandah Floor at thecoastalcalm.com or call +91 88704 67560.\n\nIt's the whole 1st floor of our house in White Town, Pondicherry, with two air-conditioned bedrooms, a living hall and your own kitchen, so the kids get their own room and nobody else walks through your space.\n\nSleeps 4. Dogs welcome. Couples too.\n\nUpstairs there's a rooftop with string lights, shared with the floor above, and Rock Beach is two minutes away on foot.\n\n#pondicherry #whitetown #familystay"
+    },
+    {
       "id": "2026-10-27-horizon-suite-tour",
       "status": "scheduled",
       "type": "carousel",
