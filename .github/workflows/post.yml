@@ -2,7 +2,7 @@ name: Post to Instagram
 
 on:
   schedule:
-    - cron: "15 * * * *"   # hourly; posts go out within ~1h of publish_at
+    - cron: "*/10 * * * *"   # GitHub skips many scheduled runs, so ask often
   workflow_dispatch:
     inputs:
       check:
