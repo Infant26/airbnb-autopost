@@ -34,7 +34,7 @@ QUEUE = os.path.join(HERE, "posts.json")
 IMAGE_EXT = (".jpg", ".jpeg")
 VIDEO_EXT = (".mp4", ".mov")
 MAX_CAPTION = 2200
-MAX_HASHTAGS = 30
+MAX_HASHTAGS = 5  # Instagram's cap since December 2025
 
 
 def api_base():
