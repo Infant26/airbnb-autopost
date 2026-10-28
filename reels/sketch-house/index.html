@@ -1,0 +1,505 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Sketch to home reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #f4efe4; font-family: Inter; }
+      #paper { position: absolute; inset: 0; background-color: #f4efe4;
+        background-image: repeating-linear-gradient(0deg, rgba(47, 91, 85, 0.07) 0 2px, transparent 2px 60px),
+                          repeating-linear-gradient(90deg, rgba(47, 91, 85, 0.07) 0 2px, transparent 2px 60px); }
+      #night { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 90% 60% at 50% 62%, #1d2c28 0%, #0d1715 70%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 30px; letter-spacing: 7px;
+        text-transform: uppercase; color: #9a6a14; }
+      .big { position: absolute; left: 60px; right: 60px; text-align: center; font-weight: 700; letter-spacing: -3px; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .cream { color: #f6f2ea; } .ink { color: #1d2c28; } .gold { color: #e0ad4f; }
+      .x3d { text-shadow: 0 2px 0 #c9b98f, 0 4px 0 #ad9b6e, 0 6px 0 #8f7d50, 0 8px 0 #6f5f34, 0 10px 0 #4f421f, 0 26px 40px rgba(0, 0, 0, 0.55); }
+      .x3dk { text-shadow: 0 2px 0 #c3bba9, 0 4px 0 #aaa18d, 0 6px 0 #918872, 0 8px 0 #786f59, 0 22px 34px rgba(29, 44, 40, 0.35); }
+      .stamp { position: absolute; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #b8452f;
+        border: 7px solid #b8452f; border-radius: 14px; padding: 14px 24px 10px; opacity: 0; }
+      .chip { position: absolute; font-weight: 700; font-size: 34px; color: #1d2c28; background: #fffdf8; border-radius: 999px;
+        padding: 14px 28px 10px; box-shadow: 0 16px 34px -14px rgba(20, 35, 30, 0.5); opacity: 0; }
+      .toast { position: absolute; left: 90px; width: 760px; height: 128px; border-radius: 28px; background: rgba(255, 253, 248, 0.96);
+        box-shadow: 0 26px 60px -24px rgba(0, 0, 0, 0.6); display: flex; align-items: center; gap: 24px; padding: 0 28px;
+        box-sizing: border-box; opacity: 0; }
+      .toast .ic { width: 74px; height: 74px; border-radius: 20px; flex: none; display: flex; align-items: center; justify-content: center;
+        font-size: 40px; font-weight: 700; color: #fff; }
+      .toast b { display: block; font-size: 36px; color: #1d2c28; }
+      .toast span { display: block; font-size: 27px; color: #6a756f; margin-top: 6px; }
+      .month { width: 220px; height: 150px; border-radius: 18px; background: #fffdf8; box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.6);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; position: absolute; }
+      .month i { font-style: normal; font-size: 30px; font-weight: 700; letter-spacing: 3px; color: #6a756f; }
+      .month b { font-size: 34px; color: #2f6b5a; margin-top: 8px; opacity: 0; }
+      .photo { position: absolute; left: -320px; top: -240px; width: 640px; height: 480px; background-size: 100% 100%;
+        border-radius: 22px; border: 8px solid #fffdf8; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.8); }
+      .star { display: inline-block; font-size: 92px; color: #3a4a45; margin: 0 6px; }
+      /* the four build stages, shown along the bottom of the safe zone */
+      #stages { position: absolute; left: 90px; top: 790px; display: flex; gap: 12px; }
+      .stg { width: 175px; height: 64px; border-radius: 32px; border: 3px solid rgba(29, 44, 40, 0.25); box-sizing: border-box;
+        display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 24px; letter-spacing: 3px; color: #8a8577; }
+      #flash { position: absolute; inset: 0; background: #fff6e0; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="32.5"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="paper"></div>
+      <div id="night"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+
+      <div id="stages">
+        <div id="s1" class="stg">01 LINES</div><div id="s2" class="stg">02 MASS</div>
+        <div id="s3" class="stg">03 DETAIL</div><div id="s4" class="stg">04 HOME</div>
+      </div>
+
+      <!-- A. The problem, on screen from frame 1 while the pencil draws -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div class="kick" style="top: 250px">The problem</div>
+        <div class="big serif it ink" style="top: 300px; font-size: 84px">Moved out of Pondy?</div>
+        <div class="big serif it ink" style="top: 395px; font-size: 76px">Your house</div>
+        <div id="a-w" class="big ink x3dk" style="top: 480px; font-size: 140px">DIDN'T.</div>
+        <div id="a-s1" class="stamp" style="left: 90px; top: 660px; font-size: 44px; transform: rotate(-6deg); background: rgba(244,239,228,0.85)">Dust</div>
+        <div id="a-s2" class="stamp" style="left: 310px; top: 655px; font-size: 44px; transform: rotate(4deg); background: rgba(244,239,228,0.85)">Damp</div>
+        <div id="a-s3" class="stamp" style="left: 540px; top: 662px; font-size: 44px; transform: rotate(-5deg); background: rgba(244,239,228,0.85)">₹ Repairs</div>
+      </div>
+
+      <!-- B. The fix: hand us the keys -->
+      <div id="gB" class="grp">
+        <div class="kick" style="top: 250px">The fix</div>
+        <div id="b-t" class="big serif ink" style="top: 305px; font-size: 104px">Hand us <span class="it">the keys.</span></div>
+        <div id="b-s" class="big ink" style="top: 440px; font-size: 46px; font-weight: 500; letter-spacing: 0; opacity: 0">we turn it into a guest stay</div>
+      </div>
+
+      <!-- C. Beds, kitchen, lights? We pay. -->
+      <div id="gC" class="grp">
+        <div id="c-t" class="big serif ink" style="top: 265px; font-size: 86px">Beds, kitchen, lights?</div>
+        <div id="c-s" class="stamp" style="left: 330px; top: 410px; font-size: 84px; transform: rotate(-7deg); background: rgba(244,239,228,0.8)">We pay</div>
+        <div id="c-1" class="chip" style="left: 70px; top: 930px">Beds &amp; linen</div>
+        <div id="c-2" class="chip" style="left: 590px; top: 1040px">Kitchen</div>
+        <div id="c-3" class="chip" style="left: 60px; top: 1160px">Lights</div>
+        <div id="c-4" class="chip" style="left: 600px; top: 1280px">Sofa</div>
+      </div>
+
+      <!-- D. Upkeep? Also us. -->
+      <div id="gD" class="grp">
+        <div id="d-t" class="big serif cream" style="top: 250px; font-size: 104px">Upkeep? <span id="d-t2" class="it gold" style="opacity: 0">Also us.</span></div>
+        <div id="d-n1" class="toast" style="top: 430px"><div class="ic" style="background: #2f6b5a">✓</div><div><b>Deep clean done</b><span>Included, nothing to pay</span></div></div>
+        <div id="d-n2" class="toast" style="top: 580px"><div class="ic" style="background: #2f6b5a">✓</div><div><b>Leaking tap fixed</b><span>Included, handled by us</span></div></div>
+      </div>
+
+      <!-- E. One figure every month, no revenue share, your dates -->
+      <div id="gE" class="grp">
+        <div id="e-t1" class="big cream" style="top: 240px; font-size: 96px">One figure,</div>
+        <div id="e-t2" class="big serif it cream" style="top: 340px; font-size: 92px">every month.</div>
+        <div id="e-grid" style="position: absolute; left: 150px; top: 480px; width: 780px; height: 700px"></div>
+        <div id="e-wed" class="stamp" style="left: 360px; top: 1205px; font-size: 40px; transform: rotate(-8deg); background: #fffdf8">Your dates</div>
+        <div id="e-p1" style="position: absolute; left: 0; right: 0; top: 1200px; text-align: center; opacity: 0">
+          <span style="display: inline-block; font-weight: 700; font-size: 44px; color: #1d2c28; background: #e0ad4f; padding: 20px 36px 16px; border-radius: 999px">No revenue share</span>
+        </div>
+        <div id="e-p2" style="position: absolute; left: 0; right: 0; top: 1300px; text-align: center; opacity: 0">
+          <span style="display: inline-block; font-weight: 700; font-size: 44px; color: #f6f2ea; border: 3px solid #e0ad4f; padding: 17px 36px 13px; border-radius: 999px">No guessing</span>
+        </div>
+      </div>
+
+      <!-- F. Why us -->
+      <div id="gF" class="grp">
+        <div id="f-why" class="big serif cream" style="top: 250px; font-size: 104px">Why us?</div>
+        <div id="f-t" class="big serif it gold" style="top: 370px; font-size: 88px; opacity: 0">The Coastal Calm</div>
+        <div id="f-s" class="big cream" style="top: 475px; font-size: 40px; font-weight: 400; letter-spacing: 1px; opacity: 0">we already run it in White Town</div>
+        <div id="f-flow" style="position: absolute; left: 540px; top: 850px; perspective: 1700px">
+          <div id="f-p0" class="photo" style="background-image: url(assets/p-hall.jpg)"></div>
+          <div id="f-p1" class="photo" style="background-image: url(assets/p-bed.jpg)"></div>
+          <div id="f-p2" class="photo" style="background-image: url(assets/p-roof.jpg)"></div>
+        </div>
+        <div id="f-rate" style="position: absolute; left: 0; right: 0; top: 1120px; text-align: center; opacity: 0">
+          <div><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+          <div id="f-q" class="serif it cream" style="font-size: 50px; margin-top: 10px; padding: 0 120px">“Fell in love with the cozy home feel of the place.”</div>
+          <div style="font-size: 28px; color: #9fb3ad; margin-top: 12px">Dhanya Joseph, Airbnb guest</div>
+        </div>
+      </div>
+
+      <!-- G. Comment KEYS -->
+      <div id="gG" class="grp">
+        <div class="kick" style="top: 260px; color: #e0ad4f">Own a house in Pondy?</div>
+        <div id="g-t" class="big cream" style="top: 320px; font-size: 118px">Comment <span class="gold" style="text-shadow: 0 6px 0 #8f7d50">KEYS</span></div>
+        <div id="g-s" class="big serif it cream" style="top: 460px; font-size: 76px; opacity: 0">we'll message you</div>
+        <div id="g-bar" style="position: absolute; left: 90px; top: 600px; width: 760px; height: 116px; border-radius: 58px; background: #fffdf8;
+             box-shadow: 0 26px 60px -24px rgba(0,0,0,0.6); display: flex; align-items: center; padding: 0 22px 0 40px; box-sizing: border-box; opacity: 0">
+          <div style="width: 60px; height: 60px; border-radius: 50%; background: #2f6b5a; flex: none; margin-right: 24px"></div>
+          <div id="g-typed" style="flex: 1; font-size: 46px; font-weight: 700; color: #1d2c28; white-space: nowrap; overflow: hidden">KEYS</div>
+          <div id="g-send" style="font-size: 36px; font-weight: 700; color: #2f6b5a">Post</div>
+        </div>
+      </div>
+
+      <!-- H. Loop: back to the sketch, then the end card -->
+      <div id="gH" class="grp">
+        <div id="h-t1" class="big serif it ink" style="top: 290px; font-size: 80px">Don't let your Pondy house</div>
+        <div id="h-w" class="big ink x3dk" style="top: 400px; font-size: 140px; opacity: 0">JUST SIT.</div>
+      </div>
+      <div id="gK" class="grp">
+        <div id="k-t" class="big serif ink" style="top: 250px; font-size: 100px">Coastal Calm Homes</div>
+        <div id="k-web" style="position: absolute; left: 0; right: 0; top: 390px; text-align: center; opacity: 0">
+          <span style="display: inline-block; font-weight: 700; font-size: 52px; color: #f6f2ea; background: #1d2c28; padding: 24px 40px 20px; border-radius: 999px">thecoastalcalm.homes</span>
+        </div>
+        <div id="k-ph" class="big ink" style="top: 525px; font-size: 46px; font-weight: 500; letter-spacing: 0; opacity: 0">WhatsApp +91 88704 67560</div>
+      </div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.3" data-duration="5.52" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="6.32" data-duration="3.36" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="10.03" data-duration="1.84" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="12.22" data-duration="1.2" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="13.87" data-duration="3.345" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="17.465" data-duration="1.855" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="19.87" data-duration="5.35" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="25.67" data-duration="1.39" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="vo8" class="clip" data-start="27.51" data-duration="1.65" src="assets/vo/s8.wav" data-volume="1" data-track-index="22"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="32.5" src="assets/bgm/track.wav" data-volume="0.28" data-fade-in="0.2" data-fade-out="2" data-track-index="9"></audio>
+      <audio id="x1" class="clip" data-start="0.1" data-duration="5.6" src="assets/sfx/pencil.wav" data-volume="0.22" data-track-index="10"></audio>
+      <audio id="x2" class="clip" data-start="3.56" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="11"></audio>
+      <audio id="x3" class="clip" data-start="7.14" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.5" data-track-index="12"></audio>
+      <audio id="x4" class="clip" data-start="10.0" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.4" data-track-index="13"></audio>
+      <audio id="x5" class="clip" data-start="11.66" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.7" data-track-index="14"></audio>
+      <audio id="x6" class="clip" data-start="11.8" data-duration="2.5" src="assets/sfx/whoosh-cinematic.mp3" data-volume="0.35" data-track-index="15"></audio>
+      <audio id="x7" class="clip" data-start="12.4" data-duration="1.2" src="assets/sfx/notification.mp3" data-volume="0.45" data-track-index="16"></audio>
+      <audio id="x8" class="clip" data-start="12.98" data-duration="1.2" src="assets/sfx/notification.mp3" data-volume="0.45" data-track-index="17"></audio>
+      <audio id="x9" class="clip" data-start="19.7" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.4" data-track-index="18"></audio>
+      <audio id="x10" class="clip" data-start="24.43" data-duration="2.5" src="assets/sfx/chime.mp3" data-volume="0.35" data-track-index="19"></audio>
+      <audio id="x11" class="clip" data-start="26.6" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.8" data-track-index="20"></audio>
+      <audio id="x12" class="clip" data-start="28.75" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="x13" class="clip" data-start="4.23" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="23"></audio>
+      <audio id="x14" class="clip" data-start="18.32" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.7" data-track-index="24"></audio>
+    </div>
+    <script>
+      // ---------- The house from thecoastalcalm.homes (src/three/house.ts), built in four stages ----------
+      const W = 6, D = 4.6, H = 1.7, SLAB = 0.16;
+      const C = { wall: '#efe8da', trim: '#d8cdb9', slab: '#cbc1ae', shutter: '#2f5b55', glass: '#1d2523', wood: '#7b5b3d',
+                  pot: '#b6724b', leaf: '#4d7a48', solar: '#203044', iron: '#28302e', ground: '#ddd3c2' };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(28, 1080 / 1920, 0.1, 200);
+      const root = new THREE.Group();
+      const groups = [], glassMats = [];
+      const hemi = new THREE.HemisphereLight('#fff6e6', '#5b6b66', 1.6);
+      const sun = new THREE.DirectionalLight('#fff1dc', 2.4);
+      sun.position.set(-8, 14, 9); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 14, bottom: -4, far: 40 }); sun.shadow.bias = -0.0004;
+      scene.add(hemi, sun);
+      const bulbMat = new THREE.MeshBasicMaterial({ color: '#ffd28c', toneMapped: false });
+      const pergolaLight = new THREE.PointLight('#ffb35a', 0, 9, 1.6);
+      const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85 }, o));
+      const box = (p, w, h, d, m, x, y, z) => { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; };
+      const potMat = mat(C.pot), leafMat = mat(C.leaf, { flatShading: true });
+      const wall = mat(C.wall), trim = mat(C.trim), slab = mat(C.slab), groundMat = mat(C.ground);
+      const MASS = new Set([wall, trim, slab, groundMat]);   // these rise as clay; everything else is detail
+      function planter(parent, x, z, y0 = 0.22) {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.13, 0.3, 10), potMat); p.position.set(x, y0 + 0.15, z);
+        const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 0), leafMat); l.position.set(x, y0 + 0.5, z); l.rotation.set(x, z, 0);
+        p.castShadow = l.castShadow = true; parent.add(p, l);
+      }
+      function balcony(parent, width, depth, iron) {
+        const z = D / 2 + depth / 2;
+        box(parent, width, 0.12, depth, slab, 0, 0.06, z);
+        box(parent, width, 0.04, 0.05, iron, 0, 0.82, D / 2 + depth - 0.03);
+        box(parent, 0.05, 0.04, depth, iron, -width / 2 + 0.03, 0.82, z);
+        box(parent, 0.05, 0.04, depth, iron, width / 2 - 0.03, 0.82, z);
+        const n = Math.round(width / 0.2), posts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.025, 0.7, 0.025), iron, n + 1), m4 = new THREE.Matrix4();
+        for (let k = 0; k <= n; k++) { m4.makeTranslation(-width / 2 + 0.03 + ((width - 0.06) * k) / n, 0.47, D / 2 + depth - 0.03); posts.setMatrixAt(k, m4); }
+        posts.castShadow = true; parent.add(posts);
+      }
+      (function build() {
+        const shutter = mat(C.shutter, { roughness: 0.6 }), wood = mat(C.wood, { roughness: 0.7 }), iron = mat(C.iron, { roughness: 0.5, metalness: 0.3 });
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(11, 64), new THREE.ShadowMaterial({ opacity: 0.16 }));
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; root.add(ground);
+        const base = new THREE.Group(), cwZ = D / 2 + 1.35;
+        box(base, W + 0.8, 0.22, D + 0.8, groundMat, 0, 0.11, 0);
+        box(base, 2.3, 0.55, 0.16, trim, -1.95, 0.27, cwZ); box(base, 2.3, 0.55, 0.16, trim, 1.95, 0.27, cwZ);
+        box(base, 0.26, 0.8, 0.26, wall, -0.75, 0.4, cwZ); box(base, 0.26, 0.8, 0.26, wall, 0.75, 0.4, cwZ);
+        box(base, 0.16, 0.55, 1.35, trim, -W / 2 - 0.02, 0.27, D / 2 + 0.68); box(base, 0.16, 0.55, 1.35, trim, W / 2 + 0.02, 0.27, D / 2 + 0.68);
+        groups.push(base); root.add(base);
+        for (let i = 0; i < 3; i++) {
+          const lvl = new THREE.Group();
+          const glass = mat(C.glass, { emissive: new THREE.Color('#ffb860'), emissiveIntensity: 0.5, roughness: 0.25, metalness: 0.1 });
+          glassMats.push(glass);
+          const wallH = H - SLAB, winY = SLAB + 0.78;
+          box(lvl, W + 0.3, SLAB, D + 0.3, slab, 0, SLAB / 2, 0);
+          box(lvl, W, wallH, 0.14, wall, 0, SLAB + wallH / 2, D / 2 - 0.07); box(lvl, W, wallH, 0.14, wall, 0, SLAB + wallH / 2, -D / 2 + 0.07);
+          box(lvl, 0.14, wallH, D, wall, -W / 2 + 0.07, SLAB + wallH / 2, 0); box(lvl, 0.14, wallH, D, wall, W / 2 - 0.07, SLAB + wallH / 2, 0);
+          box(lvl, W + 0.12, 0.08, D + 0.12, trim, 0, H - 0.04, 0);
+          const addWindow = (x, h, w = 0.7) => {
+            box(lvl, w, h, 0.05, glass, x, winY, D / 2 + 0.01);
+            box(lvl, w + 0.16, 0.06, 0.12, trim, x, winY - h / 2 - 0.03, D / 2 + 0.04); box(lvl, w + 0.16, 0.06, 0.08, trim, x, winY + h / 2 + 0.03, D / 2 + 0.03);
+            box(lvl, w / 2, h, 0.04, shutter, x - w * 0.75 - 0.04, winY, D / 2 + 0.03); box(lvl, w / 2, h, 0.04, shutter, x + w * 0.75 + 0.04, winY, D / 2 + 0.03);
+          };
+          const addSideWindow = (z, side) => {
+            box(lvl, 0.05, 0.75, 0.6, glass, side * (W / 2 + 0.01), winY, z);
+            box(lvl, 0.04, 0.75, 0.3, shutter, side * (W / 2 + 0.03), winY, z - 0.47); box(lvl, 0.04, 0.75, 0.3, shutter, side * (W / 2 + 0.03), winY, z + 0.47);
+          };
+          if (i === 0) {
+            box(lvl, 0.92, 1.25, 0.06, shutter, 0, SLAB + 0.63, D / 2 + 0.02); box(lvl, 0.92, 0.16, 0.05, glass, 0, SLAB + 1.36, D / 2 + 0.02);
+            box(lvl, 1.2, 0.07, 0.6, trim, 0, SLAB + 1.5, D / 2 + 0.3);
+            addWindow(-1.9, 0.85); addWindow(1.9, 0.85); planter(lvl, -1.05, D / 2 + 0.45); planter(lvl, 1.05, D / 2 + 0.45);
+          } else if (i === 1) { addWindow(-1.9, 1.1); addWindow(0, 1.1); addWindow(1.9, 1.1); balcony(lvl, W, 0.85, iron); }
+          else { addWindow(-1.9, 0.9); addWindow(0, 1.1, 0.9); addWindow(1.9, 0.9); balcony(lvl, 2.6, 0.7, iron); }
+          addSideWindow(-0.6, 1); addSideWindow(0.9, -1);
+          lvl.position.y = 0.22 + i * H;
+          groups.push(lvl); root.add(lvl);
+        }
+        const roof = new THREE.Group(), pH = 0.45;
+        box(roof, W + 0.3, SLAB, D + 0.3, slab, 0, SLAB / 2, 0);
+        box(roof, W + 0.3, pH, 0.14, wall, 0, SLAB + pH / 2, D / 2 + 0.08); box(roof, W + 0.3, pH, 0.14, wall, 0, SLAB + pH / 2, -D / 2 - 0.08);
+        box(roof, 0.14, pH, D + 0.3, wall, -W / 2 - 0.08, SLAB + pH / 2, 0); box(roof, 0.14, pH, D + 0.3, wall, W / 2 + 0.08, SLAB + pH / 2, 0);
+        box(roof, 1.5, 1.55, 1.4, wall, W / 2 - 0.85, SLAB + 0.78, -D / 2 + 0.78); box(roof, 1.66, 0.08, 1.56, trim, W / 2 - 0.85, SLAB + 1.59, -D / 2 + 0.78);
+        box(roof, 0.62, 1.05, 0.05, shutter, W / 2 - 0.85, SLAB + 0.55, -D / 2 + 1.5);
+        const x0 = -2.5, x1 = 1.2, z0 = -1.55, z1 = 1.75, top = SLAB + 1.55;
+        for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) box(roof, 0.12, 1.55, 0.12, wood, x, SLAB + 0.78, z);
+        box(roof, x1 - x0 + 0.3, 0.1, 0.12, wood, (x0 + x1) / 2, top, z0); box(roof, x1 - x0 + 0.3, 0.1, 0.12, wood, (x0 + x1) / 2, top, z1);
+        for (let k = 0; k <= 5; k++) box(roof, 0.07, 0.08, z1 - z0 + 0.3, wood, x0 + ((x1 - x0) * k) / 5, top + 0.09, (z0 + z1) / 2);
+        box(roof, x1 - x0 + 0.1, 0.05, z1 - z0 + 0.1, mat(C.solar, { roughness: 0.3, metalness: 0.5 }), (x0 + x1) / 2, top + 0.24, (z0 + z1) / 2).rotation.x = -0.07;
+        box(roof, 1.6, 0.08, 0.42, wood, (x0 + x1) / 2 - 0.4, SLAB + 0.36, z0 + 0.45); box(roof, 1.6, 0.3, 0.32, wood, (x0 + x1) / 2 - 0.4, SLAB + 0.16, z0 + 0.45);
+        box(roof, 1.0, 0.08, 0.42, wood, x0 + 0.5, SLAB + 0.36, (z0 + z1) / 2 + 0.3).rotation.y = Math.PI / 2;
+        for (const [x, z] of [[-2.65, 2.0], [-1.4, 2.0], [0, 2.0], [1.6, 2.0], [2.6, 1.0], [2.6, 0.1]]) planter(roof, x, z, SLAB);
+        const bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.04, 8, 6), bulbMat, 64), m4 = new THREE.Matrix4(), wireMat = new THREE.LineBasicMaterial({ color: C.iron });
+        for (let r = 0; r < 4; r++) {
+          const z = z0 + 0.25 + ((z1 - z0 - 0.5) * r) / 3, pts = [];
+          for (let k = 0; k <= 40; k++) { const t = k / 40; pts.push(new THREE.Vector3(x0 + (x1 - x0) * t, top - 0.08 - Math.sin(Math.PI * t) * 0.32, z)); }
+          roof.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+          for (let b = 0; b < 16; b++) { const t = (b + 0.5) / 16; m4.makeTranslation(x0 + (x1 - x0) * t, top - 0.13 - Math.sin(Math.PI * t) * 0.32, z); bulbs.setMatrixAt(r * 16 + b, m4); }
+        }
+        roof.add(bulbs);
+        pergolaLight.position.set((x0 + x1) / 2, top - 0.4, (z0 + z1) / 2); roof.add(pergolaLight);
+        roof.position.y = 0.22 + 3 * H;
+        groups.push(roof); root.add(roof);
+      })();
+      scene.add(root);
+      root.updateMatrixWorld(true);
+
+      // Sort every part into clay massing or detail, and remember how high it sits (for the paint and detail sweeps).
+      const clay = new THREE.MeshStandardMaterial({ color: '#ebe5d9', roughness: 1 });
+      const massParts = [], detailParts = [], v = new THREE.Vector3();
+      groups.forEach((g) => g.traverse((o) => {
+        if (o === g || o.type === 'Group' || o.type === 'PointLight') return;
+        o.getWorldPosition(v);
+        const part = { o, y: v.y, orig: o.material, s: o.scale.clone() };
+        if (o.isMesh && !o.isInstancedMesh && MASS.has(o.material)) massParts.push(part); else detailParts.push(part);
+      }));
+
+      // Pencil lines: every edge of every part becomes a thin graphite stroke, drawn bottom to top.
+      const segs = [], a = new THREE.Vector3(), b = new THREE.Vector3();
+      let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      groups.forEach((g) => g.traverse((o) => {
+        if (!o.isMesh || o.isInstancedMesh) return;
+        const p = new THREE.EdgesGeometry(o.geometry, 25).attributes.position;
+        for (let k = 0; k < p.count; k += 2) {
+          a.fromBufferAttribute(p, k).applyMatrix4(o.matrixWorld); b.fromBufferAttribute(p, k + 1).applyMatrix4(o.matrixWorld);
+          segs.push({ a: a.clone(), b: b.clone(), key: Math.min(a.y, b.y) + rnd() * 0.5 });
+        }
+      }));
+      segs.sort((p, q) => p.key - q.key);
+      const strokeGeo = new THREE.BoxGeometry(1, 1, 1);
+      const inkMat = new THREE.MeshBasicMaterial({ color: '#2b2f2d', transparent: true, depthWrite: false });
+      const sketchMat = new THREE.MeshBasicMaterial({ color: '#6b6f6a', transparent: true, depthWrite: false });
+      const ink = new THREE.InstancedMesh(strokeGeo, inkMat, segs.length), sketch = new THREE.InstancedMesh(strokeGeo, sketchMat, segs.length);
+      const up = new THREE.Vector3(0, 1, 0), q4 = new THREE.Quaternion(), m4 = new THREE.Matrix4(), dir = new THREE.Vector3(), mid = new THREE.Vector3(), sc = new THREE.Vector3();
+      function stroke(mesh, i, p0, p1, r) {
+        dir.subVectors(p1, p0); const len = dir.length(); dir.normalize();
+        q4.setFromUnitVectors(up, dir); mid.addVectors(p0, p1).multiplyScalar(0.5); sc.set(r, len, r);
+        mesh.setMatrixAt(i, m4.compose(mid, q4, sc));
+      }
+      segs.forEach((s, i) => {
+        stroke(ink, i, s.a, s.b, 0.018);
+        // a second, looser pass that overshoots the corners like a hand sketch
+        const d = new THREE.Vector3().subVectors(s.b, s.a).multiplyScalar(0.08), j = () => (rnd() - 0.5) * 0.05;
+        stroke(sketch, i, s.a.clone().sub(d).add(new THREE.Vector3(j(), j(), j())), s.b.clone().add(d).add(new THREE.Vector3(j(), j(), j())), 0.009);
+      });
+      root.add(ink, sketch);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 8), new THREE.MeshBasicMaterial({ color: '#c08a2e' }));
+      root.add(tip);
+
+      // State the paused GSAP timeline below fills in for any time t.
+      const S = { lines: 0, lineOp: 1, mass: 0, det: -1, paint: -1, glow: 0, night: 0, yaw: -0.2, r: 40, ty: 3.9, polar: 1.2, shift: -330 };
+      const clamp = (x) => Math.min(1, Math.max(0, x));
+      const easeBack = (x) => { const c = 2.2; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+      function draw() {
+        const n = Math.floor(segs.length * S.lines);
+        ink.count = sketch.count = n;
+        inkMat.opacity = S.lineOp * 0.9; sketchMat.opacity = S.lineOp * 0.45;
+        ink.visible = sketch.visible = S.lineOp > 0.01 && n > 0;
+        tip.visible = S.lines > 0.005 && S.lines < 0.995;
+        if (tip.visible) tip.position.copy(segs[Math.max(0, n - 1)].b);
+        // massing: each group rises out of the ground in turn
+        groups.forEach((g, k) => { const s = clamp(S.mass - k); g.scale.y = Math.max(0.0001, 1 - Math.pow(1 - s, 3)); g.visible = s > 0; });
+        massParts.forEach((p) => { p.o.material = p.y < S.paint ? p.orig : clay; });
+        detailParts.forEach((p) => {
+          const s = clamp((S.det - p.y) / 0.6);
+          p.o.visible = s > 0;
+          if (p.o.isMesh && !p.o.isInstancedMesh) p.o.scale.copy(p.s).multiplyScalar(Math.max(0.0001, easeBack(s)));
+        });
+        glassMats.forEach((g) => { g.emissiveIntensity = 0.02 + S.glow * 1.3; });
+        const bl = 0.15 + S.glow * 0.85;
+        bulbMat.color.setRGB(bl, 0.82 * bl, 0.55 * bl);
+        pergolaLight.intensity = S.glow * 6;
+        hemi.intensity = 1.6 - S.night * 1.05; sun.intensity = 2.4 - S.night * 1.7;
+        hemi.color.setRGB(1, 0.965 - S.night * 0.15, 0.9 + S.night * 0.1);
+        root.rotation.y = S.yaw;
+        camera.position.set(0, S.ty + Math.cos(S.polar) * S.r, Math.sin(S.polar) * S.r);
+        camera.lookAt(0, S.ty, 0);
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920);
+        renderer.render(scene, camera);
+      }
+
+      const st = gsap.timeline({ paused: true });   // drives S (the 3D house)
+      const tl = gsap.timeline({ paused: true });   // drives the HTML layers
+      // The voiceover is split into phrases with small gaps; w() maps a word's time in vo.wav onto the reel's clock.
+      const SEG = [[0, 0.3], [5.52, 0.8], [8.88, 1.15], [10.72, 1.5], [11.92, 1.95], [15.265, 2.2], [17.12, 2.75], [22.47, 3.2], [23.86, 3.65]];
+      const w = (t) => { let o = 0; SEG.forEach(([s, off]) => { if (t >= s) o = off; }); return t + o; };
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.5, filter: 'blur(12px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.32, ease: 'expo.out' }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }, t);
+      const stamp = (el, t) => tl.fromTo(el, { opacity: 0, scale: 2.4 }, { opacity: 1, scale: 1, duration: 0.25, ease: 'expo.out' }, t);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, t + 0.01); };
+      const swap = (out, inn, t) => { tl.to(out, { opacity: 0, y: -30, duration: 0.25, ease: 'power2.in' }, t - 0.25); show(inn, t); };
+      const stage = (id, t, dark) => {
+        ['#s1', '#s2', '#s3', '#s4'].forEach((s) => tl.set(s, { backgroundColor: 'rgba(0,0,0,0)', color: dark ? '#7f938d' : '#8a8577', borderColor: dark ? 'rgba(246,242,234,0.25)' : 'rgba(29,44,40,0.25)' }, t));
+        tl.set(id, { backgroundColor: '#e0ad4f', color: '#1d2c28', borderColor: '#e0ad4f' }, t);
+        tl.fromTo(id, { scale: 1.25 }, { scale: 1, duration: 0.3, ease: 'back.out(3)', immediateRender: false }, t);
+      };
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 32.5, ease: 'steps(390)' }, 0);
+      st.to(S, { yaw: -0.85, duration: 11.8, ease: 'sine.inOut' }, 0);
+
+      // 01 LINES. The problem: the pencil draws the house while it sits empty.
+      stage('#s1', 0, false);
+      st.fromTo(S, { lines: 0.14 }, { lines: 1, duration: 5.6, ease: 'power1.inOut' }, 0);
+      tl.fromTo('#a-w', { scale: 1.2, color: '#1d2c28' }, { scale: 1, color: '#9a6a14', duration: 0.3, ease: 'expo.out' }, w(1.76));
+      stamp('#a-s1', w(3.26)); stamp('#a-s2', w(3.48)); stamp('#a-s3', w(3.93));
+      tl.to('#a-s3', { x: 10, duration: 0.05, yoyo: true, repeat: 3, ease: 'none' }, w(4.98));
+
+      // 02 MASS. The fix: hand us the keys, and the floors rise out of the plan in clay.
+      swap('#gA', '#gB', w(5.52));
+      stage('#s2', w(5.52), false);
+      slam('#b-t', w(6.34));
+      st.to(S, { mass: 5, duration: 2.6, ease: 'power2.inOut' }, w(5.6));
+      st.to(S, { lineOp: 0.35, duration: 1.2 }, w(6.6));
+      rise('#b-s', w(7.2));
+      flash(w(6.34), 0.35);
+
+      // 03 DETAIL. Beds, kitchen, lights? We pay. Shutters, planters and colour sweep up the house.
+      swap('#gB', '#gC', w(8.9));
+      stage('#s3', w(8.9), false);
+      st.to(S, { det: 8.5, duration: 1.8, ease: 'power2.inOut' }, w(8.9));
+      st.to(S, { paint: 8.5, duration: 1.8, ease: 'power2.inOut' }, w(9.05));
+      st.to(S, { lineOp: 0, duration: 0.8 }, w(9.4));
+      slam('#c-t', w(8.9));
+      ['#c-1', '#c-2', '#c-3', '#c-4'].forEach((c, i) =>
+        tl.fromTo(c, { opacity: 0, scale: 0.4, x: i % 2 ? 60 : -60 }, { opacity: 1, scale: 1, x: 0, duration: 0.35, ease: 'back.out(2.2)' }, w([8.9, 9.23, 10.12, 10.25][i])));
+      stamp('#c-s', w(10.36));
+
+      // 04 HOME. Night falls, the windows light up. Upkeep? Also us.
+      swap('#gC', '#gD', w(10.72));
+      stage('#s4', w(10.72), true);
+      tl.to('#paper', { opacity: 0, duration: 0.6, ease: 'power2.inOut' }, w(10.6));
+      tl.to('#night', { opacity: 1, duration: 0.6, ease: 'power2.inOut' }, w(10.6));
+      st.to(S, { night: 1, duration: 0.6, ease: 'power2.inOut' }, w(10.6));
+      st.to(S, { glow: 1, duration: 0.5, ease: 'power2.out' }, w(10.95));
+      st.to(S, { shift: -560, r: 44, yaw: -0.4, duration: 0.8, ease: 'power3.inOut' }, w(10.6));
+      slam('#d-t', w(10.72));
+      tl.fromTo('#d-t2', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'expo.out' }, w(11.19));
+      tl.fromTo('#d-n1', { opacity: 0, y: -60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.8)' }, w(10.9));
+      tl.fromTo('#d-n2', { opacity: 0, y: -60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.8)' }, w(11.48));
+
+      // One figure every month: twelve months flip in and each gets paid; then the owner's dates are blocked.
+      swap('#gD', '#gE', w(11.94));
+      tl.to('#stages', { opacity: 0, duration: 0.3 }, w(11.8));
+      const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const grid = document.getElementById('e-grid');
+      months.forEach((m, i) => grid.insertAdjacentHTML('beforeend',
+        `<div id="e-m${i}" class="month" style="left: ${(i % 3) * 270}px; top: ${Math.floor(i / 3) * 172}px"><i>${m}</i><b id="e-r${i}">✓ Paid</b></div>`));
+      st.to(S, { shift: -820, r: 50, yaw: -0.9, duration: 0.7, ease: 'power3.inOut' }, w(11.92));
+      slam('#e-t1', w(12.24));
+      rise('#e-t2', w(12.75));
+      months.forEach((m, i) => {
+        tl.fromTo(`#e-m${i}`, { opacity: 0, rotationY: -90 }, { opacity: 1, rotationY: 0, duration: 0.3, ease: 'back.out(1.6)', transformPerspective: 800 }, w(12.3) + i * 0.08);
+        tl.to(`#e-r${i}`, { opacity: 1, duration: 0.15 }, w(13.16) + i * 0.06);
+        tl.to(`#e-m${i}`, { backgroundColor: '#fbefd2', duration: 0.15 }, w(13.16) + i * 0.06);
+      });
+      tl.fromTo('#e-p1', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)' }, w(13.68));
+      tl.fromTo('#e-p2', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)' }, w(14.57));
+      // Family wedding? The owner's month turns gold and is stamped as theirs.
+      tl.to(['#e-p1', '#e-p2'], { opacity: 0, duration: 0.25 }, w(15.3));
+      tl.set('#e-t1', { textContent: 'Family wedding?' }, w(15.3));
+      tl.fromTo('#e-t1', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', immediateRender: false }, w(15.3));
+      tl.set('#e-t2', { textContent: 'block the dates.' }, w(16.12));
+      tl.fromTo('#e-t2', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', immediateRender: false }, w(16.12));
+      tl.set('#e-r11', { textContent: 'Wedding', color: '#1d2c28' }, w(15.61));
+      tl.to('#e-m11', { backgroundColor: '#e0ad4f', scale: 1.1, duration: 0.3, ease: 'back.out(3)' }, w(15.61));
+      stamp('#e-wed', w(16.12));
+
+      // Why us: our own homestay.
+      swap('#gE', '#gF', w(17.14));
+      tl.to('#gl', { opacity: 0, duration: 0.4, ease: 'power2.in' }, w(17.0));
+      slam('#f-why', w(17.14));
+      const POS = [{ x: -330, r: 45, s: 0.78, z: -260, zi: 1 }, { x: 0, r: 0, s: 1, z: 0, zi: 3 }, { x: 330, r: -45, s: 0.78, z: -260, zi: 2 }];
+      ['#f-p0', '#f-p1', '#f-p2'].forEach((p, i) => {
+        tl.fromTo(p, { opacity: 0, x: POS[i].x * 1.6, z: -600, rotationY: POS[i].r, scale: POS[i].s, zIndex: POS[i].zi },
+          { opacity: 1, x: POS[i].x, z: POS[i].z, rotationY: POS[i].r, scale: POS[i].s, duration: 0.6, ease: 'power3.out', transformPerspective: 1700 }, w(17.4) + i * 0.1);
+        const next = POS[(i + 2) % 3];
+        tl.to(p, { x: next.x, z: next.z, rotationY: next.r, scale: next.s, zIndex: next.zi, duration: 0.6, ease: 'power3.inOut' }, w(19.81));
+      });
+      slam('#f-t', w(19.28));
+      rise('#f-s', w(19.81));
+      tl.to('#f-flow', { y: -60, scale: 0.86, duration: 0.5, ease: 'power3.inOut' }, w(20.4));
+      show('#f-rate', w(20.5));
+      rise('#f-q', w(20.6));
+      tl.to('#f-rate .star', { color: '#e0ad4f', scale: 1.15, duration: 0.2, stagger: 0.1, ease: 'back.out(3)' }, w(21.68));
+
+      // Comment KEYS, with the finished house back on screen.
+      swap('#gF', '#gG', w(22.54));
+      tl.to('#gl', { opacity: 1, duration: 0.3 }, w(22.47));
+      st.set(S, { shift: -420, r: 40, yaw: -0.3 }, w(22.47));
+      st.to(S, { yaw: -0.8, duration: 1.8, ease: 'sine.inOut' }, w(22.47));
+      slam('#g-t', w(22.54));
+      tl.fromTo('#g-bar', { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.4, ease: 'back.out(1.8)' }, w(22.6));
+      tl.fromTo('#g-typed', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.4, ease: 'steps(4)' }, w(22.9));
+      tl.to('#g-send', { scale: 1.35, duration: 0.1, yoyo: true, repeat: 1 }, w(23.4));
+      rise('#g-s', w(23.3));
+
+      // Loop: "just sit" sends the house back to a pencil sketch, the same frame the reel opened on.
+      swap('#gG', '#gH', w(23.88));
+      rise('#h-t1', w(23.88));
+      flash(w(25.1), 0.9);
+      tl.set('#paper', { opacity: 1 }, w(25.1)); tl.set('#night', { opacity: 0 }, w(25.1));
+      st.set(S, { night: 0, glow: 0, mass: 0, det: -1, paint: -1, lineOp: 1, lines: 1, shift: -330, r: 40, yaw: -0.2 }, w(25.1));
+      st.to(S, { yaw: -0.6, duration: 3.5, ease: 'sine.inOut' }, w(25.1));
+      slam('#h-w', w(25.1));
+      tl.to('#h-w', { color: '#9a6a14', duration: 0.3 }, w(25.32));
+
+      // End card.
+      swap('#gH', '#gK', w(26.3));
+      slam('#k-t', w(26.3));
+      tl.fromTo('#k-web', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)' }, w(26.5));
+      rise('#k-ph', w(26.8));
+
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
