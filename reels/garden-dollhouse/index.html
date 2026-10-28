@@ -1,0 +1,423 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Garden Floor dollhouse reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #f3e1d6; font-family: Inter; }
+      #day { position: absolute; inset: 0; background: linear-gradient(180deg, #f6e7dc 0%, #f1d9cc 55%, #e9cbbd 100%); }
+      #night { position: absolute; inset: 0; opacity: 0; background: linear-gradient(180deg, #141d36 0%, #1d2a4a 60%, #2a3554 100%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 30px; letter-spacing: 7px;
+        text-transform: uppercase; color: #9a5a3c; }
+      .big { position: absolute; left: 60px; right: 60px; text-align: center; font-weight: 700; letter-spacing: -3px; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .ink { color: #2c2421; } .cream { color: #f6f2ea; } .rose { color: #b0523c; } .gold { color: #e0ad4f; }
+      .stamp { position: absolute; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #b0523c;
+        border: 6px solid #b0523c; border-radius: 12px; padding: 12px 22px 8px; opacity: 0; }
+      .chip { position: absolute; font-weight: 700; font-size: 34px; color: #2c2421; background: #fffaf4; border-radius: 999px;
+        padding: 14px 28px 10px; box-shadow: 0 16px 34px -14px rgba(60, 30, 20, 0.45); opacity: 0; white-space: nowrap; }
+      /* room name plate, like a label on a model */
+      #plate { position: absolute; left: 0; right: 0; top: 640px; text-align: center; opacity: 0; }
+      #plate span { display: inline-block; font-weight: 700; font-size: 30px; letter-spacing: 6px; color: #f6f2ea; background: #2c2421;
+        padding: 14px 30px 10px; border-radius: 8px; }
+      .card { position: absolute; left: 110px; top: 690px; width: 860px; padding: 18px 18px 74px; background: #fffaf4; border-radius: 10px;
+        box-shadow: 0 50px 90px -30px rgba(40, 20, 10, 0.6); opacity: 0; box-sizing: border-box; }
+      .card .ph { width: 824px; height: 618px; background-size: 100% 100%; border-radius: 4px; }
+      .card .cap { position: absolute; left: 0; right: 0; bottom: 18px; text-align: center; font-family: 'EB Garamond'; font-style: italic;
+        font-size: 40px; color: #2c2421; }
+      #path { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; opacity: 0; }
+      #flash { position: absolute; inset: 0; background: #fff6e8; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="31"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="day"></div>
+      <div id="night"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+
+      <div id="plate"><span id="plate-t">01 · THE HALL</span></div>
+
+      <!-- A. Hook over the whole dollhouse, on screen from frame 1 -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div class="kick" style="top: 250px">The Garden Floor · Pondy</div>
+        <div id="a-1" class="big ink" style="top: 310px; font-size: 104px">No stairs.</div>
+        <div id="a-2" class="big ink" style="top: 425px; font-size: 104px; opacity: 0">No shared rooms.</div>
+        <div id="a-3" class="big serif it rose" style="top: 545px; font-size: 80px; opacity: 0">Your own floor.</div>
+        <div id="a-s" class="stamp" style="left: 330px; top: 1450px; font-size: 40px; transform: rotate(-5deg)">Ground floor</div>
+      </div>
+
+      <!-- B. Hall -->
+      <div id="gB" class="grp">
+        <div id="b-t" class="big serif ink" style="top: 290px; font-size: 120px">Step in.</div>
+        <div id="b-s" class="big serif it rose" style="top: 412px; font-size: 84px; opacity: 0">The hall's yours.</div>
+      </div>
+
+      <!-- C. Bedroom -->
+      <div id="gC" class="grp">
+        <div id="c-t" class="big serif ink" style="top: 290px; font-size: 112px">Bedroom next.</div>
+        <div id="c-s" class="big serif it rose" style="top: 410px; font-size: 80px; opacity: 0">three sleep easy</div>
+        <div id="c-1" class="chip" style="left: 90px; top: 1340px">Double bed</div>
+        <div id="c-2" class="chip" style="left: 420px; top: 1340px">+ a single</div>
+        <div id="c-3" class="chip" style="left: 250px; top: 1450px; background: #2c2421; color: #f6f2ea">Sleeps 3</div>
+      </div>
+
+      <!-- D. Dining and kitchen -->
+      <div id="gD" class="grp">
+        <div id="d-t" class="big serif ink" style="top: 290px; font-size: 120px">Dinner?</div>
+        <div id="d-s" class="big serif it rose" style="top: 410px; font-size: 84px; opacity: 0">Table for four.</div>
+        <div id="d-1" class="chip" style="left: 90px; top: 1340px">Kitchen right behind</div>
+        <div id="d-2" class="chip" style="left: 200px; top: 1450px">Induction · microwave</div>
+      </div>
+
+      <!-- E. Bathroom -->
+      <div id="gE" class="grp">
+        <div id="e-t" class="big serif ink" style="top: 290px; font-size: 112px">Bathroom</div>
+        <div id="e-s" class="big serif it rose" style="top: 405px; font-size: 84px; opacity: 0">off the hallway.</div>
+        <div id="e-1" class="chip" style="left: 170px; top: 1360px; background: #2c2421; color: #f6f2ea">✓ Washing machine</div>
+      </div>
+
+      <!-- F. Evening, lamps on -->
+      <div id="gF" class="grp">
+        <div id="f-t" class="big serif cream" style="top: 290px; font-size: 120px">Evening.</div>
+        <div id="f-s" class="big serif it gold" style="top: 425px; font-size: 92px; opacity: 0">Lamps on.</div>
+      </div>
+
+      <!-- G. Rock Beach on foot -->
+      <div id="gG" class="grp">
+        <div id="g-t" class="big cream" style="top: 290px; font-size: 104px">Rock Beach</div>
+        <div id="g-s" class="big serif it gold" style="top: 410px; font-size: 88px; opacity: 0">2 minutes on foot</div>
+      </div>
+      <svg id="path" viewBox="0 0 1080 1920">
+        <path id="walk" d="M 110 1010 C 160 1180, 420 1150, 540 1220 S 560 1300, 540 1320"
+              stroke="#e0ad4f" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 26" fill="none"/>
+        <g id="pin" style="opacity: 0">
+          <rect x="260" y="1330" width="560" height="90" rx="45" fill="#f6f2ea"/>
+          <text x="540" y="1389" text-anchor="middle" font-family="Inter" font-weight="700" font-size="38" fill="#2c2421" letter-spacing="3">ROCK BEACH · 2 MIN</text>
+        </g>
+      </svg>
+
+      <!-- H. Book -->
+      <div id="gH" class="grp">
+        <div class="kick" style="top: 260px; color: #e0ad4f">Book direct</div>
+        <div id="h-t" class="big serif cream" style="top: 310px; font-size: 104px">The Garden Floor</div>
+        <div id="h-web" style="position: absolute; left: 0; right: 0; top: 450px; text-align: center; opacity: 0">
+          <span style="display: inline-block; font-weight: 700; font-size: 52px; color: #2c2421; background: #e0ad4f; padding: 24px 40px 20px; border-radius: 999px">thecoastalcalm.com</span>
+        </div>
+        <div id="h-ph" class="big cream" style="top: 585px; font-size: 44px; font-weight: 500; letter-spacing: 0; opacity: 0">+91 88704 67560</div>
+      </div>
+
+      <!-- I. Loop back to the daytime dollhouse -->
+      <div id="gI" class="grp">
+        <div id="i-1" class="big ink" style="top: 310px; font-size: 104px">No stairs.</div>
+        <div id="i-2" class="big serif it rose" style="top: 430px; font-size: 92px; opacity: 0">Just your floor.</div>
+        <div id="i-web" class="big ink" style="top: 1460px; font-size: 40px; font-weight: 600; letter-spacing: 1px; opacity: 0">thecoastalcalm.com</div>
+      </div>
+
+      <!-- Real photos, flipped in over each drawn room -->
+      <div id="p0" class="card"><div class="ph" style="background-image: url(assets/photos/hall.jpg)"></div><div class="cap">the real hall</div></div>
+      <div id="p1" class="card"><div class="ph" style="background-image: url(assets/photos/bed.jpg)"></div><div class="cap">the real bedroom</div></div>
+      <div id="p2" class="card"><div class="ph" style="background-image: url(assets/photos/dining.jpg)"></div><div class="cap">the real dining &amp; kitchen</div></div>
+      <div id="p3" class="card"><div class="ph" style="background-image: url(assets/photos/bath.jpg)"></div><div class="cap">the real bathroom</div></div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.3" data-duration="3.55" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="4.45" data-duration="1.76" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="6.71" data-duration="5.865" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="13.075" data-duration="2.785" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="16.36" data-duration="2.635" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="19.495" data-duration="1.6" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="21.495" data-duration="2.48" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="24.375" data-duration="3.04" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="vo8" class="clip" data-start="27.915" data-duration="2.085" src="assets/vo/s8.wav" data-volume="1" data-track-index="10"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="31" src="assets/bgm/track.wav" data-volume="0.28" data-fade-in="0.2" data-fade-out="2" data-track-index="9"></audio>
+      <audio id="x1" class="clip" data-start="3.9" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.35" data-track-index="11"></audio>
+      <audio id="x2" class="clip" data-start="5.74" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.55" data-track-index="12"></audio>
+      <audio id="x3" class="clip" data-start="6.5" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.3" data-track-index="13"></audio>
+      <audio id="x4" class="clip" data-start="9.7" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.55" data-track-index="14"></audio>
+      <audio id="x5" class="clip" data-start="12.8" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.3" data-track-index="15"></audio>
+      <audio id="x6" class="clip" data-start="15.0" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.55" data-track-index="16"></audio>
+      <audio id="x7" class="clip" data-start="16.1" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.3" data-track-index="17"></audio>
+      <audio id="x8" class="clip" data-start="18.2" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.55" data-track-index="18"></audio>
+      <audio id="x9" class="clip" data-start="20.2" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.45" data-track-index="19"></audio>
+      <audio id="x10" class="clip" data-start="22.3" data-duration="2.5" src="assets/sfx/chime.mp3" data-volume="0.3" data-track-index="20"></audio>
+      <audio id="x11" class="clip" data-start="25.9" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.8" data-track-index="21"></audio>
+      <audio id="x12" class="clip" data-start="27.9" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.45" data-track-index="22"></audio>
+    </div>
+    <script>
+      // ---------- The Garden Floor as a dollhouse: four rooms in a row, front wall cut away ----------
+      const RW = 6, RD = 4.2, RH = 3.2, T = 0.15, GAP = 6.3;
+      const X = [-1.5, -0.5, 0.5, 1.5].map((k) => k * GAP);
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(22, 1080 / 1920, 0.1, 400);
+      const hemi = new THREE.HemisphereLight('#fff4ea', '#b49a8c', 1.5);
+      const sun = new THREE.DirectionalLight('#fff0dc', 2.2);
+      sun.position.set(-10, 16, 18); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 8, bottom: -3, far: 60 }); sun.shadow.bias = -0.0005;
+      scene.add(hemi, sun);
+
+      const M = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.82 }, o));
+      const box = (w, h, d, m, x, y, z, p = scene) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; p.add(o); return o; };
+      const cyl = (r1, r2, h, m, x, y, z, seg = 24, p = scene) => { const o = new THREE.Mesh(new THREE.CylinderGeometry(r1, r2, h, seg), m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; p.add(o); return o; };
+      const wood = M('#7a4e2d'), darkWood = M('#4e3020'), navy = M('#26386a', { roughness: 0.95 }), cream = M('#f4ece0'), white = M('#f7f5f0'),
+            green = M('#4f7a5a'), red = M('#9c2f3a'), black = M('#262222'), jute = M('#c49a62', { roughness: 1 }), glass = M('#bcd6e6', { roughness: 0.2 }),
+            stallGreen = M('#2f8a5b'), brass = M('#c9a24a', { roughness: 0.4, metalness: 0.6 }), plantMat = M('#4d7a48', { flatShading: true }), potMat = M('#b6724b'),
+            pinkFacade = M('#e7b3a6'), shutter = M('#5f8f7a'), plinth = M('#cf9f92'), slab = M('#efe6dc');
+      const lampMats = [], lights = [], fans = [], curtains = [];
+
+      // shell: plinth, floor slab, ceiling slab, outer walls, the storey above in pink
+      const L = X[0] - RW / 2 - T, R = X[3] + RW / 2 + T, W = R - L;
+      box(W + 0.6, 0.5, RD + 0.9, plinth, 0, -0.25, 0.2);
+      box(W + 0.2, 0.35, RD + 0.3, slab, 0, RH + 0.17, 0);
+      box(W + 0.2, 2.6, 0.3, pinkFacade, 0, RH + 1.65, RD / 2 - 0.15 + 0.3);
+      box(W + 0.5, 0.18, RD + 0.6, M('#d9a596'), 0, RH + 3.0, 0.3);
+      for (let k = 0; k < 6; k++) {
+        const x = L + W * (k + 0.5) / 6;
+        box(0.8, 1.3, 0.05, M('#3b4660'), x, RH + 1.7, RD / 2 + 0.33);
+        box(0.42, 1.3, 0.06, shutter, x - 0.62, RH + 1.7, RD / 2 + 0.34); box(0.42, 1.3, 0.06, shutter, x + 0.62, RH + 1.7, RD / 2 + 0.34);
+      }
+      box(T, RH, RD, pinkFacade, L + T / 2, RH / 2, 0); box(T, RH, RD, pinkFacade, R - T / 2, RH / 2, 0);
+      const walls = ['#f2dcc8', '#dbe7de', '#f3e6c4', '#d9e5ee'], floors = ['#eee6da', '#d6d0c6', '#eee6da', '#e9e4dc'];
+      X.forEach((x, i) => {
+        box(RW, 0.06, RD, M(floors[i]), x, 0.03, 0);
+        box(RW, RH, T, M(walls[i]), x, RH / 2, -RD / 2 + T / 2);
+        box(RW, 0.04, RD, M('#fbf7f1'), x, RH - 0.02, 0);
+        // a small warm light per room for the evening
+        const pl = new THREE.PointLight('#ffb867', 0, 9, 1.5); pl.position.set(x, 2.4, 0.6); scene.add(pl); lights.push(pl);
+      });
+      // partitions between rooms, each with a doorway near the back
+      for (let k = 0; k < 3; k++) {
+        const x = (X[k] + X[k + 1]) / 2, m = M(walls[k + 1]);
+        box(T, RH, 0.5, m, x, RH / 2, -RD / 2 + 0.25);
+        box(T, RH, RD - 1.5, m, x, RH / 2, -RD / 2 + 1.5 + (RD - 1.5) / 2);
+        box(T, RH - 2.2, 1.0, m, x, 2.2 + (RH - 2.2) / 2, -RD / 2 + 1.0);
+      }
+      function lamp(x, y, z, r = 0.22) {
+        const shade = new THREE.MeshStandardMaterial({ color: '#f3dfb8', emissive: new THREE.Color('#ffc277'), emissiveIntensity: 0, roughness: 0.7 });
+        lampMats.push(shade); cyl(r * 0.7, r, r * 1.1, shade, x, y, z); return shade;
+      }
+      function fan(x, z) {
+        const g = new THREE.Group(); g.position.set(x, RH - 0.35, z); scene.add(g);
+        cyl(0.03, 0.03, 0.3, black, 0, 0.17, 0, 8, g); cyl(0.12, 0.12, 0.1, black, 0, 0, 0, 16, g);
+        for (let b = 0; b < 3; b++) { const bl = box(0.9, 0.02, 0.14, black, 0, 0, 0, g); bl.geometry.translate(0.5, 0, 0); bl.rotation.y = (b * Math.PI * 2) / 3; }
+        fans.push(g);
+      }
+      function plant(x, y, z, s = 1) { cyl(0.13 * s, 0.1 * s, 0.22 * s, potMat, x, y + 0.11 * s, z, 12); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22 * s, 0), plantMat); l.position.set(x, y + 0.36 * s, z); l.castShadow = true; scene.add(l); }
+      function window_(x, z, w = 1.2, h = 1.5, y = 1.55) {
+        box(w, h, 0.04, glass, x, y, z);
+        const a = box(w * 0.32, h + 0.25, 0.06, navy, x - w / 2 - 0.05, y - 0.05, z + 0.08), b = box(w * 0.32, h + 0.25, 0.06, navy, x + w / 2 + 0.05, y - 0.05, z + 0.08);
+        box(w + 0.9, 0.04, 0.04, brass, x, y + h / 2 + 0.12, z + 0.1);
+        return [a, b];
+      }
+      const zb = -RD / 2 + T + 0.02;
+
+      // 1. Hall: front door, two wooden sofas, jute rug, round table, navy curtains, fan
+      (function hall(x) {
+        box(0.06, 2.3, 1.1, darkWood, L + T + 0.03, 1.15, 0.6); cyl(0.04, 0.04, 0.04, brass, L + T + 0.08, 1.1, 1.0, 8).rotation.z = Math.PI / 2;
+        window_(x + 0.9, zb);
+        box(0.5, 0.7, 0.04, M('#c7762e'), x - 1.4, 1.9, zb); box(0.36, 0.5, 0.04, M('#a85a24'), x - 0.85, 1.9, zb);
+        for (const s of [-1, 1]) {
+          const sx = x + s * 2.0;
+          box(0.85, 0.42, 2.0, wood, sx, 0.25, -0.2); box(0.75, 0.12, 1.9, cream, sx, 0.52, -0.2);
+          box(0.12, 0.55, 2.0, wood, sx + s * 0.38, 0.75, -0.2);
+          box(0.2, 0.35, 0.45, s < 0 ? red : M('#e9b7b0'), sx + s * 0.22, 0.75, -0.6);
+        }
+        box(2.2, 0.02, 1.7, jute, x, 0.07, 0); cyl(0.45, 0.45, 0.06, darkWood, x, 0.48, 0, 28); cyl(0.07, 0.12, 0.42, darkWood, x, 0.24, 0, 10);
+        plant(x, 0.51, 0, 0.8); plant(x + 2.6, 0.06, -1.6, 1.4);
+        cyl(0.02, 0.02, 1.4, brass, x - 2.6, 0.75, -1.5, 8); lamp(x - 2.6, 1.55, -1.5);
+        fan(x, 0);
+      })(X[0]);
+
+      // 2. Bedroom: double bed, single bed, wardrobe, navy curtains, AC, wall art, bedside lamp, fan
+      (function bed(x) {
+        box(2.1, 0.4, 2.2, wood, x - 0.6, 0.25, -0.85); box(2.0, 0.26, 2.1, white, x - 0.6, 0.55, -0.85); box(2.1, 1.1, 0.1, wood, x - 0.6, 0.6, -RD / 2 + T + 0.08);
+        box(0.6, 0.18, 0.4, green, x - 1.1, 0.75, -1.65); box(0.6, 0.18, 0.4, green, x - 0.1, 0.75, -1.65);
+        box(1.0, 0.4, 2.0, wood, x + 1.95, 0.25, -0.95); box(0.95, 0.24, 1.9, white, x + 1.95, 0.53, -0.95); box(0.5, 0.15, 0.32, cream, x + 1.95, 0.7, -1.7);
+        box(1.0, 2.1, 0.6, darkWood, x - 2.4, 1.05, -1.6);
+        curtains.push(...window_(x + 1.3, zb, 1.3, 1.6, 1.75));
+        box(1.0, 0.3, 0.25, white, x - 0.6, 2.75, zb + 0.12);
+        box(0.55, 0.45, 0.04, M('#b8862e'), x + 0.35, 1.65, zb);
+        box(0.4, 0.45, 0.4, darkWood, x + 0.8, 0.23, -1.7); lamp(x + 0.8, 0.6, -1.7, 0.16);
+        fan(x, -0.2);
+      })(X[1]);
+
+      // 3. Dining and kitchen: kitchen along the back wall, table for four, pendant lamp
+      (function dining(x) {
+        box(4.4, 0.9, 0.62, darkWood, x, 0.45, -RD / 2 + T + 0.31); box(4.5, 0.06, 0.68, M('#cfc8bd'), x, 0.93, -RD / 2 + T + 0.34);
+        box(4.4, 0.8, 0.36, darkWood, x, 2.2, -RD / 2 + T + 0.18);
+        box(0.6, 0.03, 0.4, black, x - 1.2, 0.97, -1.7); box(0.55, 0.32, 0.36, M('#2f2f33'), x + 1.3, 1.12, -1.75); box(0.25, 0.42, 0.18, white, x + 1.9, 1.5, zb + 0.08);
+        box(2.0, 0.08, 0.95, darkWood, x, 0.78, 0.3);
+        for (const [dx, dz] of [[-0.85, 0.3], [0.85, 0.3]]) { box(0.06, 0.74, 0.06, darkWood, x + dx, 0.37, dz - 0.38); box(0.06, 0.74, 0.06, darkWood, x + dx, 0.37, dz + 0.38); }
+        for (const [cx, cz, ry] of [[-1.3, 0.3, 0], [1.3, 0.3, 0], [-0.5, -0.45, 1], [0.5, -0.45, 1]]) {
+          const g = new THREE.Group(); g.position.set(x + cx, 0, cz); scene.add(g);
+          box(0.42, 0.05, 0.42, black, 0, 0.46, 0, g); box(0.05, 0.46, 0.05, black, -0.18, 0.23, -0.18, g); box(0.05, 0.46, 0.05, black, 0.18, 0.23, -0.18, g);
+          box(0.05, 0.46, 0.05, black, -0.18, 0.23, 0.18, g); box(0.05, 0.46, 0.05, black, 0.18, 0.23, 0.18, g);
+          const back = box(0.42, 0.5, 0.04, black, 0, 0.73, -0.2, g);
+          if (ry) g.rotation.y = 0; else { g.rotation.y = cx < 0 ? Math.PI / 2 : -Math.PI / 2; }
+        }
+        plant(x, 0.82, 0.3, 0.7);
+        cyl(0.01, 0.01, 0.9, black, x, RH - 0.45, 0.3, 6); lamp(x, RH - 0.95, 0.3, 0.26);
+      })(X[2]);
+
+      // 4. Bathroom: two stalls with green doors, a sink with a carved mirror, washing machine with its red cover
+      (function bath(x) {
+        for (const s of [-1, 1]) {
+          const sx = x + s * 1.75;
+          box(T, 2.3, 1.2, white, sx - s * 0.75, 1.15, -RD / 2 + 0.75);
+          const door = box(0.75, 2.0, 0.05, stallGreen, sx + s * 0.05, 1.0, -RD / 2 + 1.38); door.rotation.y = s * 0.5;
+        }
+        box(0.7, 0.18, 0.45, white, x, 0.85, -RD / 2 + 0.4); cyl(0.05, 0.05, 0.75, white, x, 0.4, -RD / 2 + 0.35, 10);
+        box(0.6, 0.85, 0.05, darkWood, x, 1.65, zb + 0.02); box(0.42, 0.62, 0.02, glass, x, 1.62, zb + 0.06);
+        box(0.66, 0.88, 0.62, red, x + 2.45, 0.44, 0.9);
+        lamp(x, 2.4, zb + 0.15, 0.13);
+      })(X[3]);
+
+      const S = { cx: 0, cy: 1.9, d: 128, yaw: 0, shift: -40, night: 0, lamps: 0, curt: 0, time: 0 };
+      function draw() {
+        fans.forEach((f) => { f.rotation.y = S.time * 7; });
+        curtains.forEach((c, i) => { const s = i % 2 ? 1 : -1; c.scale.x = 1 + S.curt * 0.9; c.position.x = c.userData.x0 + (-s) * S.curt * 0.22; });
+        lampMats.forEach((m, i) => { m.emissiveIntensity = Math.max(0, Math.min(1, S.lamps * 1.5 - i * 0.1)) * 2.2; });
+        lights.forEach((l, i) => { l.intensity = Math.max(0, Math.min(1, S.lamps * 1.5 - i * 0.12)) * 7; });
+        hemi.intensity = 1.5 - S.night * 1.1; sun.intensity = 2.2 - S.night * 2.0;
+        hemi.color.setRGB(1, 0.96 - S.night * 0.1, 0.92 + S.night * 0.08);
+        camera.position.set(S.cx + S.yaw * S.d * 0.25, S.cy + S.d * 0.09, S.d);
+        camera.lookAt(S.cx, S.cy, 0);
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920);
+        renderer.render(scene, camera);
+      }
+      curtains.forEach((c) => { c.userData.x0 = c.position.x; });
+
+      const st = gsap.timeline({ paused: true });   // drives S (the 3D dollhouse)
+      const tl = gsap.timeline({ paused: true });   // drives the HTML layers
+      // The voiceover is split into one phrase per room; w() maps a word's time in vo.wav onto the reel's clock.
+      const SEG = [[0, 0.3], [3.55, 0.9], [5.31, 1.4], [11.175, 1.9], [13.96, 2.4], [16.595, 2.9], [18.195, 3.3], [20.675, 3.7], [23.715, 4.2]];
+      const w = (t) => { let o = 0; SEG.forEach(([s, off]) => { if (t >= s) o = off; }); return t + o; };
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.4, filter: 'blur(10px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.32, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', immediateRender: false }, t);
+      const pop = (el, t) => tl.fromTo(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, t);
+      const stamp = (el, t) => tl.fromTo(el, { opacity: 0, scale: 2.4 }, { opacity: 1, scale: 1, duration: 0.25, ease: 'expo.out', immediateRender: false }, t);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, t + 0.01); };
+      const swap = (out, inn, t) => { tl.to(out, { opacity: 0, y: -30, duration: 0.25, ease: 'power2.in' }, t - 0.25); tl.set(out, { y: 0 }, t); show(inn, t); };
+      // camera glides to a room: a small lift and swing so it feels like a dolly on a track
+      const glide = (i, t, dur = 0.8) => {
+        st.to(S, { cx: X[i], d: 40, cy: 1.75, shift: -135, duration: dur, ease: 'power3.inOut' }, t);
+        st.fromTo(S, { yaw: 0.12 }, { yaw: -0.04, duration: dur + 1.6, ease: 'sine.out', immediateRender: false }, t);
+      };
+      const plate = (txt, t) => { tl.set('#plate-t', { textContent: txt }, t); tl.fromTo('#plate', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.3, ease: 'back.out(2)', immediateRender: false }, t); };
+      // the real photo flips in over the drawn room, holds, and flips away
+      const real = (el, t, hold) => {
+        show(el, t);
+        tl.fromTo(el, { rotationY: -95, scale: 0.92 }, { rotationY: 0, scale: 1, duration: 0.45, ease: 'back.out(1.4)', transformPerspective: 1800, immediateRender: false }, t);
+        tl.to(el, { rotationY: 95, opacity: 0, duration: 0.35, ease: 'power2.in', transformPerspective: 1800 }, t + hold);
+      };
+
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 31, ease: 'steps(372)' }, 0);
+      st.to(S, { time: 31, duration: 31, ease: 'none' }, 0);
+
+      // A. Hook: the whole dollhouse, pushing in slowly.
+      st.fromTo(S, { d: 128 }, { d: 112, duration: 3.6, ease: 'sine.inOut' }, 0);
+      tl.fromTo('#a-1', { scale: 1.2 }, { scale: 1, duration: 0.3, ease: 'expo.out' }, w(0.03));
+      rise('#a-2', w(0.85));
+      rise('#a-3', w(2.01));
+      stamp('#a-s', w(2.48));
+
+      // B. Hall.
+      swap('#gA', '#gB', w(3.55));
+      glide(0, w(3.4), 0.9);
+      plate('01 · THE HALL', w(3.9));
+      slam('#b-t', w(3.55));
+      rise('#b-s', w(4.27));
+      real('#p0', w(4.84), 0.95);
+
+      // C. Bedroom: chips on the words, the real photo, then the curtains draw.
+      swap('#gB', '#gC', w(5.31));
+      glide(1, w(5.15), 0.8);
+      tl.to('#plate', { opacity: 0, duration: 0.15 }, w(5.1)); plate('02 · BEDROOM', w(5.6));
+      slam('#c-t', w(5.31));
+      pop('#c-1', w(6.36)); pop('#c-2', w(7.09)); pop('#c-3', w(7.72));
+      rise('#c-s', w(7.72));
+      real('#p1', w(8.31), 1.05);
+      st.to(S, { curt: 1, duration: 0.7, ease: 'power2.inOut' }, w(10.21));
+
+      // D. Dining and kitchen.
+      swap('#gC', '#gD', w(11.19));
+      glide(2, w(11.0), 0.8);
+      tl.to('#plate', { opacity: 0, duration: 0.15 }, w(10.95)); plate('03 · DINING & KITCHEN', w(11.5));
+      slam('#d-t', w(11.19));
+      rise('#d-s', w(11.69));
+      pop('#d-1', w(12.73)); pop('#d-2', w(13.1));
+      real('#p2', w(13.48), 0.95);
+
+      // E. Bathroom off the hallway, washing machine.
+      swap('#gD', '#gE', w(13.96));
+      glide(3, w(13.75), 0.8);
+      tl.to('#plate', { opacity: 0, duration: 0.15 }, w(13.7)); plate('04 · BATHROOM', w(14.25));
+      slam('#e-t', w(13.96));
+      rise('#e-s', w(14.52));
+      pop('#e-1', w(15.33));
+      real('#p3', w(15.6), 0.95);
+
+      // F. Evening: pull back to the whole floor, dusk falls, the lamps come on room by room.
+      swap('#gE', '#gF', w(16.61));
+      tl.to('#plate', { opacity: 0, duration: 0.2 }, w(16.5));
+      st.to(S, { cx: 0, d: 112, cy: 1.9, yaw: 0, shift: -40, duration: 1.1, ease: 'power3.inOut' }, w(16.4));
+      tl.to('#day', { opacity: 0, duration: 0.9, ease: 'power2.inOut' }, w(16.6));
+      tl.to('#night', { opacity: 1, duration: 0.9, ease: 'power2.inOut' }, w(16.6));
+      st.to(S, { night: 1, duration: 0.9, ease: 'power2.inOut' }, w(16.6));
+      st.to(S, { lamps: 1, duration: 0.9, ease: 'power1.in' }, w(17.36));
+      slam('#f-t', w(16.61));
+      tl.fromTo('#f-s', { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'expo.out', immediateRender: false }, w(17.36));
+
+      // G. Rock Beach: a dotted walk leaves the front door.
+      swap('#gF', '#gG', w(18.21));
+      st.to(S, { shift: 120, d: 118, duration: 0.8, ease: 'power3.inOut' }, w(18.1));
+      slam('#g-t', w(18.21));
+      rise('#g-s', w(18.97));
+      show('#path', w(18.4));
+      tl.fromTo('#path', { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.1, ease: 'power2.inOut', immediateRender: false }, w(18.4));
+      tl.fromTo('#pin', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: 'back.out(2)', immediateRender: false }, w(19.2));
+
+      // H. Book.
+      swap('#gG', '#gH', w(20.69));
+      tl.to('#path', { opacity: 0, duration: 0.25 }, w(20.45));
+      st.to(S, { shift: -40, d: 118, duration: 0.8, ease: 'power3.inOut' }, w(20.6));
+      slam('#h-t', w(21.2));
+      tl.fromTo('#h-web', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, w(22.19));
+      tl.to('#h-web', { scale: 1.08, duration: 0.12, yoyo: true, repeat: 1 }, w(22.2));
+      rise('#h-ph', w(22.6));
+
+      // I. Loop: daylight returns on the whole floor, the same frame the reel opened on.
+      swap('#gH', '#gI', w(23.73));
+      flash(w(23.73), 0.8);
+      tl.set('#day', { opacity: 1 }, w(23.73)); tl.set('#night', { opacity: 0 }, w(23.73));
+      st.set(S, { night: 0, lamps: 0, curt: 0, cx: 0, d: 128, cy: 1.9, yaw: 0, shift: -40 }, w(23.73));
+      st.to(S, { d: 116, duration: 3.2, ease: 'sine.inOut' }, w(23.73));
+      slam('#i-1', w(23.73));
+      rise('#i-2', w(24.48));
+      rise('#i-web', w(25.0));
+
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
