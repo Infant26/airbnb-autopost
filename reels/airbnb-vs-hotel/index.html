@@ -1,0 +1,418 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Hotel vs home stay reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #10161a; font-family: Inter; }
+      #bgL { position: absolute; left: 0; top: 0; width: 540px; height: 1920px; background: linear-gradient(180deg, #1a232b 0%, #121a20 100%); }
+      #bgR { position: absolute; left: 540px; top: 0; width: 540px; height: 1920px; background: linear-gradient(180deg, #2b2016 0%, #17110c 100%); }
+      #bgW { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 90% 60% at 50% 55%, #2c3a35 0%, #0f1715 75%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 30px; letter-spacing: 7px;
+        text-transform: uppercase; color: #e0ad4f; }
+      .big { position: absolute; left: 60px; right: 60px; text-align: center; font-weight: 800; letter-spacing: -3px; line-height: 1.02; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .cream { color: #f6f2ea; } .gold { color: #e0ad4f; } .grey { color: #9aa6ae; }
+      .x3d { text-shadow: 0 2px 0 #c9b98f, 0 4px 0 #ad9b6e, 0 6px 0 #8f7d50, 0 8px 0 #6f5f34, 0 10px 0 #4f421f, 0 26px 40px rgba(0, 0, 0, 0.55); }
+      /* scoreboard */
+      #score { position: absolute; left: 0; right: 0; top: 250px; display: flex; justify-content: center; align-items: center; gap: 22px; opacity: 0; }
+      .side { font-weight: 800; font-size: 34px; letter-spacing: 6px; width: 170px; text-align: center; }
+      .dig { width: 120px; height: 140px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-weight: 800;
+        font-size: 104px; box-shadow: 0 20px 40px -18px rgba(0, 0, 0, 0.7), inset 0 -6px 0 rgba(0, 0, 0, 0.18); }
+      #dL { background: #3a4650; color: #dfe6ea; } #dR { background: #e0ad4f; color: #1d1610; }
+      .colon { font-weight: 800; font-size: 80px; color: #f6f2ea; opacity: 0.6; }
+      #round { position: absolute; left: 0; right: 0; top: 420px; text-align: center; opacity: 0; }
+      #round span { display: inline-block; font-weight: 800; font-size: 30px; letter-spacing: 6px; color: #10161a; background: #f6f2ea;
+        padding: 12px 26px 9px; border-radius: 10px; }
+      .head { position: absolute; left: 60px; right: 60px; top: 490px; text-align: center; font-family: 'EB Garamond'; font-weight: 500;
+        font-size: 64px; color: #f6f2ea; line-height: 1; opacity: 0; white-space: nowrap; }
+      /* the two verdict cards under the 3D stage */
+      .vc { position: absolute; top: 1300px; width: 340px; height: 120px; border-radius: 24px; display: flex; align-items: center; gap: 18px;
+        padding: 0 24px; box-sizing: border-box; font-weight: 700; font-size: 34px; opacity: 0; }
+      .vc i { font-style: normal; width: 56px; height: 56px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
+        font-size: 32px; font-weight: 800; }
+      .vL { left: 90px; background: #26313a; color: #b9c3c9; } .vL i { background: #b8452f; color: #fff; }
+      .vR { left: 500px; background: #fffaf2; color: #1d1610; box-shadow: 0 24px 50px -20px rgba(224, 173, 79, 0.7); } .vR i { background: #2f6b5a; color: #fff; }
+      .tag { position: absolute; top: 1240px; font-weight: 800; font-size: 30px; letter-spacing: 8px; opacity: 0; }
+      #vs { position: absolute; left: 440px; top: 760px; width: 200px; height: 200px; border-radius: 50%; background: #f6f2ea; color: #10161a;
+        display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 96px; letter-spacing: -4px; opacity: 0;
+        box-shadow: 0 0 0 14px rgba(246, 242, 234, 0.12), 0 30px 60px -20px rgba(0, 0, 0, 0.8); }
+      .conf { position: absolute; left: 540px; top: 900px; width: 18px; height: 30px; border-radius: 4px; opacity: 0; }
+      .photo { position: absolute; background-size: cover; background-position: center; border-radius: 26px; border: 10px solid #fffaf2;
+        box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.85); }
+      .chip { position: absolute; font-weight: 700; font-size: 34px; color: #1d1610; background: #e0ad4f; border-radius: 999px;
+        padding: 14px 28px 10px; opacity: 0; white-space: nowrap; }
+      #flash { position: absolute; inset: 0; background: #fff6e0; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="36"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="bgL"></div><div id="bgR"></div><div id="bgW"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div id="tagL" class="tag grey" style="left: 150px">HOTEL</div>
+      <div id="tagR" class="tag gold" style="left: 640px">HOME</div>
+
+      <!-- A. Hook, on screen from frame 1 -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div class="big cream" style="top: 260px; font-size: 92px">Your family of 5</div>
+        <div id="a-2" class="big gold x3d" style="top: 365px; font-size: 130px">DOESN'T FIT</div>
+        <div class="big cream" style="top: 515px; font-size: 64px; font-weight: 600; letter-spacing: -1px">in <span id="a-1" class="gold">1 hotel room.</span></div>
+      </div>
+      <div id="vs">VS</div>
+
+      <div id="score"><div class="side grey">HOTEL</div><div id="dL" class="dig">0</div><div class="colon">:</div><div id="dR" class="dig">0</div><div class="side gold">HOME</div></div>
+      <div id="round"><span id="round-t">ROUND 1 · SPACE</span></div>
+
+      <div id="h1" class="head">One room, <span class="it gold">or the whole place?</span></div>
+      <div id="h2" class="head">Midnight chai? <span class="it gold">Make it yourself.</span></div>
+      <div id="h3" class="head">Everyone <span class="it gold">under one roof.</span></div>
+      <div id="h4" class="head">Laundry. <span class="it gold">Done.</span></div>
+      <div id="h5" class="head">A real street, <span class="it gold">like a local.</span></div>
+      <div id="h6" class="head">Fresh towels daily? <span class="it grey">Fine. Hotel.</span></div>
+
+      <div id="l1" class="vc vL"><i>✕</i>1 room</div><div id="r1" class="vc vR"><i>✓</i>Whole place</div>
+      <div id="l2" class="vc vL"><i>✕</i>Room service</div><div id="r2" class="vc vR"><i>✓</i>Own kitchen</div>
+      <div id="l3" class="vc vL"><i>✕</i>2 rooms apart</div><div id="r3" class="vc vR"><i>✓</i>All together</div>
+      <div id="l4" class="vc vL"><i>✕</i>Laundry bill</div><div id="r4" class="vc vR"><i>✓</i>Washer at home</div>
+      <div id="l5" class="vc vL"><i>✕</i>Hotel strip</div><div id="r5" class="vc vR"><i>✓</i>Real street</div>
+      <div id="l6" class="vc vL" style="background: #f6f2ea; color: #1d1610"><i style="background: #2f6b5a">✓</i>Daily towels</div>
+      <div id="r6" class="vc vR" style="background: #26313a; color: #b9c3c9; box-shadow: none"><i style="background: #6a756f">–</i>Ask the host</div>
+
+      <!-- Final score -->
+      <div id="gW" class="grp">
+        <div id="w-s" class="big cream" style="top: 470px; font-size: 200px; letter-spacing: -6px">5 : 1</div>
+        <div id="w-t" class="big gold x3d" style="top: 690px; font-size: 150px">HOME WINS</div>
+      </div>
+
+      <!-- Our place -->
+      <div id="gO" class="grp">
+        <div class="kick" style="top: 250px">That's why we run</div>
+        <div id="o-t" class="big serif cream" style="top: 300px; font-size: 104px; font-weight: 500; letter-spacing: 0">The Coastal Calm</div>
+        <div id="o-s" class="big cream" style="top: 420px; font-size: 40px; font-weight: 500; letter-spacing: 1px; opacity: 0">White Town, Pondy</div>
+        <div id="o-stage" style="position: absolute; left: 540px; top: 900px; perspective: 1800px">
+          <div id="o-p" class="photo" style="left: -440px; top: -330px; width: 880px; height: 660px; background-image: url(assets/photos/outside.jpg)"></div>
+        </div>
+        <div id="o-c1" class="chip" style="left: 120px; top: 1300px">Whole floors</div>
+        <div id="o-c2" class="chip" style="left: 420px; top: 1300px">2 min to Rock Beach</div>
+      </div>
+
+      <!-- Send this -->
+      <div id="gS" class="grp">
+        <div id="s-t" class="big cream" style="top: 300px; font-size: 84px">Send this to the friend</div>
+        <div id="s-t2" class="big serif it gold" style="top: 400px; font-size: 92px; font-weight: 500; letter-spacing: 0">who still books hotel rooms.</div>
+        <svg id="s-plane" style="position: absolute; left: 440px; top: 640px; opacity: 0" width="200" height="200" viewBox="0 0 24 24">
+          <path d="M22 2 L11 13" stroke="#f6f2ea" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M22 2 L15 22 L11 13 L2 9 Z" stroke="#f6f2ea" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+        </svg>
+        <div id="s-web" style="position: absolute; left: 0; right: 0; top: 1300px; text-align: center; opacity: 0">
+          <span style="display: inline-block; font-weight: 700; font-size: 46px; color: #1d1610; background: #e0ad4f; padding: 22px 38px 18px; border-radius: 999px">thecoastalcalm.com</span>
+        </div>
+      </div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo" class="clip" data-start="0.3" data-duration="33.43" src="assets/vo/vo.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="36" src="assets/bgm/track35.wav" data-volume="0.26" data-fade-in="0.1" data-fade-out="1.6" data-track-index="2"></audio>
+      <audio id="x1" class="clip" data-start="3.44" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.5" data-track-index="3"></audio>
+      <audio id="x2" class="clip" data-start="7.81" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="4"></audio>
+      <audio id="x3" class="clip" data-start="9.95" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="5"></audio>
+      <audio id="x4" class="clip" data-start="12.61" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="6"></audio>
+      <audio id="x5" class="clip" data-start="16.89" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="7"></audio>
+      <audio id="x6" class="clip" data-start="20.28" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="8"></audio>
+      <audio id="x7" class="clip" data-start="23.44" data-duration="1.2" src="assets/sfx/notification.mp3" data-volume="0.4" data-track-index="9"></audio>
+      <audio id="x8" class="clip" data-start="24.84" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.5" data-track-index="10"></audio>
+      <audio id="x9" class="clip" data-start="25.74" data-duration="2.5" src="assets/sfx/whoosh-cinematic.mp3" data-volume="0.35" data-track-index="11"></audio>
+      <audio id="x10" class="clip" data-start="31.28" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.4" data-track-index="12"></audio>
+      <audio id="x11" class="clip" data-start="5.54" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.3" data-track-index="13"></audio>
+    </div>
+    <script>
+      const W = 6, D = 4.6, H = 1.7, SLAB = 0.16, GAP = 1.25;
+      const C = { wall: '#efe8da', trim: '#d8cdb9', slab: '#cbc1ae', shutter: '#2f5b55', glass: '#1d2523', wood: '#7b5b3d',
+                  pot: '#b6724b', leaf: '#4d7a48', solar: '#203044', iron: '#28302e', ground: '#ddd3c2' };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(28, 1080 / 1920, 0.1, 200);
+      const root = new THREE.Group();
+      const levels = [], glassMats = [];
+      const hemi = new THREE.HemisphereLight('#fff6e6', '#5b6b66', 1.6);
+      const sun = new THREE.DirectionalLight('#fff1dc', 2.4);
+      sun.position.set(-8, 14, 9); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 14, bottom: -4, far: 40 }); sun.shadow.bias = -0.0004;
+      scene.add(hemi, sun);
+      const bulbMat = new THREE.MeshBasicMaterial({ color: '#ffd28c', toneMapped: false });
+      const pergolaLight = new THREE.PointLight('#ffb35a', 0, 9, 1.6);
+      const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85 }, o));
+      const box = (p, w, h, d, m, x, y, z) => { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; };
+      const potMat = mat(C.pot), leafMat = mat(C.leaf, { flatShading: true });
+      function planter(parent, x, z, y0 = 0.22) {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.13, 0.3, 10), potMat); p.position.set(x, y0 + 0.15, z);
+        const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 0), leafMat); l.position.set(x, y0 + 0.5, z); l.rotation.set(x, z, 0);
+        p.castShadow = l.castShadow = true; parent.add(p, l);
+      }
+      function balcony(parent, width, depth, slab, iron) {
+        const z = D / 2 + depth / 2;
+        box(parent, width, 0.12, depth, slab, 0, 0.06, z);
+        box(parent, width, 0.04, 0.05, iron, 0, 0.82, D / 2 + depth - 0.03);
+        box(parent, 0.05, 0.04, depth, iron, -width / 2 + 0.03, 0.82, z);
+        box(parent, 0.05, 0.04, depth, iron, width / 2 - 0.03, 0.82, z);
+        const n = Math.round(width / 0.2), posts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.025, 0.7, 0.025), iron, n + 1), m4 = new THREE.Matrix4();
+        for (let k = 0; k <= n; k++) { m4.makeTranslation(-width / 2 + 0.03 + ((width - 0.06) * k) / n, 0.47, D / 2 + depth - 0.03); posts.setMatrixAt(k, m4); }
+        posts.castShadow = true; parent.add(posts);
+      }
+      (function build() {
+        const wall = mat(C.wall), trim = mat(C.trim), slab = mat(C.slab), shutter = mat(C.shutter, { roughness: 0.6 });
+        const wood = mat(C.wood, { roughness: 0.7 }), iron = mat(C.iron, { roughness: 0.5, metalness: 0.3 });
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(11, 64), new THREE.ShadowMaterial({ opacity: 0.18 }));
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; root.add(ground);
+        const base = new THREE.Group(), cwZ = D / 2 + 1.35;
+        box(base, W + 0.8, 0.22, D + 0.8, mat(C.ground), 0, 0.11, 0);
+        box(base, 2.3, 0.55, 0.16, trim, -1.95, 0.27, cwZ); box(base, 2.3, 0.55, 0.16, trim, 1.95, 0.27, cwZ);
+        box(base, 0.26, 0.8, 0.26, wall, -0.75, 0.4, cwZ); box(base, 0.26, 0.8, 0.26, wall, 0.75, 0.4, cwZ);
+        box(base, 0.16, 0.55, 1.35, trim, -W / 2 - 0.02, 0.27, D / 2 + 0.68); box(base, 0.16, 0.55, 1.35, trim, W / 2 + 0.02, 0.27, D / 2 + 0.68);
+        root.add(base);
+        for (let i = 0; i < 3; i++) {
+          const lvl = new THREE.Group();
+          const glass = mat(C.glass, { emissive: new THREE.Color('#ffb860'), emissiveIntensity: 0.5, roughness: 0.25, metalness: 0.1 });
+          glassMats.push(glass);
+          const wallH = H - SLAB, winY = SLAB + 0.78;
+          box(lvl, W + 0.3, SLAB, D + 0.3, slab, 0, SLAB / 2, 0);
+          box(lvl, W, wallH, 0.14, wall, 0, SLAB + wallH / 2, D / 2 - 0.07); box(lvl, W, wallH, 0.14, wall, 0, SLAB + wallH / 2, -D / 2 + 0.07);
+          box(lvl, 0.14, wallH, D, wall, -W / 2 + 0.07, SLAB + wallH / 2, 0); box(lvl, 0.14, wallH, D, wall, W / 2 - 0.07, SLAB + wallH / 2, 0);
+          box(lvl, W + 0.12, 0.08, D + 0.12, trim, 0, H - 0.04, 0);
+          const addWindow = (x, h, w = 0.7) => {
+            box(lvl, w, h, 0.05, glass, x, winY, D / 2 + 0.01);
+            box(lvl, w + 0.16, 0.06, 0.12, trim, x, winY - h / 2 - 0.03, D / 2 + 0.04); box(lvl, w + 0.16, 0.06, 0.08, trim, x, winY + h / 2 + 0.03, D / 2 + 0.03);
+            box(lvl, w / 2, h, 0.04, shutter, x - w * 0.75 - 0.04, winY, D / 2 + 0.03); box(lvl, w / 2, h, 0.04, shutter, x + w * 0.75 + 0.04, winY, D / 2 + 0.03);
+          };
+          const addSideWindow = (z, side) => {
+            box(lvl, 0.05, 0.75, 0.6, glass, side * (W / 2 + 0.01), winY, z);
+            box(lvl, 0.04, 0.75, 0.3, shutter, side * (W / 2 + 0.03), winY, z - 0.47); box(lvl, 0.04, 0.75, 0.3, shutter, side * (W / 2 + 0.03), winY, z + 0.47);
+          };
+          if (i === 0) {
+            box(lvl, 0.92, 1.25, 0.06, shutter, 0, SLAB + 0.63, D / 2 + 0.02); box(lvl, 0.92, 0.16, 0.05, glass, 0, SLAB + 1.36, D / 2 + 0.02);
+            box(lvl, 1.2, 0.07, 0.6, trim, 0, SLAB + 1.5, D / 2 + 0.3);
+            addWindow(-1.9, 0.85); addWindow(1.9, 0.85); planter(lvl, -1.05, D / 2 + 0.45); planter(lvl, 1.05, D / 2 + 0.45);
+          } else if (i === 1) { addWindow(-1.9, 1.1); addWindow(0, 1.1); addWindow(1.9, 1.1); balcony(lvl, W, 0.85, slab, iron); }
+          else { addWindow(-1.9, 0.9); addWindow(0, 1.1, 0.9); addWindow(1.9, 0.9); balcony(lvl, 2.6, 0.7, slab, iron); }
+          addSideWindow(-0.6, 1); addSideWindow(0.9, -1);
+          levels.push(lvl); root.add(lvl);
+        }
+        const roof = new THREE.Group(), pH = 0.45;
+        box(roof, W + 0.3, SLAB, D + 0.3, slab, 0, SLAB / 2, 0);
+        box(roof, W + 0.3, pH, 0.14, wall, 0, SLAB + pH / 2, D / 2 + 0.08); box(roof, W + 0.3, pH, 0.14, wall, 0, SLAB + pH / 2, -D / 2 - 0.08);
+        box(roof, 0.14, pH, D + 0.3, wall, -W / 2 - 0.08, SLAB + pH / 2, 0); box(roof, 0.14, pH, D + 0.3, wall, W / 2 + 0.08, SLAB + pH / 2, 0);
+        box(roof, 1.5, 1.55, 1.4, wall, W / 2 - 0.85, SLAB + 0.78, -D / 2 + 0.78); box(roof, 1.66, 0.08, 1.56, trim, W / 2 - 0.85, SLAB + 1.59, -D / 2 + 0.78);
+        box(roof, 0.62, 1.05, 0.05, shutter, W / 2 - 0.85, SLAB + 0.55, -D / 2 + 1.5);
+        const x0 = -2.5, x1 = 1.2, z0 = -1.55, z1 = 1.75, top = SLAB + 1.55;
+        for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) box(roof, 0.12, 1.55, 0.12, wood, x, SLAB + 0.78, z);
+        box(roof, x1 - x0 + 0.3, 0.1, 0.12, wood, (x0 + x1) / 2, top, z0); box(roof, x1 - x0 + 0.3, 0.1, 0.12, wood, (x0 + x1) / 2, top, z1);
+        for (let k = 0; k <= 5; k++) box(roof, 0.07, 0.08, z1 - z0 + 0.3, wood, x0 + ((x1 - x0) * k) / 5, top + 0.09, (z0 + z1) / 2);
+        box(roof, x1 - x0 + 0.1, 0.05, z1 - z0 + 0.1, mat(C.solar, { roughness: 0.3, metalness: 0.5 }), (x0 + x1) / 2, top + 0.24, (z0 + z1) / 2).rotation.x = -0.07;
+        box(roof, 1.6, 0.08, 0.42, wood, (x0 + x1) / 2 - 0.4, SLAB + 0.36, z0 + 0.45); box(roof, 1.6, 0.3, 0.32, wood, (x0 + x1) / 2 - 0.4, SLAB + 0.16, z0 + 0.45);
+        box(roof, 1.0, 0.08, 0.42, wood, x0 + 0.5, SLAB + 0.36, (z0 + z1) / 2 + 0.3).rotation.y = Math.PI / 2;
+        for (const [x, z] of [[-2.65, 2.0], [-1.4, 2.0], [0, 2.0], [1.6, 2.0], [2.6, 1.0], [2.6, 0.1]]) planter(roof, x, z, SLAB);
+        const bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.04, 8, 6), bulbMat, 64), m4 = new THREE.Matrix4(), wireMat = new THREE.LineBasicMaterial({ color: C.iron });
+        for (let r = 0; r < 4; r++) {
+          const z = z0 + 0.25 + ((z1 - z0 - 0.5) * r) / 3, pts = [];
+          for (let k = 0; k <= 40; k++) { const t = k / 40; pts.push(new THREE.Vector3(x0 + (x1 - x0) * t, top - 0.08 - Math.sin(Math.PI * t) * 0.32, z)); }
+          roof.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+          for (let b = 0; b < 16; b++) { const t = (b + 0.5) / 16; m4.makeTranslation(x0 + (x1 - x0) * t, top - 0.13 - Math.sin(Math.PI * t) * 0.32, z); bulbs.setMatrixAt(r * 16 + b, m4); }
+        }
+        roof.add(bulbs);
+        pergolaLight.position.set((x0 + x1) / 2, top - 0.4, (z0 + z1) / 2); roof.add(pergolaLight);
+        levels.push(roof); root.add(roof);
+      })();
+      scene.add(root);
+      // ---------- The hotel: a grey tower of identical rooms, stood beside our house ----------
+      root.position.x = 3.4;
+      const tower = new THREE.Group(); tower.position.x = -3.6; scene.add(tower);
+      const tGrey = new THREE.MeshStandardMaterial({ color: '#8a9298', roughness: 0.7 });
+      const tDark = new THREE.MeshStandardMaterial({ color: '#555d63', roughness: 0.6 });
+      const tb = (w, h, d, m, x, y, z) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); o.castShadow = o.receiveShadow = true; tower.add(o); return o; };
+      tb(4.4, 9.4, 4.0, tGrey, 0, 4.9, 0);
+      tb(4.8, 0.9, 4.4, tDark, 0, 0.45, 0);
+      tb(1.4, 0.75, 0.05, new THREE.MeshStandardMaterial({ color: '#9fb6c4', roughness: 0.2, emissive: new THREE.Color('#cfe3ef'), emissiveIntensity: 0.4 }), 0, 0.45, 2.21);
+      tb(4.6, 0.25, 4.2, tDark, 0, 9.72, 0); tb(1.2, 0.8, 1.2, tDark, 1.1, 10.2, -0.8); tb(0.06, 1.6, 0.06, tDark, -1.2, 10.6, 0.6);
+      const win = [];
+      for (let r = 0; r < 9; r++) {
+        win.push([]);
+        for (let c = 0; c < 4; c++) {
+          const m = new THREE.MeshStandardMaterial({ color: '#1c2228', roughness: 0.3, emissive: new THREE.Color('#dfe9f2'), emissiveIntensity: 0 });
+          tb(0.62, 0.6, 0.04, m, -1.47 + c * 0.98, 1.6 + r * 0.92, 2.01);
+          win[r].push(m);
+        }
+      }
+      let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      const baseLit = win.map((row) => row.map(() => (rnd() < 0.35 ? 0.35 : 0.04)));
+
+      // State the paused GSAP timeline below fills in for any time t.
+      const S = { explode: 0, glow: 0.35, f1: 0, yaw: -0.35, r: 74, ty: 4.6, polar: 1.3, shift: 40, hm: 0, hx: 3.4, tdrop: 0, cx: 0 };
+      const ONE = [[5, 1]], TWO = [[2, 0], [7, 3]];
+      function draw() {
+        levels.forEach((lvl, i) => { lvl.position.y = 0.22 + i * H + S.explode * i * GAP; });
+        glassMats.forEach((g, i) => { g.emissiveIntensity = 0.05 + S.glow * 1.1 + (i === 1 ? S.f1 * 1.8 : 0) - (i !== 1 ? S.f1 * 0.3 : 0); });
+        const bl = 0.2 + S.glow * 0.8; bulbMat.color.setRGB(bl, 0.82 * bl, 0.55 * bl); pergolaLight.intensity = S.glow * 5;
+        hemi.intensity = 0.75; sun.intensity = 1.1;
+        win.forEach((row, r) => row.forEach((m, c) => {
+          let e = baseLit[r][c];
+          if (S.hm === 1) e = ONE.some(([a, b]) => a === r && b === c) ? 2.2 : 0.03;
+          if (S.hm === 2) e = TWO.some(([a, b]) => a === r && b === c) ? 2.2 : 0.03;
+          if (S.hm === 3) e = 1.3;
+          m.emissiveIntensity = e;
+        }));
+        tower.position.y = -S.tdrop * 22; tower.visible = S.tdrop < 0.98;
+        root.position.x = S.hx;
+        root.rotation.y = S.yaw; tower.rotation.y = 0.35 + S.yaw * 0.3;
+        camera.position.set(S.cx, S.ty + Math.cos(S.polar) * S.r, Math.sin(S.polar) * S.r);
+        camera.lookAt(S.cx, S.ty, 0);
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920);
+        renderer.render(scene, camera);
+      }
+
+      const st = gsap.timeline({ paused: true });   // drives S (the 3D stage)
+      const tl = gsap.timeline({ paused: true });   // drives the HTML layers
+      const w = (t) => 0.3 + t + (t >= 2.6 ? 0.444 : 0);   // a word's time in the original vo take; the new hook line pushed the rest back 0.444 s
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.5, filter: 'blur(12px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, t + 0.01); };
+      const out = (el, t) => tl.to(el, { opacity: 0, y: -24, duration: 0.2, ease: 'power2.in' }, t - 0.2);
+      // a round: label, headline, the two verdict cards slide in from their sides
+      const round = (n, name, t, h, l, r) => {
+        tl.set('#round-t', { textContent: `ROUND ${n} · ${name}` }, t);
+        tl.fromTo('#round', { scale: 1.3 }, { scale: 1, duration: 0.25, ease: 'back.out(3)', immediateRender: false }, t);
+        tl.set([h, l, r], { y: 0, x: 0 }, t);
+        slam(h, t + 0.05);
+        tl.fromTo(l, { opacity: 0, x: -120 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t + 0.25);
+        tl.fromTo(r, { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t + 0.4);
+      };
+      const clear = (h, l, r, t) => { out(h, t); out(l, t); out(r, t); };
+      // the score digit flips over
+      const point = (side, val, t) => {
+        const d = side === 'R' ? '#dR' : '#dL';
+        tl.to(d, { rotationX: 90, duration: 0.12, ease: 'power2.in', transformPerspective: 500 }, t);
+        tl.set(d, { textContent: String(val) }, t + 0.12);
+        tl.to(d, { rotationX: 0, duration: 0.2, ease: 'back.out(3)', transformPerspective: 500 }, t + 0.12);
+        tl.fromTo(d, { scale: 1.25 }, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.5)', immediateRender: false }, t + 0.12);
+        tl.fromTo(side === 'R' ? '#tagR' : '#tagL', { scale: 1.4 }, { scale: 1, duration: 0.35, ease: 'back.out(3)', immediateRender: false }, t);
+      };
+
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 36, ease: 'steps(432)' }, 0);
+      st.to(S, { yaw: 0.15, duration: 23, ease: 'sine.inOut' }, 0);
+
+      // A. Hook: the hotel lights two rooms far apart; the house sits whole beside it.
+      st.set(S, { hm: 1 }, 0);
+      show('#tagL', 0); show('#tagR', 0);
+      tl.fromTo('#a-2', { scale: 1.3, rotationX: -60 }, { scale: 1, rotationX: 0, duration: 0.35, ease: 'back.out(2)', transformPerspective: 800, immediateRender: false }, w(1.27));
+      tl.fromTo('#a-1', { color: '#f6f2ea' }, { color: '#e0ad4f', duration: 0.3 }, w(1.91));
+
+      // VS: the board comes up.
+      out('#gA', w(2.72));
+      tl.fromTo('#vs', { opacity: 0, scale: 3, rotation: -30 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.35, ease: 'expo.out', immediateRender: false }, w(3.11));
+      flash(w(3.11), 0.5);
+      tl.to('#vs', { opacity: 0, scale: 0.4, duration: 0.25, ease: 'power2.in' }, w(4.2));
+      rise('#score', w(2.85));
+      st.set(S, { hm: 0 }, w(2.72));
+
+      // Round 1, space: one hotel room against the house opening up floor by floor.
+      show('#round', w(4.4)); round(1, 'SPACE', w(4.4), '#h1', '#l1', '#r1');
+      st.set(S, { hm: 1 }, w(5.74));
+      st.to(S, { explode: 1, duration: 0.6, ease: 'back.out(1.6)' }, w(6.6));
+      st.to(S, { explode: 0, duration: 0.5, ease: 'power3.inOut' }, w(7.5));
+      point('R', 1, w(7.07));
+
+      // Round 2, kitchen: every window of the house warms up.
+      clear('#h1', '#l1', '#r1', w(7.52)); round(2, 'KITCHEN', w(7.52), '#h2', '#l2', '#r2');
+      st.set(S, { hm: 0 }, w(7.52));
+      st.to(S, { glow: 1, duration: 0.5, ease: 'power2.out' }, w(8.48));
+      point('R', 2, w(9.21));
+
+      // Round 3, family: the hotel splits them two rooms apart; the house holds them on one floor.
+      clear('#h2', '#l2', '#r2', w(10.02)); round(3, 'FAMILY', w(10.02), '#h3', '#l3', '#r3');
+      st.set(S, { hm: 2 }, w(12.66));
+      st.to(S, { f1: 1, duration: 0.4, ease: 'power2.out' }, w(11.64));
+      point('R', 3, w(11.87));
+      st.to(S, { f1: 0, duration: 0.4 }, w(15.2));
+
+      // Round 4, laundry.
+      clear('#h3', '#l3', '#r3', w(15.39)); round(4, 'LAUNDRY', w(15.39), '#h4', '#l4', '#r4');
+      st.set(S, { hm: 0 }, w(15.39));
+      point('R', 4, w(16.15));
+
+      // Round 5, location: the camera swings round the house like walking down its street.
+      clear('#h4', '#l4', '#r4', w(16.9)); round(5, 'LOCATION', w(16.9), '#h5', '#l5', '#r5');
+      st.to(S, { yaw: -0.9, duration: 2.6, ease: 'sine.inOut' }, w(16.9));
+      point('R', 5, w(19.54));
+
+      // Round 6, towels: fair's fair, the hotel lights up and takes a point.
+      clear('#h5', '#l5', '#r5', w(19.88)); round(6, 'TOWELS', w(19.88), '#h6', '#l6', '#r6');
+      st.to(S, { yaw: 0.1, duration: 1.2, ease: 'power2.inOut' }, w(19.9));
+      st.set(S, { hm: 3 }, w(21.34));
+      point('L', 1, w(22.71));
+
+      // Final: 5 : 1. The hotel sinks, the house takes the middle, confetti.
+      clear('#h6', '#l6', '#r6', w(23.26));
+      out('#round', w(23.26)); out('#score', w(23.26)); out('#tagL', w(23.26)); out('#tagR', w(23.26));
+      show('#gW', w(23.26));
+      slam('#w-s', w(23.26));
+      tl.fromTo('#w-t', { opacity: 0, scale: 0.4, rotationX: -70 }, { opacity: 1, scale: 1, rotationX: 0, duration: 0.45, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, w(24.13));
+      st.set(S, { hm: 0 }, w(23.26));
+      st.to(S, { tdrop: 1, duration: 0.7, ease: 'power3.in' }, w(23.3));
+      st.to(S, { hx: 0, r: 46, yaw: -0.4, shift: -230, glow: 1, duration: 1.0, ease: 'power3.inOut' }, w(24.0));
+      tl.to('#bgL', { opacity: 0, duration: 0.6 }, w(24.0)); tl.to('#bgR', { opacity: 0, duration: 0.6 }, w(24.0)); tl.to('#bgW', { opacity: 1, duration: 0.6 }, w(24.0));
+      const COLORS = ['#e0ad4f', '#f6f2ea', '#2f6b5a', '#b8452f', '#f0c987'];
+      const root_ = document.getElementById('root');
+      for (let i = 0; i < 40; i++) {
+        root_.insertAdjacentHTML('beforeend', `<div id="cf${i}" class="conf" style="background: ${COLORS[i % 5]}"></div>`);
+        const a = rnd() * Math.PI * 2, d = 260 + rnd() * 420;
+        show(`#cf${i}`, w(24.47));
+        tl.fromTo(`#cf${i}`, { x: 0, y: 0, rotation: 0 },
+          { x: Math.cos(a) * d, y: Math.sin(a) * d * 0.8 + 320, rotation: rnd() * 720 - 360, duration: 1.5, ease: 'power2.out', immediateRender: false }, w(24.47));
+        tl.to(`#cf${i}`, { opacity: 0, duration: 0.4 }, w(24.47) + 1.2);
+      }
+
+      // Our place: the 3D house hands over to the real photo of The Coastal Calm.
+      out('#gW', w(25.16));
+      show('#gO', w(25.16));
+      tl.to('#gl', { opacity: 0, duration: 0.45, ease: 'power2.in' }, w(25.2));
+      tl.fromTo('#o-p', { rotationY: 55, rotationX: 12, z: -500, scale: 0.5 },
+        { rotationY: -6, rotationX: 3, z: 0, scale: 1, opacity: 1, duration: 0.9, ease: 'power3.out', immediateRender: false }, w(25.3));
+      tl.to('#o-p', { rotationY: 6, rotationX: -2, scale: 1.05, duration: 4.6, ease: 'sine.inOut' }, w(26.2));
+      tl.fromTo('#o-p', { backgroundPosition: '50% 60%' }, { backgroundPosition: '50% 40%', duration: 5.4, ease: 'none', immediateRender: false }, w(25.3));
+      slam('#o-t', w(26.07));
+      rise('#o-s', w(26.8));
+      tl.fromTo('#o-c1', { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, w(28.18));
+      tl.fromTo('#o-c2', { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, w(29.09));
+
+      // Send this.
+      out('#gO', w(30.54));
+      show('#gS', w(30.54));
+      slam('#s-t', w(30.54));
+      rise('#s-t2', w(31.22));
+      tl.fromTo('#s-plane', { opacity: 0, x: -200, y: 160, rotation: -20, scale: 0.6 }, { opacity: 1, x: 0, y: 0, rotation: 0, scale: 1, duration: 0.5, ease: 'back.out(1.8)', immediateRender: false }, w(31.6));
+      tl.to('#s-plane', { x: 420, y: -380, opacity: 0, scale: 0.4, duration: 0.6, ease: 'power3.in' }, w(32.9));
+      tl.fromTo('#s-web', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, w(33.0));
+
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
