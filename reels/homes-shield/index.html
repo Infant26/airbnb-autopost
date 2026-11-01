@@ -1,0 +1,410 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Owner worries shield reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #0b1311; font-family: Inter; }
+      #bg { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 55% at 50% 58%, #1f302b 0%, #0b1311 72%); }
+      #bgRed { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 85% 55% at 50% 58%, #3a1714 0%, #0b1311 72%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 28px; letter-spacing: 7px;
+        text-transform: uppercase; color: #e0ad4f; }
+      .big { position: absolute; left: 60px; right: 60px; text-align: center; font-weight: 800; letter-spacing: -3px; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .cream { color: #f6f2ea; } .gold { color: #e0ad4f; } .red { color: #e05a44; }
+      .x3d { text-shadow: 0 2px 0 #c9b98f, 0 4px 0 #ad9b6e, 0 6px 0 #8f7d50, 0 8px 0 #6f5f34, 0 10px 0 #4f421f, 0 26px 40px rgba(0, 0, 0, 0.55); }
+      .x3r { text-shadow: 0 2px 0 #b9493a, 0 4px 0 #9a3a2e, 0 6px 0 #7b2c22, 0 8px 0 #5c1f17, 0 24px 40px rgba(0, 0, 0, 0.6); }
+      /* four shield pips that fill as each worry is handled */
+      #pips { position: absolute; left: 0; right: 0; top: 300px; display: flex; justify-content: center; gap: 26px; opacity: 0; }
+      .pip { width: 74px; height: 84px; }
+      .pip path { fill: none; stroke: #4a5a55; stroke-width: 5; }
+      .pip text { font-family: Inter; font-weight: 800; font-size: 30px; fill: #4a5a55; }
+      /* worry card and its answer, two faces that swap with a flip */
+      .card { position: absolute; left: 130px; top: 470px; width: 820px; height: 170px; border-radius: 28px; display: flex; align-items: center; gap: 26px;
+        padding: 0 34px; box-sizing: border-box; opacity: 0; }
+      .card i { font-style: normal; width: 84px; height: 84px; border-radius: 22px; flex: none; display: flex; align-items: center; justify-content: center;
+        font-size: 50px; font-weight: 900; color: #fff; }
+      .card b { display: block; font-size: 25px; letter-spacing: 5px; font-weight: 800; }
+      .card span { display: block; font-size: 46px; font-weight: 800; letter-spacing: -1px; margin-top: 6px; }
+      .wq { background: #2a1512; border: 3px solid #e05a44; box-shadow: 0 30px 70px -20px rgba(224, 90, 68, 0.55); }
+      .wq i { background: #e05a44; } .wq b { color: #e9a092; } .wq span { color: #fbe9e5; }
+      .wa { background: #fffaf2; border: 3px solid #e0ad4f; box-shadow: 0 30px 80px -20px rgba(224, 173, 79, 0.75); }
+      .wa i { background: #2f6b5a; } .wa b { color: #9a6a14; } .wa span { color: #1d1610; }
+      .ring { position: absolute; left: 540px; top: 700px; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%;
+        border: 6px solid #f0c987; opacity: 0; }
+      .float { position: absolute; padding: 14px 22px 10px; border-radius: 16px; background: #2a1512; border: 3px solid #e05a44; color: #fbe9e5;
+        font-weight: 800; font-size: 30px; opacity: 0; white-space: nowrap; }
+      .chip { position: absolute; font-weight: 700; font-size: 34px; color: #1d1610; background: #e0ad4f; border-radius: 999px;
+        padding: 14px 28px 10px; opacity: 0; white-space: nowrap; }
+      .photo { position: absolute; background-size: cover; background-position: center; border-radius: 26px; border: 10px solid #fffaf2;
+        box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.85); }
+      .key { width: 140px; height: 150px; border-radius: 26px; background: #f6f2ea; color: #1d1610; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 92px; box-shadow: 0 16px 0 #b9ab8c, 0 30px 50px -10px rgba(0, 0, 0, 0.7); opacity: 0; }
+      #flash { position: absolute; inset: 0; background: #fff1d6; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="31"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="bg"></div><div id="bgRed"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+
+      <!-- A. Hook, on screen from frame 1, worries floating round the house -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div class="big serif it cream" style="top: 255px; font-size: 62px; white-space: nowrap">You'd rent your Pondy house out.</div>
+        <div class="big cream" style="top: 350px; font-size: 64px; font-weight: 600; letter-spacing: -1px">Except for</div>
+        <div id="a-w" class="big red x3r" style="top: 430px; font-size: 150px">4 WORRIES</div>
+      </div>
+      <div id="f1" class="float" style="left: 70px; top: 760px; transform: rotate(-8deg)">Damage?</div>
+      <div id="f2" class="float" style="left: 700px; top: 860px; transform: rotate(7deg)">Empty months?</div>
+      <div id="f3" class="float" style="left: 80px; top: 1180px; transform: rotate(5deg)">Furniture cost?</div>
+      <div id="f4" class="float" style="left: 640px; top: 1300px; transform: rotate(-6deg)">My own dates?</div>
+
+      <div class="kick" id="kk" style="top: 250px; opacity: 0">Coastal Calm Homes · owner worries</div>
+      <div id="pips">
+        <svg id="p1" class="pip" viewBox="0 0 74 84"><path d="M37 4 L68 16 V40 C68 60 54 74 37 80 C20 74 6 60 6 40 V16 Z"/><text x="37" y="53" text-anchor="middle">1</text></svg>
+        <svg id="p2" class="pip" viewBox="0 0 74 84"><path d="M37 4 L68 16 V40 C68 60 54 74 37 80 C20 74 6 60 6 40 V16 Z"/><text x="37" y="53" text-anchor="middle">2</text></svg>
+        <svg id="p3" class="pip" viewBox="0 0 74 84"><path d="M37 4 L68 16 V40 C68 60 54 74 37 80 C20 74 6 60 6 40 V16 Z"/><text x="37" y="53" text-anchor="middle">3</text></svg>
+        <svg id="p4" class="pip" viewBox="0 0 74 84"><path d="M37 4 L68 16 V40 C68 60 54 74 37 80 C20 74 6 60 6 40 V16 Z"/><text x="37" y="53" text-anchor="middle">4</text></svg>
+      </div>
+
+      <div id="ring" class="ring"></div>
+      <div id="q1" class="card wq"><i>!</i><div><b>WORRY 1</b><span>A guest breaks something</span></div></div>
+      <div id="a1" class="card wa"><i>✓</i><div><b>HANDLED</b><span>We repair it. We pay.</span></div></div>
+      <div id="q2" class="card wq"><i>!</i><div><b>WORRY 2</b><span>A month with 0 bookings</span></div></div>
+      <div id="a2" class="card wa"><i>✓</i><div><b>HANDLED</b><span>Your rent still lands</span></div></div>
+      <div id="q3" class="card wq"><i>!</i><div><b>WORRY 3</b><span>Furnishing it</span></div></div>
+      <div id="a3" class="card wa"><i>✓</i><div><b>HANDLED</b><span>On us</span></div></div>
+      <div id="q4" class="card wq"><i>!</i><div><b>WORRY 4</b><span>A family function</span></div></div>
+      <div id="a4" class="card wa"><i>✓</i><div><b>HANDLED</b><span>Block the dates</span></div></div>
+      <div id="c3a" class="chip" style="left: 90px; top: 1390px">Beds</div>
+      <div id="c3b" class="chip" style="left: 290px; top: 1390px">Kitchen</div>
+      <div id="c3c" class="chip" style="left: 540px; top: 1390px">Lights</div>
+      <div id="c4" class="chip" style="left: 270px; top: 1390px; background: #f6f2ea">Still your house</div>
+
+      <!-- F. Fixed rent vs revenue share -->
+      <div id="gF" class="grp">
+        <div id="f-t" class="big cream" style="top: 250px; font-size: 92px">No revenue share.</div>
+        <div id="f-s" class="big serif it gold" style="top: 360px; font-size: 80px; opacity: 0">One fixed rent, in writing.</div>
+        <svg id="chart" style="position: absolute; left: 110px; top: 560px" width="860" height="560" viewBox="0 0 860 560">
+          <line x1="0" y1="520" x2="860" y2="520" stroke="#3b4a45" stroke-width="3"/>
+          <path id="zig" d="M 0 300 L 70 380 L 140 220 L 210 440 L 280 260 L 350 470 L 420 200 L 490 410 L 560 330 L 630 480 L 700 240 L 770 400 L 860 300"
+                stroke="#6a756f" stroke-width="7" fill="none" stroke-linejoin="round" stroke-dasharray="3000" stroke-dashoffset="3000"/>
+          <path id="flat" d="M 0 160 L 860 160" stroke="#e0ad4f" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="900" stroke-dashoffset="900"/>
+          <text id="zl" x="860" y="545" text-anchor="end" font-family="Inter" font-weight="700" font-size="30" fill="#8a958f" opacity="0">revenue share</text>
+          <text id="fl" x="0" y="130" font-family="Inter" font-weight="800" font-size="36" fill="#e0ad4f" opacity="0">your rent, every month</text>
+        </svg>
+      </div>
+
+      <!-- G. Proof -->
+      <div id="gG" class="grp">
+        <div class="kick" style="top: 250px">We already run</div>
+        <div id="g-t" class="big serif cream" style="top: 300px; font-size: 104px; font-weight: 500; letter-spacing: 0">The Coastal Calm</div>
+        <div id="g-s" class="big cream" style="top: 420px; font-size: 40px; font-weight: 500; letter-spacing: 1px; opacity: 0">White Town, Pondy</div>
+        <div style="position: absolute; left: 540px; top: 900px; perspective: 1800px">
+          <div id="g-p" class="photo" style="left: -440px; top: -330px; width: 880px; height: 660px; background-image: url(assets/photos/outside.jpg)"></div>
+        </div>
+      </div>
+
+      <!-- H. Comment LEASE on keycaps -->
+      <div id="gH" class="grp">
+        <div class="kick" style="top: 300px">Own a house in Pondy?</div>
+        <div class="big cream" style="top: 360px; font-size: 104px">Comment</div>
+        <div style="position: absolute; left: 0; right: 0; top: 560px; display: flex; justify-content: center; gap: 22px">
+          <div id="k1" class="key">L</div><div id="k2" class="key">E</div><div id="k3" class="key">A</div><div id="k4" class="key">S</div><div id="k5" class="key">E</div>
+        </div>
+        <div id="h-s" class="big serif it gold" style="top: 790px; font-size: 76px; opacity: 0">we'll message you</div>
+      </div>
+
+      <!-- I. Loop and end card -->
+      <div id="gI" class="grp">
+        <div id="i-1" class="big red x3r" style="top: 250px; font-size: 120px">4 WORRIES.</div>
+        <div id="i-2" class="big gold x3d" style="top: 380px; font-size: 104px; opacity: 0">ALL 4 HANDLED.</div>
+        <div id="i-web" style="position: absolute; left: 0; right: 0; top: 1390px; text-align: center; opacity: 0">
+          <span style="display: inline-block; font-weight: 700; font-size: 46px; color: #1d1610; background: #e0ad4f; padding: 20px 36px 16px; border-radius: 999px">thecoastalcalm.homes</span>
+        </div>
+      </div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.3" data-duration="2.965" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="3.965" data-duration="2.19" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="6.755" data-duration="4.61" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="11.965" data-duration="1.72" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="14.285" data-duration="3.2" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="17.985" data-duration="2.66" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="21.245" data-duration="2.36" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="24.105" data-duration="1.74" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="vo8" class="clip" data-start="26.345" data-duration="2.155" src="assets/vo/s8.wav" data-volume="1" data-track-index="9"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="31" src="assets/bgm/track.wav" data-volume="0.26" data-fade-in="0.1" data-fade-out="1.8" data-track-index="10"></audio>
+      <audio id="x1" class="clip" data-start="2.8" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.5" data-track-index="11"></audio>
+      <audio id="x2" class="clip" data-start="4.39" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="12"></audio>
+      <audio id="x3" class="clip" data-start="7.9" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="13"></audio>
+      <audio id="x4" class="clip" data-start="12.42" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="14"></audio>
+      <audio id="x5" class="clip" data-start="14.83" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="15"></audio>
+      <audio id="x6" class="clip" data-start="5.5" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="16"></audio>
+      <audio id="x7" class="clip" data-start="8.72" data-duration="2.5" src="assets/sfx/chime.mp3" data-volume="0.35" data-track-index="17"></audio>
+      <audio id="x8" class="clip" data-start="13.31" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="18"></audio>
+      <audio id="x9" class="clip" data-start="15.82" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="19"></audio>
+      <audio id="x10" class="clip" data-start="21.1" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.4" data-track-index="20"></audio>
+      <audio id="x11" class="clip" data-start="24.53" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.8" data-track-index="21"></audio>
+      <audio id="x12" class="clip" data-start="27.13" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.45" data-track-index="22"></audio>
+    </div>
+    <script>
+      const W = 6, D = 4.6, H = 1.7, SLAB = 0.16, GAP = 1.25;
+      const C = { wall: '#efe8da', trim: '#d8cdb9', slab: '#cbc1ae', shutter: '#2f5b55', glass: '#1d2523', wood: '#7b5b3d',
+                  pot: '#b6724b', leaf: '#4d7a48', solar: '#203044', iron: '#28302e', ground: '#ddd3c2' };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(28, 1080 / 1920, 0.1, 200);
+      const root = new THREE.Group();
+      const levels = [], glassMats = [];
+      const hemi = new THREE.HemisphereLight('#fff6e6', '#5b6b66', 1.6);
+      const sun = new THREE.DirectionalLight('#fff1dc', 2.4);
+      sun.position.set(-8, 14, 9); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -9, right: 9, top: 14, bottom: -4, far: 40 }); sun.shadow.bias = -0.0004;
+      scene.add(hemi, sun);
+      const bulbMat = new THREE.MeshBasicMaterial({ color: '#ffd28c', toneMapped: false });
+      const pergolaLight = new THREE.PointLight('#ffb35a', 0, 9, 1.6);
+      const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85 }, o));
+      const box = (p, w, h, d, m, x, y, z) => { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; };
+      const potMat = mat(C.pot), leafMat = mat(C.leaf, { flatShading: true });
+      function planter(parent, x, z, y0 = 0.22) {
+        const p = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.13, 0.3, 10), potMat); p.position.set(x, y0 + 0.15, z);
+        const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 0), leafMat); l.position.set(x, y0 + 0.5, z); l.rotation.set(x, z, 0);
+        p.castShadow = l.castShadow = true; parent.add(p, l);
+      }
+      function balcony(parent, width, depth, slab, iron) {
+        const z = D / 2 + depth / 2;
+        box(parent, width, 0.12, depth, slab, 0, 0.06, z);
+        box(parent, width, 0.04, 0.05, iron, 0, 0.82, D / 2 + depth - 0.03);
+        box(parent, 0.05, 0.04, depth, iron, -width / 2 + 0.03, 0.82, z);
+        box(parent, 0.05, 0.04, depth, iron, width / 2 - 0.03, 0.82, z);
+        const n = Math.round(width / 0.2), posts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.025, 0.7, 0.025), iron, n + 1), m4 = new THREE.Matrix4();
+        for (let k = 0; k <= n; k++) { m4.makeTranslation(-width / 2 + 0.03 + ((width - 0.06) * k) / n, 0.47, D / 2 + depth - 0.03); posts.setMatrixAt(k, m4); }
+        posts.castShadow = true; parent.add(posts);
+      }
+      (function build() {
+        const wall = mat(C.wall), trim = mat(C.trim), slab = mat(C.slab), shutter = mat(C.shutter, { roughness: 0.6 });
+        const wood = mat(C.wood, { roughness: 0.7 }), iron = mat(C.iron, { roughness: 0.5, metalness: 0.3 });
+        const ground = new THREE.Mesh(new THREE.CircleGeometry(11, 64), new THREE.ShadowMaterial({ opacity: 0.18 }));
+        ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; root.add(ground);
+        const base = new THREE.Group(), cwZ = D / 2 + 1.35;
+        box(base, W + 0.8, 0.22, D + 0.8, mat(C.ground), 0, 0.11, 0);
+        box(base, 2.3, 0.55, 0.16, trim, -1.95, 0.27, cwZ); box(base, 2.3, 0.55, 0.16, trim, 1.95, 0.27, cwZ);
+        box(base, 0.26, 0.8, 0.26, wall, -0.75, 0.4, cwZ); box(base, 0.26, 0.8, 0.26, wall, 0.75, 0.4, cwZ);
+        box(base, 0.16, 0.55, 1.35, trim, -W / 2 - 0.02, 0.27, D / 2 + 0.68); box(base, 0.16, 0.55, 1.35, trim, W / 2 + 0.02, 0.27, D / 2 + 0.68);
+        root.add(base);
+        for (let i = 0; i < 3; i++) {
+          const lvl = new THREE.Group();
+          const glass = mat(C.glass, { emissive: new THREE.Color('#ffb860'), emissiveIntensity: 0.5, roughness: 0.25, metalness: 0.1 });
+          glassMats.push(glass);
+          const wallH = H - SLAB, winY = SLAB + 0.78;
+          box(lvl, W + 0.3, SLAB, D + 0.3, slab, 0, SLAB / 2, 0);
+          box(lvl, W, wallH, 0.14, wall, 0, SLAB + wallH / 2, D / 2 - 0.07); box(lvl, W, wallH, 0.14, wall, 0, SLAB + wallH / 2, -D / 2 + 0.07);
+          box(lvl, 0.14, wallH, D, wall, -W / 2 + 0.07, SLAB + wallH / 2, 0); box(lvl, 0.14, wallH, D, wall, W / 2 - 0.07, SLAB + wallH / 2, 0);
+          box(lvl, W + 0.12, 0.08, D + 0.12, trim, 0, H - 0.04, 0);
+          const addWindow = (x, h, w = 0.7) => {
+            box(lvl, w, h, 0.05, glass, x, winY, D / 2 + 0.01);
+            box(lvl, w + 0.16, 0.06, 0.12, trim, x, winY - h / 2 - 0.03, D / 2 + 0.04); box(lvl, w + 0.16, 0.06, 0.08, trim, x, winY + h / 2 + 0.03, D / 2 + 0.03);
+            box(lvl, w / 2, h, 0.04, shutter, x - w * 0.75 - 0.04, winY, D / 2 + 0.03); box(lvl, w / 2, h, 0.04, shutter, x + w * 0.75 + 0.04, winY, D / 2 + 0.03);
+          };
+          const addSideWindow = (z, side) => {
+            box(lvl, 0.05, 0.75, 0.6, glass, side * (W / 2 + 0.01), winY, z);
+            box(lvl, 0.04, 0.75, 0.3, shutter, side * (W / 2 + 0.03), winY, z - 0.47); box(lvl, 0.04, 0.75, 0.3, shutter, side * (W / 2 + 0.03), winY, z + 0.47);
+          };
+          if (i === 0) {
+            box(lvl, 0.92, 1.25, 0.06, shutter, 0, SLAB + 0.63, D / 2 + 0.02); box(lvl, 0.92, 0.16, 0.05, glass, 0, SLAB + 1.36, D / 2 + 0.02);
+            box(lvl, 1.2, 0.07, 0.6, trim, 0, SLAB + 1.5, D / 2 + 0.3);
+            addWindow(-1.9, 0.85); addWindow(1.9, 0.85); planter(lvl, -1.05, D / 2 + 0.45); planter(lvl, 1.05, D / 2 + 0.45);
+          } else if (i === 1) { addWindow(-1.9, 1.1); addWindow(0, 1.1); addWindow(1.9, 1.1); balcony(lvl, W, 0.85, slab, iron); }
+          else { addWindow(-1.9, 0.9); addWindow(0, 1.1, 0.9); addWindow(1.9, 0.9); balcony(lvl, 2.6, 0.7, slab, iron); }
+          addSideWindow(-0.6, 1); addSideWindow(0.9, -1);
+          levels.push(lvl); root.add(lvl);
+        }
+        const roof = new THREE.Group(), pH = 0.45;
+        box(roof, W + 0.3, SLAB, D + 0.3, slab, 0, SLAB / 2, 0);
+        box(roof, W + 0.3, pH, 0.14, wall, 0, SLAB + pH / 2, D / 2 + 0.08); box(roof, W + 0.3, pH, 0.14, wall, 0, SLAB + pH / 2, -D / 2 - 0.08);
+        box(roof, 0.14, pH, D + 0.3, wall, -W / 2 - 0.08, SLAB + pH / 2, 0); box(roof, 0.14, pH, D + 0.3, wall, W / 2 + 0.08, SLAB + pH / 2, 0);
+        box(roof, 1.5, 1.55, 1.4, wall, W / 2 - 0.85, SLAB + 0.78, -D / 2 + 0.78); box(roof, 1.66, 0.08, 1.56, trim, W / 2 - 0.85, SLAB + 1.59, -D / 2 + 0.78);
+        box(roof, 0.62, 1.05, 0.05, shutter, W / 2 - 0.85, SLAB + 0.55, -D / 2 + 1.5);
+        const x0 = -2.5, x1 = 1.2, z0 = -1.55, z1 = 1.75, top = SLAB + 1.55;
+        for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) box(roof, 0.12, 1.55, 0.12, wood, x, SLAB + 0.78, z);
+        box(roof, x1 - x0 + 0.3, 0.1, 0.12, wood, (x0 + x1) / 2, top, z0); box(roof, x1 - x0 + 0.3, 0.1, 0.12, wood, (x0 + x1) / 2, top, z1);
+        for (let k = 0; k <= 5; k++) box(roof, 0.07, 0.08, z1 - z0 + 0.3, wood, x0 + ((x1 - x0) * k) / 5, top + 0.09, (z0 + z1) / 2);
+        box(roof, x1 - x0 + 0.1, 0.05, z1 - z0 + 0.1, mat(C.solar, { roughness: 0.3, metalness: 0.5 }), (x0 + x1) / 2, top + 0.24, (z0 + z1) / 2).rotation.x = -0.07;
+        box(roof, 1.6, 0.08, 0.42, wood, (x0 + x1) / 2 - 0.4, SLAB + 0.36, z0 + 0.45); box(roof, 1.6, 0.3, 0.32, wood, (x0 + x1) / 2 - 0.4, SLAB + 0.16, z0 + 0.45);
+        box(roof, 1.0, 0.08, 0.42, wood, x0 + 0.5, SLAB + 0.36, (z0 + z1) / 2 + 0.3).rotation.y = Math.PI / 2;
+        for (const [x, z] of [[-2.65, 2.0], [-1.4, 2.0], [0, 2.0], [1.6, 2.0], [2.6, 1.0], [2.6, 0.1]]) planter(roof, x, z, SLAB);
+        const bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.04, 8, 6), bulbMat, 64), m4 = new THREE.Matrix4(), wireMat = new THREE.LineBasicMaterial({ color: C.iron });
+        for (let r = 0; r < 4; r++) {
+          const z = z0 + 0.25 + ((z1 - z0 - 0.5) * r) / 3, pts = [];
+          for (let k = 0; k <= 40; k++) { const t = k / 40; pts.push(new THREE.Vector3(x0 + (x1 - x0) * t, top - 0.08 - Math.sin(Math.PI * t) * 0.32, z)); }
+          roof.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+          for (let b = 0; b < 16; b++) { const t = (b + 0.5) / 16; m4.makeTranslation(x0 + (x1 - x0) * t, top - 0.13 - Math.sin(Math.PI * t) * 0.32, z); bulbs.setMatrixAt(r * 16 + b, m4); }
+        }
+        roof.add(bulbs);
+        pergolaLight.position.set((x0 + x1) / 2, top - 0.4, (z0 + z1) / 2); roof.add(pergolaLight);
+        levels.push(roof); root.add(roof);
+      })();
+      scene.add(root);
+      // ---------- The shield: a gold geodesic dome over the house, and the rent coin ----------
+      const dome = new THREE.Group(); dome.position.y = 3.7; scene.add(dome);
+      const domeLine = new THREE.LineBasicMaterial({ color: '#f0c987', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      dome.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(6.4, 2)), domeLine));
+      const domeFill = new THREE.MeshBasicMaterial({ color: '#e0ad4f', transparent: true, opacity: 0, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false });
+      dome.add(new THREE.Mesh(new THREE.SphereGeometry(6.4, 48, 32), domeFill));
+      const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.16, 48),
+        new THREE.MeshStandardMaterial({ color: '#e7b450', roughness: 0.25, metalness: 0.85, emissive: new THREE.Color('#7a5410'), emissiveIntensity: 0.4 }));
+      coin.rotation.x = Math.PI / 2; scene.add(coin);
+
+      // State the paused GSAP timeline below fills in for any time t.
+      const S = { explode: 0, glow: 0.08, yaw: -0.5, r: 62, ty: 3.8, polar: 1.32, shift: -150, dome: 0, hit: 0, coin: 0, spin: 0 };
+      function draw() {
+        levels.forEach((lvl, i) => { lvl.position.y = 0.22 + i * H + S.explode * i * GAP; });
+        glassMats.forEach((g) => { g.emissiveIntensity = 0.03 + S.glow * 1.2; });
+        const bl = 0.12 + S.glow * 0.85; bulbMat.color.setRGB(bl, 0.82 * bl, 0.55 * bl); pergolaLight.intensity = S.glow * 5;
+        hemi.intensity = 0.7; sun.intensity = 1.0;
+        dome.scale.setScalar(0.25 + 0.75 * S.dome + S.hit * 0.04);
+        domeLine.opacity = S.dome * 0.55 + S.hit * 0.45;
+        domeFill.opacity = S.dome * 0.05 + S.hit * 0.22;
+        dome.rotation.y = S.spin * 0.6;
+        coin.visible = S.coin > 0.001 && S.coin < 0.999;
+        coin.position.set(0, 17 - S.coin * 9.5, 0.6); coin.rotation.z = S.coin * 9;
+        root.rotation.y = S.yaw;
+        camera.position.set(0, S.ty + Math.cos(S.polar) * S.r, Math.sin(S.polar) * S.r);
+        camera.lookAt(0, S.ty, 0);
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920);
+        renderer.render(scene, camera);
+      }
+
+      const st = gsap.timeline({ paused: true });   // drives S (the 3D house and shield)
+      const tl = gsap.timeline({ paused: true });   // drives the HTML layers
+      // The voiceover is split into one phrase per worry; w() maps a word's time in vo.wav onto the reel's clock.
+      const SEG = [[0, 0.3], [2.965, 1.0], [5.155, 1.6], [9.765, 2.2], [11.485, 2.8], [14.685, 3.3], [17.345, 3.9], [19.705, 4.4], [21.445, 4.9]];
+      const w = (t) => { let o = 0; SEG.forEach(([s, off]) => { if (t >= s) o = off; }); return t + o; };
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.5, filter: 'blur(12px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t);
+      const pop = (el, t) => tl.fromTo(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, t);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, t + 0.01); };
+      const out = (el, t) => tl.to(el, { opacity: 0, y: -24, duration: 0.2, ease: 'power2.in' }, t - 0.2);
+
+      // A worry falls onto the shield, hits it, then flips over into our answer.
+      function worry(n, tIn, tHit, tAns, tOut) {
+        const q = '#q' + n, a = '#a' + n;
+        show(q, tIn);
+        tl.fromTo(q, { y: -620, scale: 1.08 }, { y: 0, scale: 1, duration: tHit - tIn, ease: 'power3.in', transformPerspective: 1200, immediateRender: false }, tIn);
+        flash(tHit, 0.18);
+        tl.set('#bgRed', { opacity: 0.8 }, tHit); tl.to('#bgRed', { opacity: 0, duration: 0.6, ease: 'power2.out' }, tHit + 0.01);
+        show('#ring', tHit);
+        tl.fromTo('#ring', { scale: 1 }, { scale: 26, opacity: 0, duration: 0.6, ease: 'power2.out', immediateRender: false }, tHit);
+        tl.to(q, { x: 16, duration: 0.04, yoyo: true, repeat: 5, ease: 'none' }, tHit);
+        st.fromTo(S, { hit: 1 }, { hit: 0, duration: 0.7, ease: 'power2.out', immediateRender: false }, tHit);
+        tl.to(q, { rotationY: 90, duration: 0.14, ease: 'power2.in', transformPerspective: 1200 }, tAns - 0.14);
+        hide(q, tAns);
+        show(a, tAns);
+        tl.fromTo(a, { rotationY: -90 }, { rotationY: 0, duration: 0.3, ease: 'back.out(2)', transformPerspective: 1200, immediateRender: false }, tAns);
+        const p = '#p' + n;
+        tl.set(p + ' path', { fill: '#e0ad4f', stroke: '#e0ad4f' }, tAns); tl.set(p + ' text', { fill: '#1d1610' }, tAns);
+        tl.fromTo(p, { scale: 1.5 }, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.5)', immediateRender: false }, tAns);
+        st.to(S, { glow: '+=0.22', duration: 0.4 }, tAns);
+        tl.to(a, { x: 900, rotation: 18, opacity: 0, duration: 0.35, ease: 'power3.in' }, tOut);
+      }
+
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 31, ease: 'steps(372)' }, 0);
+      st.to(S, { yaw: 0.6, duration: 17, ease: 'sine.inOut' }, 0);
+      st.to(S, { spin: 1, duration: 31, ease: 'none' }, 0);
+
+      // A. Hook: four worries hover round a dark house, then the shield goes up.
+      ['#f1', '#f2', '#f3', '#f4'].forEach((f, i) => {
+        show(f, 0);
+        tl.fromTo(f, { y: 0 }, { y: -18, duration: 0.9, yoyo: true, repeat: 2, ease: 'sine.inOut', immediateRender: false }, i * 0.2);
+        tl.to(f, { scale: 0.2, opacity: 0, x: (i % 2 ? -1 : 1) * 160, duration: 0.35, ease: 'power3.in' }, w(2.5) + i * 0.05);
+      });
+      tl.fromTo('#a-w', { scale: 1.2 }, { scale: 1, duration: 0.3, ease: 'expo.out', immediateRender: false }, w(2.25));
+      st.to(S, { dome: 1, duration: 0.8, ease: 'back.out(1.6)' }, w(2.5));
+      st.to(S, { glow: 0.3, duration: 0.6 }, w(2.5));
+      flash(w(2.6), 0.4);
+      out('#gA', w(2.9));
+      rise('#kk', w(2.85)); rise('#pips', w(2.95));
+
+      // The four worries.
+      worry(1, w(2.75), w(3.39), w(4.5), w(5.1));
+      worry(2, w(5.19), w(6.3), w(7.12), w(9.55));
+      st.fromTo(S, { coin: 0 }, { coin: 1, duration: 0.9, ease: 'bounce.out', immediateRender: false }, w(7.12));
+      worry(3, w(9.77), w(10.22), w(11.11), w(11.32));
+      st.to(S, { explode: 1, duration: 0.5, ease: 'back.out(1.6)' }, w(11.11));
+      st.to(S, { explode: 0, duration: 0.45, ease: 'power3.inOut' }, w(11.11) + 1.1);
+      pop('#c3a', w(11.15)); pop('#c3b', w(11.25)); pop('#c3c', w(11.35));
+      out('#c3a', w(11.49)); out('#c3b', w(11.49)); out('#c3c', w(11.49));
+      worry(4, w(11.49), w(12.03), w(13.02), w(14.45));
+      pop('#c4', w(13.69));
+      out('#c4', w(14.69));
+
+      // F. No revenue share: the flat gold rent line against the zigzag.
+      out('#pips', w(14.69)); out('#kk', w(14.69));
+      show('#gF', w(14.69));
+      tl.to('#gl', { opacity: 0, duration: 0.4 }, w(14.6));
+      slam('#f-t', w(14.69));
+      tl.to('#zig', { strokeDashoffset: 0, duration: 1.0, ease: 'none' }, w(14.81));
+      tl.to('#zl', { opacity: 1, duration: 0.3 }, w(15.3));
+      tl.to('#flat', { strokeDashoffset: 0, duration: 0.5, ease: 'power2.out' }, w(15.81));
+      tl.to('#fl', { opacity: 1, duration: 0.3 }, w(16.0));
+      rise('#f-s', w(15.99));
+
+      // G. Proof: the real house.
+      out('#gF', w(17.35));
+      show('#gG', w(17.35));
+      tl.to('#gl', { opacity: 0, duration: 0.2 }, w(17.2));
+      tl.fromTo('#g-p', { rotationY: -55, rotationX: 12, z: -500, scale: 0.5 },
+        { rotationY: 6, rotationX: 3, z: 0, scale: 1, duration: 0.9, ease: 'power3.out', immediateRender: false }, w(17.4));
+      tl.to('#g-p', { rotationY: -5, scale: 1.05, duration: 2.4, ease: 'sine.inOut' }, w(17.4) + 0.9);
+      slam('#g-t', w(18.19));
+      rise('#g-s', w(18.95));
+
+      // H. Comment LEASE: the keys drop in and get pressed.
+      out('#gG', w(19.71));
+      show('#gH', w(19.71));
+      ['#k1', '#k2', '#k3', '#k4', '#k5'].forEach((k, i) => {
+        show(k, w(19.71) + i * 0.07);
+        tl.fromTo(k, { y: -260, rotationX: 60 }, { y: 0, rotationX: 0, duration: 0.35, ease: 'back.out(1.8)', transformPerspective: 900, immediateRender: false }, w(19.71) + i * 0.07);
+        tl.to(k, { y: 14, boxShadow: '0 2px 0 #b9ab8c, 0 10px 20px -6px rgba(0,0,0,0.7)', backgroundColor: '#e0ad4f', duration: 0.08 }, w(20.13) + i * 0.06);
+        tl.to(k, { y: 0, boxShadow: '0 16px 0 #8f7d50, 0 30px 50px -10px rgba(0, 0, 0, 0.7)', duration: 0.15 }, w(20.13) + i * 0.06 + 0.1);
+      });
+      rise('#h-s', w(20.85));
+
+      // I. Loop: the shield and house again, every worry handled.
+      out('#gH', w(21.45));
+      show('#gI', w(21.45));
+      tl.to('#gl', { opacity: 1, duration: 0.3 }, w(21.4));
+      st.set(S, { shift: -120, glow: 1, yaw: -0.2 }, w(21.4));
+      st.to(S, { yaw: 0.5, duration: 4.5, ease: 'sine.inOut' }, w(21.4));
+      slam('#i-1', w(21.45));
+      tl.fromTo('#i-2', { opacity: 0, scale: 0.4, rotationX: -70 }, { opacity: 1, scale: 1, rotationX: 0, duration: 0.45, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, w(22.23));
+      st.fromTo(S, { hit: 1 }, { hit: 0, duration: 0.9, ease: 'power2.out', immediateRender: false }, w(22.23));
+      flash(w(22.23), 0.4);
+      tl.fromTo('#i-web', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, w(22.98) + 0.3);
+
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
