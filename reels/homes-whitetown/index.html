@@ -1,0 +1,573 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>White Town owner reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #6fb0dd; font-family: Inter; }
+      .sky { position: absolute; inset: 0; }
+      #skyDay { background: linear-gradient(180deg, #5da4d6 0%, #a9cfe6 45%, #f3e6cc 75%); }
+      #skyGrey { opacity: 0; background: linear-gradient(180deg, #6f7a80 0%, #a3a8a8 50%, #c9c6bd 78%); }
+      #skyEve { opacity: 0; background: linear-gradient(180deg, #141d3c 0%, #3b3f6b 38%, #c9796a 66%, #f0a46a 80%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .scrim { position: absolute; left: 0; right: 0; pointer-events: none; }
+      #scrimT { top: 0; height: 820px; background: linear-gradient(180deg, rgba(8, 14, 13, 0.78) 0%, rgba(8, 14, 13, 0.5) 55%, rgba(8, 14, 13, 0) 100%); }
+      #scrimB { top: 1000px; height: 920px; opacity: 0; background: linear-gradient(0deg, rgba(8, 14, 13, 0.85) 0%, rgba(8, 14, 13, 0.6) 55%, rgba(8, 14, 13, 0) 100%); }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 28px; letter-spacing: 7px;
+        text-transform: uppercase; color: #f0c56a; }
+      .big { position: absolute; left: 60px; right: 60px; text-align: center; font-weight: 800; letter-spacing: -3px; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .cream { color: #f6f2ea; } .gold { color: #f0c56a; } .red { color: #ff6a52; }
+      .x3d { text-shadow: 0 2px 0 #c9b98f, 0 4px 0 #ad9b6e, 0 6px 0 #8f7d50, 0 8px 0 #6f5f34, 0 10px 0 #4f421f, 0 26px 40px rgba(0, 0, 0, 0.55); }
+      .x3r { text-shadow: 0 2px 0 #b9493a, 0 4px 0 #9a3a2e, 0 6px 0 #7b2c22, 0 8px 0 #5c1f17, 0 24px 40px rgba(0, 0, 0, 0.6); }
+      .x3c { text-shadow: 0 2px 0 #cfc6b4, 0 4px 0 #b0a690, 0 6px 0 #8e846e, 0 8px 0 #6b624f, 0 24px 40px rgba(0, 0, 0, 0.6); }
+      .meter { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; }
+      .meter span { display: inline-block; font-weight: 800; font-size: 42px; padding: 18px 34px 14px; border-radius: 999px; white-space: nowrap; }
+      .m0 span { background: #2a1512; border: 3px solid #ff6a52; color: #fbe9e5; }
+      .chip { position: absolute; font-weight: 700; font-size: 40px; color: #1d1610; background: #f6f2ea; border-radius: 999px;
+        padding: 16px 30px 12px; opacity: 0; white-space: nowrap; box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6); }
+      .chip.g { background: #f0c56a; }
+      /* search bar */
+      #search { position: absolute; left: 110px; width: 860px; top: 1250px; height: 118px; border-radius: 999px; background: #fffaf2; opacity: 0;
+        box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.7); display: flex; align-items: center; gap: 24px; padding: 0 40px; box-sizing: border-box; }
+      #search svg { flex: none; }
+      #q { font-weight: 600; font-size: 44px; color: #1d1610; white-space: nowrap; }
+      #caret { width: 4px; height: 52px; background: #e0583f; }
+      /* split-flap rent board */
+      #board { position: absolute; left: 0; right: 0; top: 1150px; opacity: 0; text-align: center; }
+      #board .lbl { font-weight: 800; font-size: 30px; letter-spacing: 7px; color: #f0c56a; margin-bottom: 18px; }
+      #flaps { display: flex; justify-content: center; gap: 12px; }
+      .flap { width: 124px; height: 132px; border-radius: 14px; background: #161d1b; border: 3px solid #39443f; position: relative; overflow: hidden;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; color: #f6f2ea; font-weight: 800; font-size: 30px; letter-spacing: 2px; }
+      .flap::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: #0a0f0e; }
+      .flap i { font-style: normal; font-size: 40px; color: #1d1610; background: #f0c56a; border-radius: 999px; width: 54px; height: 54px; line-height: 56px;
+        margin-top: 8px; text-align: center; opacity: 0; }
+      .key { width: 140px; height: 150px; border-radius: 26px; background: #f6f2ea; color: #1d1610; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 92px; box-shadow: 0 16px 0 #b9ab8c, 0 30px 50px -10px rgba(0, 0, 0, 0.7); opacity: 0; }
+      .pill { display: inline-flex; align-items: center; gap: 18px; font-weight: 800; font-size: 48px; padding: 20px 38px 16px; border-radius: 999px; white-space: nowrap; }
+      #flash { position: absolute; inset: 0; background: #fff1d6; opacity: 0; }
+      #leak { position: absolute; inset: -200px; opacity: 0; mix-blend-mode: screen;
+        background: radial-gradient(ellipse 50% 40% at 80% 20%, rgba(255, 170, 90, 0.9), rgba(255, 120, 60, 0) 70%), radial-gradient(ellipse 40% 30% at 15% 75%, rgba(255, 210, 140, 0.6), rgba(0, 0, 0, 0) 70%); }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="20"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="skyDay" class="sky"></div><div id="skyGrey" class="sky"></div><div id="skyEve" class="sky"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div id="scrimT" class="scrim"></div><div id="scrimB" class="scrim"></div>
+
+      <!-- A. Hook over the aerial town, on screen from frame 1 -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div id="a-1" class="big red x3r" style="top: 260px; font-size: 132px; white-space: nowrap; left: 0; right: 0">LOSING RENT</div>
+        <div id="a-2" class="big serif it cream" style="top: 410px; font-size: 84px">near White Town?</div>
+      </div>
+      <div id="m0" class="meter m0" style="top: 1260px"><span>Rent this month: ₹0</span></div>
+      <div id="tag" style="position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0">
+        <div style="position: absolute; left: -3px; bottom: 0; width: 6px; height: 120px; background: #ff6a52"></div>
+        <div id="tagIn" style="position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); white-space: nowrap; background: #2a1512; border: 4px solid #ff6a52; color: #fbe9e5; font-weight: 800; font-size: 40px; padding: 16px 30px 12px; border-radius: 999px; box-shadow: 0 20px 50px -10px rgba(0,0,0,0.7)">Your house · ₹0 this month</div>
+      </div>
+
+      <!-- B. Guests are already looking for it -->
+      <div id="gB" class="grp">
+        <div id="b-1" class="big cream x3c" style="top: 250px; font-size: 92px; letter-spacing: -2px">Guests are already</div>
+        <div id="b-2" class="big serif it gold" style="top: 362px; font-size: 96px; opacity: 0">looking for it.</div>
+        <div id="search">
+          <svg width="52" height="52" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="#1d1610" stroke-width="2.6"/><path d="M15.5 15.5 21 21" stroke="#1d1610" stroke-width="2.8" stroke-linecap="round"/></svg>
+          <span id="q"></span><span id="caret"></span>
+        </div>
+      </div>
+
+      <!-- C/D. Street walk -->
+      <div id="kk" class="kick" style="top: 262px; opacity: 0">White Town, Pondy</div>
+      <div id="gD" class="grp">
+        <div id="d-1" class="big gold x3d" style="top: 300px; font-size: 120px">2 MIN</div>
+        <div id="d-2" class="big serif it cream" style="top: 432px; font-size: 72px; opacity: 0">on foot to Rock Beach</div>
+      </div>
+
+      <!-- E. Your door -->
+      <div id="gE" class="grp">
+        <div id="e-1" class="big serif it cream" style="top: 262px; font-size: 76px">And your door?</div>
+        <div id="e-2" class="big red x3r" style="top: 360px; font-size: 138px; opacity: 0">STILL LOCKED.</div>
+      </div>
+      <!-- F. Keys -->
+      <div id="gF" class="grp">
+        <div id="f-1" class="big cream x3c" style="top: 270px; font-size: 112px">HAND US</div>
+        <div id="f-2" class="big gold x3d" style="top: 390px; font-size: 112px; opacity: 0">THE KEYS</div>
+      </div>
+      <!-- G. What we do -->
+      <div id="gG" class="grp">
+        <div class="kick" style="top: 258px">Your house, with us</div>
+        <div id="g-1" class="big cream x3c" style="top: 316px; font-size: 104px; opacity: 0">We furnish it.</div>
+        <div id="g-2" class="big cream x3c" style="top: 316px; font-size: 104px; opacity: 0">We host guests.</div>
+        <div id="g-3" class="big gold x3d" style="top: 316px; font-size: 104px; opacity: 0">You get paid.</div>
+      </div>
+      <div id="c1" class="chip" style="left: 110px; top: 1050px">Furnished ✓</div>
+      <div id="c2" class="chip g" style="left: 470px; top: 1050px">Guests hosted ✓</div>
+      <div id="board">
+        <div class="lbl">FIXED RENT · EVERY MONTH</div>
+        <div id="flaps">
+          <div class="flap" id="fl0">JAN<i>✓</i></div><div class="flap" id="fl1">FEB<i>✓</i></div><div class="flap" id="fl2">MAR<i>✓</i></div>
+          <div class="flap" id="fl3">APR<i>✓</i></div><div class="flap" id="fl4">MAY<i>✓</i></div><div class="flap" id="fl5">JUN<i>✓</i></div>
+        </div>
+      </div>
+
+      <!-- H. End card -->
+      <div id="gH" class="grp">
+        <div id="h-0" class="kick" style="top: 236px">Own a home near White Town?</div>
+        <div id="h-1" class="big cream x3c" style="top: 292px; font-size: 82px; letter-spacing: -2px; white-space: nowrap; left: 0; right: 0">Let us turn it into</div>
+        <div id="h-2" class="big serif it gold" style="top: 384px; font-size: 104px">steady income.</div>
+        <div id="h-3" class="big cream" style="top: 984px; font-size: 56px; letter-spacing: -1px; opacity: 0">Comment</div>
+        <div style="position: absolute; left: 0; right: 0; top: 1074px; display: flex; justify-content: center; gap: 22px">
+          <div id="k1" class="key">R</div><div id="k2" class="key">E</div><div id="k3" class="key">N</div><div id="k4" class="key">T</div>
+        </div>
+        <div id="h-ph" style="position: absolute; left: 0; right: 0; top: 1262px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #25d366; color: #0b2a17; box-shadow: 0 24px 60px -16px rgba(37, 211, 102, 0.7)">
+            <svg width="50" height="50" viewBox="0 0 32 32"><path fill="#0b2a17" d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1c1.9 1 4 1.6 6.1 1.6 7 0 12.7-5.7 12.7-12.7S23 3 16 3zm0 23.2c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.2 1.2-4-.3-.4a10.4 10.4 0 1 1 9 4.9zm5.7-7.8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7 0-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.6-1.9-1.7-2.2-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.9 1.1 3.5.9 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.3z"/></svg>
+            +91 88704 67560</span>
+        </div>
+        <div id="h-web" style="position: absolute; left: 0; right: 0; top: 1360px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #f0c56a; color: #1d1610; font-size: 44px; padding: 16px 34px 12px">thecoastalcalm.homes</span>
+        </div>
+        <div id="h-4" class="big serif it cream" style="top: 498px; font-size: 38px; opacity: 0">from the hosts of The Coastal Calm, White Town</div>
+      </div>
+
+      <div id="leak"></div>
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.15" data-duration="1.69" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="2.0" data-duration="2.205" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="4.4" data-duration="2.215" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="6.75" data-duration="1.73" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="8.75" data-duration="1.9" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="11.0" data-duration="1.235" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="12.45" data-duration="3.525" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="16.3" data-duration="0.811" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="20" src="assets/bgm/track.wav" data-volume="0.26" data-fade-in="0.1" data-fade-out="1.4" data-track-index="9"></audio>
+      <audio id="x1" class="clip" data-start="2.1" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.45" data-track-index="10"></audio>
+      <audio id="x2" class="clip" data-start="2.7" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.45" data-track-index="11"></audio>
+      <audio id="x3" class="clip" data-start="3.36" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.5" data-track-index="12"></audio>
+      <audio id="x4" class="clip" data-start="3.95" data-duration="1.9" src="assets/sfx/whoosh-cinematic.mp3" data-volume="0.55" data-track-index="13"></audio>
+      <audio id="x5" class="clip" data-start="6.6" data-duration="0.57" src="assets/sfx/whoosh-short.mp3" data-volume="0.45" data-track-index="14"></audio>
+      <audio id="x6" class="clip" data-start="8.6" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.5" data-track-index="15"></audio>
+      <audio id="x7" class="clip" data-start="10.0" data-duration="1.0" src="assets/sfx/glitch-2.mp3" data-volume="0.4" data-track-index="16"></audio>
+      <audio id="x8" class="clip" data-start="11.67" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.9" data-track-index="17"></audio>
+      <audio id="x9" class="clip" data-start="11.9" data-duration="2.1" src="assets/sfx/impact-bass-2.mp3" data-volume="0.6" data-track-index="18"></audio>
+      <audio id="x10" class="clip" data-start="12.0" data-duration="1.6" src="assets/sfx/riser.mp3" data-volume="0.3" data-track-index="19"></audio>
+      <audio id="x11" class="clip" data-start="13.2" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.55" data-track-index="20"></audio>
+      <audio id="x12" class="clip" data-start="14.3" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="x13" class="clip" data-start="14.65" data-duration="0.4" src="assets/sfx/click-soft.mp3" data-volume="0.8" data-track-index="22"></audio>
+      <audio id="x14" class="clip" data-start="15.05" data-duration="0.4" src="assets/sfx/click-soft.mp3" data-volume="0.8" data-track-index="23"></audio>
+      <audio id="x15" class="clip" data-start="15.45" data-duration="0.4" src="assets/sfx/click-soft.mp3" data-volume="0.8" data-track-index="24"></audio>
+      <audio id="x16" class="clip" data-start="16.1" data-duration="2.5" src="assets/sfx/chime.mp3" data-volume="0.3" data-track-index="25"></audio>
+      <audio id="x17" class="clip" data-start="16.72" data-duration="0.4" src="assets/sfx/key-press.mp3" data-volume="0.7" data-track-index="26"></audio>
+      <audio id="x18" class="clip" data-start="17.25" data-duration="0.7" src="assets/sfx/notification.mp3" data-volume="0.5" data-track-index="27"></audio>
+    </div>
+    <script>
+      let seed = 11; const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      const FOG_DAY = new THREE.Color('#f3e6cc'), FOG_EVE = new THREE.Color('#e9a06c');
+      scene.fog = new THREE.Fog(FOG_DAY.clone(), 90, 320);
+      const camera = new THREE.PerspectiveCamera(40, 1080 / 1920, 0.1, 700);
+      const hemi = new THREE.HemisphereLight('#fff6e6', '#8a7a62', 1.25);
+      const sun = new THREE.DirectionalLight('#fff1dc', 2.0);
+      sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -34, right: 34, top: 34, bottom: -34, far: 140 }); sun.shadow.bias = -0.0005;
+      scene.add(hemi, sun, sun.target);
+      const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85 }, o));
+      const glow = (color) => new THREE.MeshBasicMaterial({ color, toneMapped: false });
+      function box(p, w, h, d, m, x, y, z) { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; }
+      function cyl(p, rt, rb, h, m, x, y, z, seg = 16) { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; }
+      const clamp01 = (p) => Math.min(1, Math.max(0, p));
+      const back = (p) => { p = clamp01(p); const c = 1.9; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+      const smooth = (p) => { p = clamp01(p); return p * p * (3 - 2 * p); };
+
+      // Text painted onto a plane, so it sits on walls and the ground in 3D
+      function textPlane(txt, w, h, color, px, shadow) {
+        const c = document.createElement('canvas'); c.width = 2048; c.height = Math.round(2048 * h / w); const g = c.getContext('2d');
+        g.font = '900 ' + px + 'px Helvetica, Arial, sans-serif'; const fit = (c.width - 40) / g.measureText(txt).width;
+        if (fit < 1) { px = Math.floor(px * fit); g.font = '900 ' + px + 'px Helvetica, Arial, sans-serif'; }
+        g.textAlign = 'left'; g.textBaseline = 'middle';
+        if (shadow) { g.fillStyle = shadow; g.fillText(txt, 22, c.height / 2 + 14); }
+        g.fillStyle = color; g.fillText(txt, 14, c.height / 2);
+        const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+        const geo = new THREE.PlaneGeometry(w, h); geo.translate(w / 2, 0, 0);
+        return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, depthWrite: false, fog: false }));
+      }
+
+      // ---------- Ground, sea, promenade ----------
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 121.6), mat('#cdbf9f')); ground.rotation.x = -Math.PI / 2; ground.position.set(0, 0, -0.8); ground.receiveShadow = true; scene.add(ground);
+      const lane = new THREE.Mesh(new THREE.PlaneGeometry(7, 70), mat('#b7a688')); lane.rotation.x = -Math.PI / 2; lane.position.set(0, 0.01, -20); lane.receiveShadow = true; scene.add(lane);
+      const prom = new THREE.Mesh(new THREE.PlaneGeometry(400, 7), mat('#e6dccb')); prom.rotation.x = -Math.PI / 2; prom.position.set(0, 0.02, -58); prom.receiveShadow = true; scene.add(prom);
+      box(scene, 400, 0.9, 0.4, mat('#f7f2e8'), 0, 0.45, -61.6);
+      for (let x = -60; x <= 60; x += 3) box(scene, 0.25, 0.25, 0.5, mat('#f7f2e8'), x, 1.0, -61.6);
+      const seaM = mat('#3d8db3', { roughness: 0.18, metalness: 0.2 });
+      const sea = new THREE.Mesh(new THREE.PlaneGeometry(1400, 700), seaM); sea.rotation.x = -Math.PI / 2; sea.position.set(0, -0.8, -62 - 350); scene.add(sea);
+      const rockM = mat('#6f6a63', { flatShading: true });
+      for (let k = 0; k < 40; k++) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(0.7 + rnd() * 0.9, 0), rockM); r.position.set(-60 + k * 3 + rnd() * 2, -0.3, -63.5 - rnd() * 2.5); r.rotation.set(rnd() * 3, rnd() * 3, 0); r.castShadow = true; scene.add(r); }
+      const shimmer = [];
+      for (let k = 0; k < 60; k++) { const s = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 0.12), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.5, fog: true }));
+        s.rotation.x = -Math.PI / 2; s.position.set(-50 + rnd() * 100, -0.75, -70 - rnd() * 140); scene.add(s); shimmer.push([s, rnd() * 6.28]); }
+
+      // ---------- Heritage houses ----------
+      const FH = 3.2, W = 5.8, D = 6;
+      const WALLS = ['#e9b949', '#f4efe3', '#e3a63a', '#efe6cf', '#e8c25c', '#d98f5c', '#f2e9d2', '#e6b448'];
+      const SHUTS = ['#2f6f63', '#3d5f7a', '#6b3f2a', '#2f5b55', '#5b6e3a'];
+      const trimM = mat('#fbf7ee'), doorM = mat('#5a321d'), glassBase = { emissive: new THREE.Color('#ffb860'), roughness: 0.3 };
+      const winGlass = [];   // glass on ordinary houses, some of them light up at dusk
+      function buildHouse(o) {
+        const g = new THREE.Group(), H = o.floors * FH, walls = [], shutters = [];
+        for (let f = 0; f < o.floors; f++) { const wm = mat(o.wall); walls.push(wm); box(g, W, FH, D, wm, 0, f * FH + FH / 2, 0); }
+        const shutM = mat(o.shut, { roughness: 0.6 });
+        const glassM = mat('#2a2f33', Object.assign({ emissiveIntensity: 0 }, glassBase));
+        for (let f = 1; f <= o.floors; f++) box(g, W + 0.14, 0.2, 0.3, trimM, 0, f * FH - 0.06, D / 2 + 0.08);
+        // roof parapet with a balustrade on the street side
+        box(g, W + 0.14, 0.16, 0.34, trimM, 0, H + 0.92, D / 2 - 0.1);
+        for (let k = 0; k < 9; k++) box(g, 0.14, 0.72, 0.14, trimM, -W / 2 + 0.35 + k * (W - 0.7) / 8, H + 0.48, D / 2 - 0.1);
+        box(g, W, 0.8, 0.16, o.backWall || walls[o.floors - 1], 0, H + 0.4, -D / 2 + 0.08);
+        box(g, 0.16, 0.8, D, walls[o.floors - 1], -W / 2 + 0.08, H + 0.4, 0); box(g, 0.16, 0.8, D, walls[o.floors - 1], W / 2 - 0.08, H + 0.4, 0);
+        for (let f = 0; f < o.floors; f++) {
+          const xs = f === 0 ? [-1.9, 1.9] : [-1.9, 0, 1.9], h = f === 0 ? 1.5 : 1.85, wdt = 0.9, y = f * FH + (f === 0 ? 1.55 : 1.7);
+          xs.forEach((x) => {
+            box(g, wdt + 0.26, h + 0.26, 0.08, trimM, x, y, D / 2 + 0.03);
+            box(g, wdt + 0.46, 0.14, 0.22, trimM, x, y + h / 2 + 0.2, D / 2 + 0.1);
+            box(g, wdt, h, 0.06, glassM, x, y, D / 2 + 0.06);
+            [-1, 1].forEach((sgn) => {
+              const piv = new THREE.Group(); piv.position.set(x + sgn * wdt / 2, y, D / 2 + 0.1);
+              box(piv, wdt / 2, h, 0.05, shutM, -sgn * wdt / 4, 0, 0);
+              for (let s = 0; s < 6; s++) box(piv, wdt / 2 - 0.06, 0.03, 0.07, shutM, -sgn * wdt / 4, -h / 2 + 0.2 + s * (h - 0.4) / 5, 0.02);
+              g.add(piv); shutters.push([piv, sgn]);
+              piv.rotation.y = o.open === undefined ? (rnd() < 0.55 ? sgn * 1.9 : 0) : 0;
+            });
+          });
+        }
+        box(g, 1.5, 2.6, 0.08, trimM, 0, 1.3, D / 2 + 0.03); const door = box(g, 1.2, 2.35, 0.08, o.doorM || doorM, 0, 1.18, D / 2 + 0.07);
+        box(g, 1.7, 0.16, 0.3, trimM, 0, 2.7, D / 2 + 0.1);
+        return { g, H, walls, shutM, glassM, shutters, door };
+      }
+      // Bougainvillea: a pink cluster that grows from nothing at time tg
+      const blooms = [];
+      const pinkMs = [mat('#d63384', { flatShading: true }), mat('#e8559c', { flatShading: true }), mat('#c2185b', { flatShading: true })], leafM = mat('#3f7a3c', { flatShading: true });
+      function bloom(p, x, y, z, n, tg, spread = 1) {
+        const g = new THREE.Group(); g.position.set(x, y, z);
+        for (let k = 0; k < n; k++) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16 + rnd() * 0.2, 0), rnd() < 0.25 ? leafM : pinkMs[k % 3]);
+          const a = rnd() * 6.28; m.position.set(Math.cos(a) * rnd() * 0.9 * spread, -rnd() * 1.6 * spread + 0.3, Math.sin(a) * 0.25 + 0.15); m.castShadow = true; g.add(m); }
+        g.scale.setScalar(0.0001); p.add(g); blooms.push([g, tg]); return g;
+      }
+      // the lane: 8 houses each side, then your house on the corner by the promenade
+      const SLOT = (k) => -3 - k * 6.1;
+      for (let side = -1; side <= 1; side += 2) {
+        for (let k = 0; k < 9; k++) {
+          if (side === 1 && k === 8) continue;
+          const h = buildHouse({ floors: rnd() < 0.45 ? 3 : 2, wall: WALLS[(k * 3 + (side > 0 ? 1 : 0)) % WALLS.length], shut: SHUTS[(k + (side > 0 ? 2 : 0)) % SHUTS.length] });
+          h.g.position.set(side * (3.5 + D / 2), 0, SLOT(k)); h.g.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2; scene.add(h.g);
+          winGlass.push(h.glassM);
+          const tg = 4.45 + k * 0.17 + (side > 0 ? 0.08 : 0);
+          if ((k + (side > 0 ? 1 : 0)) % 2 === 0) bloom(h.g, -W / 2 + 0.4, h.H + 0.6, D / 2 + 0.2, 26, tg);
+          if (k % 3 === 1) bloom(h.g, W / 2 - 0.4, FH + 0.4, D / 2 + 0.15, 20, tg + 0.1);
+        }
+      }
+      // street lamps
+      const lampMs = [];
+      for (let k = 0; k < 5; k++) { const side = k % 2 ? 1 : -1, z = -6 - k * 11;
+        cyl(scene, 0.06, 0.09, 4.2, mat('#1d2523'), side * 3.25, 2.1, z); box(scene, 0.7, 0.06, 0.06, mat('#1d2523'), side * 2.95, 4.15, z);
+        const lm = glow('#6d6a62'); const b = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), lm); b.position.set(side * 2.65, 3.95, z); scene.add(b); lampMs.push(lm); }
+      // back rows, so the town looks full from the air
+      const blockM = WALLS.map((c) => mat(c));
+      for (const bx of [-12.5, 12.5, -22.5, 22.5, -32, 32]) for (let z = 4; z > -54; z -= 6.1) {
+        const h = (rnd() < 0.45 ? 3 : 2) * FH; box(scene, 6, h, 5.9, blockM[Math.floor(rnd() * blockM.length)], bx + (rnd() - 0.5) * 0.6, h / 2, z - 3);
+        box(scene, 6.1, 0.5, 6.0, trimM, bx, h + 0.25, z - 3).scale.set(1, 1, 1);
+        if (rnd() < 0.35) bloom(scene, bx + 2.6 * Math.sign(-bx), h + 0.5, z - 3, 14, 0.0, 1.2);
+        if (rnd() < 0.3) { cyl(scene, 0.18, 0.22, 1.6, mat('#6b4a2c'), bx + 3.6, 0.8, z - 0.3); const c = new THREE.Mesh(new THREE.IcosahedronGeometry(1.6, 0), leafM); c.position.set(bx + 3.6, 2.4, z - 0.3); c.castShadow = true; scene.add(c); }
+      }
+
+      // ---------- Your house: grey, shuttered, padlocked ----------
+      const HERO = { wall: '#e9b949', shut: '#2f6f63', door: '#7a3b22' };
+      const GREY_W = new THREE.Color('#8f8d88'), GREY_S = new THREE.Color('#5b5c5a'), GREY_D = new THREE.Color('#4d4b47');
+      const heroDoorM = mat(GREY_D.clone());
+      const hero = buildHouse({ floors: 2, wall: GREY_W.clone(), shut: GREY_S.clone(), open: false, doorM: heroDoorM });
+      hero.g.position.set(3.5 + D / 2, 0, SLOT(8)); hero.g.rotation.y = -Math.PI / 2; scene.add(hero.g);
+      const heroBlooms = [bloom(hero.g, -W / 2 + 0.4, hero.H + 0.6, D / 2 + 0.25, 34, 99), bloom(hero.g, W / 2 - 0.3, FH + 0.6, D / 2 + 0.2, 26, 99), bloom(hero.g, -W / 2 + 0.2, 1.6, D / 2 + 0.25, 18, 99, 0.8)];
+      heroBlooms.forEach((b) => blooms.pop());   // these grow on the paint, not on the walk
+      // chain and padlock across the door
+      const lockG = new THREE.Group(); lockG.position.set(0, 1.25, D / 2 + 0.16); hero.g.add(lockG);
+      const ironM = mat('#3a3a38', { metalness: 0.7, roughness: 0.4 }), brassM = mat('#b08a3c', { metalness: 0.8, roughness: 0.35 });
+      for (let k = 0; k < 9; k++) { const l = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.022, 6, 12), ironM); l.position.set(-0.64 + k * 0.16, Math.sin(k / 8 * Math.PI) * -0.1, 0); l.rotation.y = k % 2 ? Math.PI / 2 : 0; lockG.add(l); }
+      const padG = new THREE.Group(); padG.position.set(0.02, -0.32, 0.05); lockG.add(padG);
+      box(padG, 0.34, 0.36, 0.14, brassM, 0, 0, 0);
+      const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.03, 8, 16, Math.PI), ironM); shackle.position.y = 0.18; padG.add(shackle);
+      box(padG, 0.04, 0.09, 0.02, glow('#111'), 0, -0.04, 0.08);
+      // the key that opens it
+      const keyG = new THREE.Group(); hero.g.add(keyG); keyG.visible = false;
+      const keyM = mat('#f0c56a', { metalness: 0.9, roughness: 0.25, emissive: new THREE.Color('#7a5410'), emissiveIntensity: 0.5 });
+      const bow = new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.045, 10, 24), keyM); bow.position.z = 0.42; keyG.add(bow);
+      box(keyG, 0.05, 0.05, 0.6, keyM, 0, 0, 0.06); box(keyG, 0.05, 0.12, 0.05, keyM, 0, -0.07, -0.18); box(keyG, 0.05, 0.09, 0.05, keyM, 0, -0.06, -0.08);
+      // dust in front of the locked door
+      const DN = 120, dpos = new Float32Array(DN * 3), dseeds = [];
+      for (let k = 0; k < DN; k++) dseeds.push([(rnd() - 0.5) * 5, rnd() * 4.5, D / 2 + 0.3 + rnd() * 3, rnd() * 6.28]);
+      const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
+      const dm = new THREE.PointsMaterial({ color: '#efe6d2', size: 0.05, transparent: true, opacity: 0, depthWrite: false });
+      hero.g.add(new THREE.Points(dg, dm));
+      // red outline: "this one is yours" from the air
+      const markM = new THREE.LineBasicMaterial({ color: '#ff6a52', transparent: true, opacity: 0, depthWrite: false, toneMapped: false });
+      const mark = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(W + 0.8, hero.H + 1.4, D + 0.8)), markM); mark.position.y = (hero.H + 1.4) / 2; hero.g.add(mark);
+      const markFill = new THREE.Mesh(new THREE.BoxGeometry(W + 0.8, hero.H + 1.4, D + 0.8), new THREE.MeshBasicMaterial({ color: '#ff6a52', transparent: true, opacity: 0, depthWrite: false, toneMapped: false })); markFill.position.copy(mark.position); hero.g.add(markFill);
+      const ringM = new THREE.MeshBasicMaterial({ color: '#ff6a52', transparent: true, opacity: 0, depthWrite: false, toneMapped: false, side: THREE.DoubleSide });
+      const ring = new THREE.Mesh(new THREE.RingGeometry(4.6, 5.0, 48), ringM); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.06; hero.g.add(ring);
+      // guests arriving with suitcases
+      const guests = [];
+      [[-1.5, 1.6, '#3d6f8c'], [1.4, 1.9, '#c0583c'], [2.3, 1.3, '#e0ad4f']].forEach(([x, dz, c], k) => {
+        const p = new THREE.Group(); p.position.set(x, 0, D / 2 + dz);
+        cyl(p, 0.22, 0.26, 1.0, mat(c), 0, 0.75, 0); const hd = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), mat('#b07a55')); hd.position.y = 1.48; p.add(hd);
+        cyl(p, 0.08, 0.08, 0.5, mat('#2b2b2b'), 0, 0.25, 0); box(p, 0.42, 0.5, 0.22, mat(k === 1 ? '#2f5b55' : '#5a321d'), 0.42, 0.28, 0);
+        p.scale.setScalar(0.0001); hero.g.add(p); guests.push(p);
+      });
+      // roof terrace: pergola, plants, chairs, string lights
+      const terr = new THREE.Group(); terr.position.y = hero.H; terr.scale.setScalar(0.0001); hero.g.add(terr);
+      const woodM = mat('#8a5a32', { roughness: 0.6 });
+      for (const [x, z] of [[-1.9, -1.7], [1.9, -1.7], [-1.9, 1.5], [1.9, 1.5]]) box(terr, 0.14, 2.3, 0.14, woodM, x, 1.15, z);
+      box(terr, 4.2, 0.1, 0.16, woodM, 0, 2.3, -1.7); box(terr, 4.2, 0.1, 0.16, woodM, 0, 2.3, 1.5);
+      for (let k = 0; k < 6; k++) box(terr, 0.08, 0.08, 3.6, woodM, -1.9 + k * 0.76, 2.4, -0.1);
+      for (const [x, z] of [[-2.4, -2.4], [2.4, -2.4], [-2.4, 2.3], [2.4, 2.3], [0, -2.5]]) { cyl(terr, 0.22, 0.16, 0.4, mat('#b6724b'), x, 0.2, z); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.42, 0), leafM); l.position.set(x, 0.7, z); terr.add(l); }
+      for (const x of [-0.8, 0.8]) { box(terr, 0.7, 0.08, 0.7, mat('#f6f2ea'), x, 0.45, 0); box(terr, 0.7, 0.6, 0.08, mat('#f6f2ea'), x, 0.75, -0.32); }
+      cyl(terr, 0.4, 0.4, 0.06, woodM, 0, 0.55, 0.9); cyl(terr, 0.05, 0.05, 0.5, woodM, 0, 0.28, 0.9);
+      const bulbs = [];
+      for (let r = 0; r < 4; r++) { const z = -1.6 + r * 1.0, pts = [];
+        for (let k = 0; k <= 20; k++) { const t = k / 20; pts.push(new THREE.Vector3(-2.1 + 4.2 * t, 2.25 - Math.sin(Math.PI * t) * 0.3, z)); }
+        terr.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: '#222' })));
+        for (let b = 0; b < 10; b++) { const t = (b + 0.5) / 10, m = glow('#3a3226'), s = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), m);
+          s.position.set(-2.1 + 4.2 * t, 2.19 - Math.sin(Math.PI * t) * 0.3, z); terr.add(s); bulbs.push([m, (r * 10 + b) / 40]); } }
+      const terrLight = new THREE.PointLight('#ffc27a', 0, 14, 1.4); terrLight.position.set(0, 2.0, 0); terr.add(terrLight);
+      const winLight = new THREE.PointLight('#ffb860', 0, 9, 1.5); winLight.position.set(0, 3, D / 2 + 1.5); hero.g.add(winLight);
+
+      // ---------- Map pins: guests searching ----------
+      const pins = [];
+      const pinRed = mat('#e05a44', { roughness: 0.35, emissive: new THREE.Color('#5a1208'), emissiveIntensity: 0.4 });
+      const pinGold = mat('#f0c56a', { roughness: 0.3, metalness: 0.4, emissive: new THREE.Color('#7a5410'), emissiveIntensity: 0.6 });
+      const pinSpots = [[-12.5, -8], [12.5, -14], [-6.5, -20], [6.5, -26], [-22.5, -32], [-6.5, -38], [22.5, -6], [12.5, -44], [6.5, SLOT(8)]];
+      pinSpots.forEach(([x, z], k) => {
+        const hero1 = k === pinSpots.length - 1, sc = hero1 ? 1.6 : 1;
+        const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g);
+        const pin = new THREE.Group(); g.add(pin);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(1.0 * sc, 24, 18), hero1 ? pinGold : pinRed); head.position.y = 2.4 * sc; pin.add(head);
+        const tip = new THREE.Mesh(new THREE.ConeGeometry(0.62 * sc, 2.0 * sc, 24), hero1 ? pinGold : pinRed); tip.rotation.x = Math.PI; tip.position.y = 1.0 * sc; pin.add(tip);
+        const dot = new THREE.Mesh(new THREE.SphereGeometry(0.4 * sc, 16, 12), glow('#fffaf2')); dot.position.set(0, 2.4 * sc, 0.72 * sc); pin.add(dot);
+        head.castShadow = tip.castShadow = true;
+        const rm = new THREE.MeshBasicMaterial({ color: hero1 ? '#f0c56a' : '#ff6a52', transparent: true, opacity: 0, depthWrite: false, toneMapped: false, side: THREE.DoubleSide });
+        const rg = new THREE.Mesh(new THREE.RingGeometry(1.1, 1.5, 40), rm); rg.rotation.x = -Math.PI / 2; g.add(rg);
+        const top = hero1 ? hero.H + 1.0 : 10.4;
+        pins.push({ g, pin, rg, rm, top, t0: hero1 ? 3.36 : 2.05 + k * 0.13 });
+      });
+
+      // ---------- 3D type on the walls and the promenade ----------
+      const wt1 = textPlane('YELLOW LANES', 6.0, 1.3, '#fffaf2', 300, 'rgba(60,40,10,0.55)');
+      wt1.position.set(-3.0, 3.4, -15); wt1.scale.x = 0.0001; scene.add(wt1);
+      const wt2 = textPlane('BOUGAINVILLEA', 5.6, 1.1, '#ff4fa0', 260, 'rgba(60,10,30,0.55)');
+      wt2.position.set(-2.8, 3.2, -30); wt2.scale.x = 0.0001; scene.add(wt2);
+      const gt = textPlane('ROCK BEACH · 2 MIN', 6.0, 1.2, '#ffd27a', 250, 'rgba(40,25,0,0.6)');
+      gt.rotation.x = -Math.PI / 2 + 0.75; gt.position.set(-3.0, 0.5, -59.0); gt.scale.x = 0.0001; scene.add(gt);
+      // footprints from the lane to the sea
+      const steps = []; const stepM = glow('#f0c56a');
+      for (let k = 0; k < 34; k++) { const s = new THREE.Mesh(new THREE.CircleGeometry(0.16, 14), stepM); s.scale.set(0.8, 1.5, 1); s.rotation.x = -Math.PI / 2;
+        s.position.set(k % 2 ? 0.28 : -0.28, 0.04, -22 - k * 1.0); s.visible = false; scene.add(s); steps.push(s); }
+
+      // ---------- State the paused timeline fills in for any time t ----------
+      const S = { time: 0, px: 2, py: 62, pz: -22, lx: 6.5, ly: 0, lz: -51, fov: 40, roll: 0, shift: 0, bob: 0,
+        pins: 0, pinOut: 0, red: 0, wt1: 0, wt2: 0, gt: 0, path: 0, dust: 0, key: 0, turn: 0, unlock: 0, paint: 0, open: 0, glow: 0, guests: 0, terr: 0, lights: 0, night: 0 };
+      const tmpC = new THREE.Color(), tv = new THREE.Vector3();
+      function draw() {
+        const t = S.time;
+        // pins fall, bounce, then shrink away
+        pins.forEach((p) => { const a = clamp01((t - p.t0) / 0.5), drop = a < 1 ? (1 - back(a)) : 0;
+          p.g.visible = t >= p.t0 && S.pinOut < 1; p.pin.position.y = p.top + drop * 26 + Math.sin(t * 3 + p.t0 * 5) * 0.25 * a;
+          p.pin.rotation.y = t * 1.6 + p.t0; p.g.scale.setScalar(Math.max(0.0001, 1 - S.pinOut));
+          const rp = ((t - p.t0) % 0.9) / 0.9; p.rg.scale.setScalar(1 + rp * 2.2); p.rg.position.y = p.top - 0.2; p.rm.opacity = a >= 1 ? (1 - rp) * 0.8 : 0; });
+        markM.opacity = S.red * (0.7 + 0.3 * Math.sin(t * 8)); markFill.opacity = S.red * (0.45 + 0.15 * Math.sin(t * 8)); const rr = (t % 0.8) / 0.8; ring.scale.setScalar(1 + rr * 0.5); ringM.opacity = S.red * (1 - rr) * 0.9;
+        blooms.forEach(([g, tg]) => g.scale.setScalar(Math.max(0.0001, Math.min(1.1, back((t - tg) / 0.45)))));
+        heroBlooms.forEach((g, k) => g.scale.setScalar(Math.max(0.0001, Math.min(1.1, back(S.paint * 1.6 - 0.5 - k * 0.15)))));
+        wt1.scale.x = Math.max(0.0001, smooth(S.wt1)); wt1.material.opacity = clamp01((S.pz - wt1.position.z - 4.0) / 3); wt2.material.opacity = clamp01((S.pz - wt2.position.z - 4.0) / 3); wt2.scale.x = Math.max(0.0001, smooth(S.wt2)); gt.scale.x = Math.max(0.0001, smooth(S.gt));
+        steps.forEach((s, k) => { s.visible = S.path * steps.length > k; });
+        shimmer.forEach(([s, ph]) => { s.material.opacity = 0.15 + 0.35 * Math.max(0, Math.sin(t * 2.2 + ph)); });
+        // the locked house, then the paint sweeping up it floor by floor
+        hero.walls.forEach((m, f) => m.color.copy(GREY_W).lerp(tmpC.set(HERO.wall), smooth(S.paint * 2 - f * 0.6)));
+        hero.shutM.color.copy(GREY_S).lerp(tmpC.set(HERO.shut), smooth(S.paint * 1.4));
+        heroDoorM.color.copy(GREY_D).lerp(tmpC.set(HERO.door), smooth(S.paint * 1.4));
+        hero.shutters.forEach(([piv, sgn], k) => { piv.rotation.y = sgn * 1.95 * back(S.open * 1.6 - (k % 6) * 0.1); });
+        hero.glassM.emissiveIntensity = S.glow * 1.3; winLight.intensity = S.glow * 8;
+        const pa = dg.attributes.position.array;
+        dseeds.forEach((s, k) => { pa[k * 3] = s[0] + Math.sin(t * 0.5 + s[3]) * 0.3; pa[k * 3 + 1] = s[1] + Math.sin(t * 0.7 + s[3] * 2) * 0.25; pa[k * 3 + 2] = s[2]; });
+        dg.attributes.position.needsUpdate = true; dm.opacity = S.dust * 0.75;
+        // key flies in, turns, padlock pops and drops
+        keyG.visible = S.key > 0 && S.unlock < 0.9;
+        const kp = smooth(S.key); keyG.position.set(0.9 * (1 - kp), 1.0 + 0.25 * (1 - kp) - 0.32 * kp + 0.0, D / 2 + 0.3 + 3.2 * (1 - kp));
+        keyG.rotation.set(0, (1 - kp) * 2.4, S.turn * Math.PI / 2);
+        padG.rotation.z = Math.sin(t * 2.4) * 0.12 * (1 - S.unlock);
+        shackle.position.y = 0.18 + clamp01(S.unlock * 4) * 0.12;
+        const fall = clamp01((S.unlock - 0.25) / 0.75);
+        lockG.position.y = 1.25 - fall * fall * 1.3; lockG.rotation.z = fall * 0.9; lockG.visible = fall < 0.98;
+        guests.forEach((g, k) => { const a = clamp01((S.guests * 3 - k) / 1); g.scale.setScalar(Math.max(0.0001, Math.min(1.12, back(a))));
+          g.position.y = Math.abs(Math.sin(t * 7 + k)) * 0.12 * a; });
+        terr.scale.setScalar(Math.max(0.0001, Math.min(1.08, back(S.terr))));
+        bulbs.forEach(([m, k]) => { const on = clamp01((S.lights - k * 0.85) / 0.15); m.color.setRGB(0.23 + on * 0.77, 0.2 + on * 0.66, 0.15 + on * 0.42); });
+        terrLight.intensity = S.lights * 10;
+        // dusk
+        hemi.intensity = 1.25 - S.night * 0.85; sun.intensity = 2.0 - S.night * 1.6;
+        sun.color.set(S.night > 0.5 ? '#ffb27a' : '#fff1dc'); hemi.color.set(S.night > 0.5 ? '#8e9cd0' : '#fff6e6');
+        scene.fog.color.copy(FOG_DAY).lerp(FOG_EVE, S.night);
+        winGlass.forEach((g, k) => { g.emissiveIntensity = (k % 3 === 0 ? 0.9 : 0.25) * S.night; });
+        lampMs.forEach((m) => m.color.setRGB(0.43 + S.night * 0.57, 0.42 + S.night * 0.45, 0.38 + S.night * 0.2));
+        seaM.color.set('#3d8db3').lerp(tmpC.set('#2b3f63'), S.night);
+        // camera
+        const bob = S.bob * Math.sin(t * 9.5) * 0.06;
+        camera.position.set(S.px, S.py + bob, S.pz);
+        sun.position.set(S.lx - 18, 40, S.lz + 22); sun.target.position.set(S.lx, 0, S.lz);
+        camera.fov = S.fov; camera.updateProjectionMatrix();
+        camera.lookAt(tv.set(S.lx, S.ly, S.lz)); camera.rotateZ(S.roll);
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920);
+        renderer.render(scene, camera);
+        tv.set(0, hero.H + 1.2, 0); hero.g.localToWorld(tv); tv.project(camera);
+        tagEl.style.left = ((tv.x + 1) / 2 * 1080) + 'px'; tagEl.style.top = ((1 - tv.y) / 2 * 1920) + 'px';
+      }
+      const tagEl = document.getElementById('tag');
+
+      const st = gsap.timeline({ paused: true });   // drives S (the 3D town)
+      const tl = gsap.timeline({ paused: true });   // drives the HTML layers
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.5, filter: 'blur(12px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t);
+      const pop = (el, t) => tl.fromTo(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, t);
+      const flip = (el, t) => { show(el, t); tl.fromTo(el, { rotationX: -90 }, { rotationX: 0, duration: 0.3, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, t); };
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, t + 0.01); };
+      const out = (el, t) => tl.to(el, { opacity: 0, y: -24, duration: 0.2, ease: 'power2.in' }, t - 0.2);
+      const cam = (t, d, o, ease = 'power3.inOut') => st.to(S, Object.assign({ duration: d, ease }, o), t);
+
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 20, ease: 'steps(240)' }, 0);
+      st.to(S, { time: 20, duration: 20, ease: 'none' }, 0);
+
+      // A. Hook (0 - 1.9): over White Town from the air, your house outlined in red
+      cam(0, 1.95, { px: 0, py: 52, pz: -28, lx: 6.5, lz: -51.5 }, 'sine.inOut');
+      st.to(S, { red: 1, duration: 0.3 }, 0.3);
+      tl.fromTo('#a-1', { scale: 1.14 }, { scale: 1, duration: 0.5, ease: 'expo.out', immediateRender: false }, 0);
+      pop('#tag', 0.35); tl.fromTo('#tagIn', { scale: 1 }, { scale: 1.08, duration: 0.25, yoyo: true, repeat: 5, ease: 'sine.inOut', immediateRender: false }, 0.8);
+      tl.fromTo('#a-2', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power3.out', immediateRender: false }, 0.6);
+      out('#gA', 2.0);
+
+      // B. Guests are looking (2.0 - 4.2): pins rain on the town, the gold one lands on yours
+      cam(1.95, 2.1, { px: -5, py: 46, pz: -30, lx: 6, lz: -50, fov: 46 }, 'sine.inOut');
+      show('#gB', 2.0); rise('#b-1', 2.0); rise('#b-2', 2.78);
+      show('#search', 2.05); tl.fromTo('#search', { y: 60, scale: 0.9 }, { y: 0, scale: 1, duration: 0.35, ease: 'back.out(2)', immediateRender: false }, 2.05);
+      const Q = 'Stays near White Town, Pondy';
+      for (let i = 1; i <= Q.length; i++) tl.set('#q', { textContent: Q.slice(0, i) }, 2.15 + i * 0.03);
+      tl.fromTo('#caret', { opacity: 1 }, { opacity: 0, duration: 0.2, repeat: 9, yoyo: true, ease: 'steps(1)', immediateRender: false }, 2.1);
+      tl.set('#tagIn', { textContent: 'Your house', borderColor: '#f0c56a', backgroundColor: '#1d1610', color: '#f0c56a' }, 3.36); tl.to('#tag', { opacity: 0, duration: 0.2 }, 3.85);
+      st.to(S, { red: 0, duration: 0.2 }, 3.36);
+      flash(3.36, 0.18);
+      tl.to('#search', { y: -30, opacity: 0, duration: 0.2 }, 3.95);
+      out('#gB', 4.2);
+
+      // C. Drone dive into the lane (3.95 - 4.65), then walk it
+      st.to(S, { pinOut: 1, duration: 0.3, ease: 'power2.in' }, 3.95);
+      cam(3.95, 0.7, { px: 0, py: 2.0, pz: 7, lx: -1.2, ly: 2.6, lz: -14, fov: 74, roll: 0.1 }, 'power3.in');
+      st.to(S, { roll: 0, duration: 0.5, ease: 'power2.out' }, 4.65);
+      tl.set('#scrimT', { opacity: 0.7 }, 4.4);
+      flash(4.62, 0.25);
+      rise('#kk', 4.7);
+      st.to(S, { bob: 1, duration: 0.2 }, 4.65);
+      cam(4.65, 2.1, { pz: -27, lz: -50, ease: 'none' }, 'none');
+      st.to(S, { lx: -0.8, ly: 3.0, duration: 0.6, ease: 'sine.inOut' }, 4.7);         // look left at the yellow walls
+      st.to(S, { wt1: 1, duration: 0.45, ease: 'power2.out' }, 4.98);
+      st.to(S, { lx: 0.8, ly: 3.0, duration: 0.6, ease: 'sine.inOut' }, 5.45);          // then right at the flowers
+      st.to(S, { wt2: 1, duration: 0.5, ease: 'power2.out' }, 5.62);
+
+      // D. Rock Beach, two minutes (6.75 - 8.6): footsteps to the promenade and the sea
+      cam(6.6, 1.0, { px: 0, py: 2.8, pz: -47, lx: 0, ly: 1.6, lz: -120, fov: 70 }, 'power2.inOut');
+      st.to(S, { bob: 0, duration: 0.4 }, 7.2);
+      st.to(S, { path: 1, duration: 1.0, ease: 'none' }, 6.6);
+      st.to(S, { gt: 1, duration: 0.5, ease: 'power2.out' }, 7.38);
+      out('#kk', 6.75);
+      show('#gD', 6.75); slam('#d-1', 7.38); tl.set('#d-1', { opacity: 0 }, 0); rise('#d-2', 7.6);
+      tl.fromTo('#leak', { opacity: 0 }, { opacity: 0.55, duration: 0.5, yoyo: true, repeat: 1, ease: 'sine.inOut', immediateRender: false }, 6.9);
+      cam(7.6, 1.0, { pz: -50, ease: 'sine.out' }, 'sine.out');
+      out('#gD', 8.6);
+
+      // E. Whip to your door (8.6 - 10.9): grey, shut, padlocked
+      cam(8.55, 0.42, { px: -0.6, py: 1.7, pz: -51.2, lx: 3.5, ly: 1.55, lz: SLOT(8), fov: 62, roll: -0.12 }, 'power4.inOut');
+      st.to(S, { roll: 0, duration: 0.4, ease: 'power2.out' }, 8.97);
+      cam(8.97, 2.0, { px: -1.4, py: 1.9, pz: SLOT(8) - 0.05, ly: 2.0, ease: 'sine.inOut' }, 'sine.inOut');
+      st.to(S, { dust: 1, duration: 0.6 }, 8.8);
+      tl.to('#gl', { filter: 'saturate(0.2) brightness(0.9)', duration: 0.4 }, 8.75);
+      tl.to('#skyGrey', { opacity: 1, duration: 0.4 }, 8.75);
+      show('#gE', 8.75); rise('#e-1', 8.75); slam('#e-2', 10.0); tl.set('#e-2', { opacity: 0 }, 0);
+      tl.fromTo('#gE', { x: 0 }, { x: 14, duration: 0.05, repeat: 5, yoyo: true, ease: 'none', immediateRender: false }, 10.05);
+      tl.set('#m0 span', { textContent: 'Rent this month: ₹0' }, 9.6); tl.set('#m0', { top: '1330px' }, 9.6); pop('#m0', 10.1);
+      out('#gE', 10.95); out('#m0', 10.95);
+
+      // F. Hand us the keys (11.0 - 12.3): the key flies in, turns, the lock drops
+      show('#gF', 11.0); slam('#f-1', 11.0); slam('#f-2', 11.67); tl.set('#f-2', { opacity: 0 }, 0);
+      st.to(S, { key: 1, duration: 0.55, ease: 'power3.out' }, 11.12);
+      st.to(S, { turn: 1, duration: 0.18, ease: 'back.out(3)' }, 11.67);
+      st.to(S, { unlock: 1, duration: 0.55, ease: 'power2.in' }, 11.86);
+      st.to(S, { dust: 0, duration: 0.4 }, 11.9);
+      flash(11.9, 0.55);
+      tl.to('#gl', { filter: 'saturate(1) brightness(1)', duration: 0.3 }, 11.9);
+      tl.to('#skyGrey', { opacity: 0, duration: 0.3 }, 11.9);
+      out('#gF', 12.4);
+
+      // G. We furnish it, host, pay you (12.45 - 16.1): paint, shutters, guests, terrace, dusk
+      cam(12.2, 1.6, { px: -2.6, py: 3.2, pz: -39.5, lx: 6.5, ly: 3.6, lz: SLOT(8), fov: 58 }, 'power3.inOut');
+      st.to(S, { paint: 1, duration: 0.8, ease: 'power2.out' }, 12.45);
+      st.to(S, { open: 1, duration: 0.7, ease: 'none' }, 12.6);
+      st.to(S, { glow: 1, duration: 0.5 }, 12.75);
+      st.to(S, { guests: 1, duration: 0.45, ease: 'none' }, 13.2);
+      cam(13.85, 1.6, { px: -5.5, py: 12.5, pz: -41, lx: 6.5, ly: 6.4, lz: SLOT(8), fov: 54 }, 'power2.inOut');
+      st.to(S, { terr: 1, duration: 0.5, ease: 'none' }, 13.95);
+      st.to(S, { night: 1, duration: 1.3, ease: 'sine.inOut' }, 14.0);
+      st.to(S, { lights: 1, duration: 0.8, ease: 'none' }, 14.3);
+      tl.to('#skyEve', { opacity: 1, duration: 1.3, ease: 'sine.inOut' }, 14.0);
+      flash(12.45, 0.2);
+      show('#gG', 12.45); slam('#g-1', 12.5); hide('#g-1', 13.2); slam('#g-2', 13.2); hide('#g-2', 14.2); slam('#g-3', 14.2);
+      tl.to('#scrimB', { opacity: 1, duration: 0.3 }, 12.5);
+      pop('#c1', 12.6); pop('#c2', 13.25);
+      out('#c1', 14.55); out('#c2', 14.55);
+      show('#board', 14.55); tl.fromTo('#board', { y: 50 }, { y: 0, duration: 0.3, ease: 'power3.out', immediateRender: false }, 14.55);
+      for (let i = 0; i < 6; i++) {
+        const tt = 14.66 + i * 0.2;
+        tl.fromTo('#fl' + i, { rotationX: -90 }, { rotationX: 0, duration: 0.18, ease: 'power2.out', transformPerspective: 600, immediateRender: false }, tt);
+        tl.set('#fl' + i, { borderColor: '#f0c56a', backgroundColor: '#22302b' }, tt + 0.1);
+        tl.fromTo('#fl' + i + ' i', { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.2, ease: 'back.out(3)', immediateRender: false }, tt + 0.1);
+      }
+      out('#gG', 16.15); out('#board', 16.15);
+
+      // H. End (16.15 - 19.5): wide orbit at dusk, comment RENT, WhatsApp, site
+      cam(15.9, 4.1, { px: -12, py: 15.5, pz: -28, lx: 6.5, ly: 4.6, lz: SLOT(8), fov: 50, shift: -60 }, 'sine.inOut');
+      show('#gH', 16.15); rise('#h-0', 16.15); slam('#h-1', 16.2); rise('#h-2', 16.45); tl.set('#h-1', { opacity: 0 }, 0); tl.set('#h-2', { opacity: 0 }, 0); tl.set('#h-0', { opacity: 0 }, 0);
+      rise('#h-3', 16.35);
+      ['#k1', '#k2', '#k3', '#k4'].forEach((k, i) => { show(k, 16.72 + i * 0.07);
+        tl.fromTo(k, { y: -120, rotationX: 70 }, { y: 0, rotationX: 0, duration: 0.35, ease: 'back.out(2.2)', transformPerspective: 800, immediateRender: false }, 16.72 + i * 0.07); });
+      tl.fromTo('#k1', { y: 0 }, { y: 14, duration: 0.08, yoyo: true, repeat: 1, ease: 'power2.inOut', immediateRender: false }, 17.25);
+      pop('#h-ph', 17.25); pop('#h-web', 17.5); rise('#h-4', 17.65);
+      tl.fromTo('#h-ph', { scale: 1 }, { scale: 1.05, duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut', immediateRender: false }, 18.3);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
