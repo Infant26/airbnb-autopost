@@ -330,7 +330,7 @@
       "id": "2026-11-02-horizon-suite-tub",
       "status": "scheduled",
       "type": "image",
-      "publish_at": "2026-11-02T19:00:00+05:30",
+      "publish_at": "2026-11-07T19:00:00+05:30",
       "media": [
         "media/ig/2026-11-02-horizon-suite-tub/01.jpg"
       ],
