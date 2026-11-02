@@ -1,0 +1,531 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Empty floor before and after reel</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #0d1715; font-family: Inter; }
+      #bg { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 55% at 50% 50%, #22342f 0%, #0d1715 72%); }
+      #bgCold { position: absolute; inset: 0; opacity: 1; background: radial-gradient(ellipse 90% 55% at 50% 50%, #2a2f31 0%, #101314 72%); }
+      #bgNight { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse 90% 60% at 50% 45%, #1b2a4a 0%, #070c18 75%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 28px; letter-spacing: 7px;
+        text-transform: uppercase; color: #e0ad4f; }
+      .big { position: absolute; left: 60px; right: 60px; text-align: center; font-weight: 800; letter-spacing: -3px; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .cream { color: #f6f2ea; } .gold { color: #e0ad4f; } .red { color: #e05a44; }
+      .x3d { text-shadow: 0 2px 0 #c9b98f, 0 4px 0 #ad9b6e, 0 6px 0 #8f7d50, 0 8px 0 #6f5f34, 0 10px 0 #4f421f, 0 26px 40px rgba(0, 0, 0, 0.55); }
+      .x3r { text-shadow: 0 2px 0 #b9493a, 0 4px 0 #9a3a2e, 0 6px 0 #7b2c22, 0 8px 0 #5c1f17, 0 24px 40px rgba(0, 0, 0, 0.6); }
+      .x3c { text-shadow: 0 2px 0 #cfc6b4, 0 4px 0 #b0a690, 0 6px 0 #8e846e, 0 8px 0 #6b624f, 0 24px 40px rgba(0, 0, 0, 0.6); }
+      /* BEFORE / AFTER status, two faces that swap with a flip */
+      .st { position: absolute; left: 0; right: 0; top: 318px; text-align: center; font-weight: 800; font-size: 92px; letter-spacing: -3px; line-height: 1; opacity: 0; }
+      .st small { display: block; font-size: 30px; letter-spacing: 7px; font-weight: 700; margin-bottom: 14px; }
+      .meter { position: absolute; left: 0; right: 0; top: 1250px; text-align: center; opacity: 0; }
+      .meter span { display: inline-block; font-weight: 800; font-size: 40px; padding: 18px 34px 14px; border-radius: 999px; }
+      .m0 span { background: #2a1512; border: 3px solid #e05a44; color: #fbe9e5; }
+      .m1 span { background: #e0ad4f; color: #1d1610; box-shadow: 0 20px 50px -14px rgba(224, 173, 79, 0.8); }
+      .chip { position: absolute; font-weight: 700; font-size: 36px; color: #1d1610; background: #f6f2ea; border-radius: 999px;
+        padding: 14px 28px 10px; opacity: 0; white-space: nowrap; box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6); }
+      .chip.g { background: #e0ad4f; }
+      /* room progress row */
+      #prog { position: absolute; left: 70px; top: 1372px; display: flex; gap: 14px; opacity: 0; }
+      .rp { font-weight: 700; font-size: 24px; letter-spacing: 3px; color: #7f8a86; border: 3px solid #3b4a45; border-radius: 999px; padding: 10px 18px 7px; }
+      .photo { position: absolute; background-size: cover; background-position: center; border-radius: 26px; border: 10px solid #fffaf2;
+        box-shadow: 0 50px 100px -30px rgba(0, 0, 0, 0.85); }
+      .pcard { position: absolute; left: 100px; top: 520px; width: 880px; height: 680px; opacity: 0; }
+      .pcard .photo { inset: 0; }
+      .pcard b { position: absolute; left: 30px; top: -26px; background: #e0ad4f; color: #1d1610; font-size: 26px; letter-spacing: 5px; font-weight: 800;
+        padding: 12px 22px 9px; border-radius: 12px; }
+      .month { width: 118px; height: 92px; border-radius: 16px; background: #1c2a26; border: 3px solid #3b4a45; color: #7f8a86;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; letter-spacing: 2px; }
+      .month i { font-style: normal; font-size: 30px; line-height: 1; margin-top: 4px; opacity: 0; color: #1d1610; }
+      .key { width: 140px; height: 150px; border-radius: 26px; background: #f6f2ea; color: #1d1610; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 92px; box-shadow: 0 16px 0 #b9ab8c, 0 30px 50px -10px rgba(0, 0, 0, 0.7); opacity: 0; }
+      .pill { display: inline-flex; align-items: center; gap: 18px; font-weight: 800; font-size: 50px; padding: 22px 40px 18px; border-radius: 999px; white-space: nowrap; }
+      #flash { position: absolute; inset: 0; background: #fff1d6; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="26"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="bg"></div><div id="bgCold"></div><div id="bgNight"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+
+      <!-- A. Hook, on screen from frame 1 over the bare room -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div id="a-1" class="big cream x3c" style="top: 255px; font-size: 140px">EMPTY FLOOR?</div>
+        <div id="a-2" class="big serif it red" style="top: 555px; font-size: 78px">You're losing rent.</div>
+        <div id="a-3" class="big serif it gold" style="top: 555px; font-size: 78px; opacity: 0">Watch this one change.</div>
+      </div>
+      <div id="m0" class="meter m0" style="opacity: 1"><span>Rent this month: ₹0</span></div>
+
+      <div id="kk" class="kick" style="top: 248px; opacity: 0">Bedroom</div>
+      <div id="sb" class="st red x3r"><small style="color: #e9a092">BEFORE</small>EMPTY</div>
+      <div id="sa" class="st gold x3d"><small style="color: #f0d49a">AFTER</small>EARNING</div>
+      <div id="m1" class="meter m1"><span>Rent: paid ✓</span></div>
+
+      <div id="c1a" class="chip" style="left: 90px; top: 1130px">Beds in</div>
+      <div id="c1b" class="chip" style="left: 330px; top: 1130px">AC on</div>
+      <div id="c1c" class="chip g" style="left: 540px; top: 1130px">Booked ✓</div>
+      <div id="c2a" class="chip" style="left: 90px; top: 1130px">Sofas</div>
+      <div id="c2b" class="chip" style="left: 290px; top: 1130px">Lamps</div>
+      <div id="c2c" class="chip g" style="left: 500px; top: 1130px">Guests ✓</div>
+      <div id="c3a" class="chip" style="left: 90px; top: 1130px">Done up</div>
+      <div id="c3b" class="chip g" style="left: 350px; top: 1130px">We look after it</div>
+      <div id="c4a" class="chip g" style="left: 330px; top: 1130px">Lights on ✓</div>
+
+      <div id="prog"><div id="r1" class="rp">BEDROOM</div><div id="r2" class="rp">HALL</div><div id="r3" class="rp">BATH</div><div id="r4" class="rp">TERRACE</div></div>
+
+      <div id="p1" class="pcard"><div class="photo" style="background-image: url(assets/photos/bed.jpg)"></div><b>THE REAL ROOM</b></div>
+      <div id="p2" class="pcard"><div class="photo" style="background-image: url(assets/photos/hall.jpg)"></div><b>THE REAL ROOM</b></div>
+      <div id="p3" class="pcard"><div class="photo" style="background-image: url(assets/photos/bath.jpg)"></div><b>THE REAL ROOM</b></div>
+      <div id="p4" class="pcard" style="left: 70px; top: 470px; width: 940px; height: 860px"><div class="photo" style="background-image: url(assets/photos/terrace.jpg)"></div><b>THE REAL TERRACE</b></div>
+
+      <!-- H. The whole floor, and the months it pays -->
+      <div id="gH" class="grp">
+        <div id="h-1" class="big cream" style="top: 250px; font-size: 76px; letter-spacing: -2px; white-space: nowrap; left: 0; right: 0">This was an empty floor.</div>
+        <div id="h-2" class="big serif it gold" style="top: 345px; font-size: 60px; opacity: 0">in White Town, Pondy</div>
+        <div id="h-3" class="big gold x3d" style="top: 250px; font-size: 80px; letter-spacing: -2px; white-space: nowrap; left: 0; right: 0; opacity: 0">Now it pays its owner</div>
+        <div id="h-4" class="big serif it cream" style="top: 350px; font-size: 64px; opacity: 0">every month.</div>
+        <div id="months" style="position: absolute; left: 70px; width: 840px; top: 1150px; display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; opacity: 0">
+          <div class="month" id="mo0">JAN<i>✓</i></div><div class="month" id="mo1">FEB<i>✓</i></div><div class="month" id="mo2">MAR<i>✓</i></div>
+          <div class="month" id="mo3">APR<i>✓</i></div><div class="month" id="mo4">MAY<i>✓</i></div><div class="month" id="mo5">JUN<i>✓</i></div>
+          <div class="month" id="mo6">JUL<i>✓</i></div><div class="month" id="mo7">AUG<i>✓</i></div><div class="month" id="mo8">SEP<i>✓</i></div>
+          <div class="month" id="mo9">OCT<i>✓</i></div><div class="month" id="mo10">NOV<i>✓</i></div><div class="month" id="mo11">DEC<i>✓</i></div>
+        </div>
+      </div>
+
+      <!-- I. Comment FLOOR on keycaps -->
+      <div id="gI" class="grp">
+        <div class="kick" style="top: 300px">Got an empty floor in Pondy?</div>
+        <div class="big cream" style="top: 360px; font-size: 104px">Comment</div>
+        <div style="position: absolute; left: 0; right: 0; top: 560px; display: flex; justify-content: center; gap: 22px">
+          <div id="k1" class="key">F</div><div id="k2" class="key">L</div><div id="k3" class="key">O</div><div id="k4" class="key">O</div><div id="k5" class="key">R</div>
+        </div>
+      </div>
+
+      <!-- J. Contact and loop -->
+      <div id="gJ" class="grp">
+        <div id="j-0" class="big serif it cream" style="top: 260px; font-size: 64px">or WhatsApp us</div>
+        <div id="j-ph" style="position: absolute; left: 0; right: 0; top: 370px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #25d366; color: #0b2a17; box-shadow: 0 24px 60px -16px rgba(37, 211, 102, 0.7)">
+            <svg width="54" height="54" viewBox="0 0 32 32"><path fill="#0b2a17" d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.4.7 4.7 1.9 6.7L3 29l6.9-2.1c1.9 1 4 1.6 6.1 1.6 7 0 12.7-5.7 12.7-12.7S23 3 16 3zm0 23.2c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.1 1.2 1.2-4-.3-.4a10.4 10.4 0 1 1 9 4.9zm5.7-7.8c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7 0-.3-.2-1.3-.5-2.5-1.5-.9-.8-1.6-1.9-1.7-2.2-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.9 5.2 2.9 1.1 3.5.9 4.1.8.6-.1 1.9-.8 2.2-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.3z"/></svg>
+            +91 88704 67560</span>
+        </div>
+        <div id="j-web" style="position: absolute; left: 0; right: 0; top: 520px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #e0ad4f; color: #1d1610">thecoastalcalm.homes</span>
+        </div>
+        <div id="j-1" class="big red x3r" style="top: 1225px; font-size: 92px; opacity: 0">DON'T LEAVE</div>
+        <div id="j-2" class="big cream x3c" style="top: 1330px; font-size: 92px; opacity: 0">YOUR FLOOR EMPTY.</div>
+      </div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.2" data-duration="3.245" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="3.545" data-duration="2.04" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="5.985" data-duration="1.615" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="7.8" data-duration="1.27" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="9.17" data-duration="1.29" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="10.76" data-duration="1.75" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="12.81" data-duration="1.74" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="14.75" data-duration="0.715" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="vo8" class="clip" data-start="15.965" data-duration="4.0" src="assets/vo/s8.wav" data-volume="1" data-track-index="9"></audio>
+      <audio id="vo9" class="clip" data-start="20.165" data-duration="1.785" src="assets/vo/s9.wav" data-volume="1" data-track-index="10"></audio>
+      <audio id="vo10" class="clip" data-start="22.05" data-duration="2.15" src="assets/vo/s10.wav" data-volume="1" data-track-index="11"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="26" src="assets/bgm/track.wav" data-volume="0.26" data-fade-in="0.1" data-fade-out="1.6" data-track-index="12"></audio>
+      <audio id="x1" class="clip" data-start="2.85" data-duration="1.0" src="assets/sfx/glitch-2.mp3" data-volume="0.45" data-track-index="13"></audio>
+      <audio id="x2" class="clip" data-start="5.99" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="14"></audio>
+      <audio id="x3" class="clip" data-start="6.69" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.8" data-track-index="15"></audio>
+      <audio id="x4" class="clip" data-start="7.18" data-duration="2.5" src="assets/sfx/chime.mp3" data-volume="0.35" data-track-index="16"></audio>
+      <audio id="x5" class="clip" data-start="7.75" data-duration="1.0" src="assets/sfx/whoosh-short.mp3" data-volume="0.5" data-track-index="17"></audio>
+      <audio id="x6" class="clip" data-start="9.21" data-duration="2.1" src="assets/sfx/impact-bass-2.mp3" data-volume="0.55" data-track-index="18"></audio>
+      <audio id="x7" class="clip" data-start="9.98" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="19"></audio>
+      <audio id="x8" class="clip" data-start="10.5" data-duration="1.0" src="assets/sfx/whoosh-short.mp3" data-volume="0.5" data-track-index="20"></audio>
+      <audio id="x9" class="clip" data-start="11.38" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="21"></audio>
+      <audio id="x10" class="clip" data-start="11.92" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="22"></audio>
+      <audio id="x11" class="clip" data-start="12.6" data-duration="1.0" src="assets/sfx/whoosh-short.mp3" data-volume="0.5" data-track-index="23"></audio>
+      <audio id="x12" class="clip" data-start="13.2" data-duration="1.6" src="assets/sfx/riser.mp3" data-volume="0.35" data-track-index="24"></audio>
+      <audio id="x13" class="clip" data-start="14.82" data-duration="0.4" src="assets/sfx/click-soft.mp3" data-volume="0.9" data-track-index="25"></audio>
+      <audio id="x14" class="clip" data-start="14.86" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.5" data-track-index="26"></audio>
+      <audio id="x15" class="clip" data-start="15.9" data-duration="1.9" src="assets/sfx/whoosh_cut.wav" data-volume="0.45" data-track-index="27"></audio>
+      <audio id="x16" class="clip" data-start="18.44" data-duration="2.5" src="assets/sfx/chime.mp3" data-volume="0.3" data-track-index="28"></audio>
+      <audio id="x17" class="clip" data-start="20.6" data-duration="0.4" src="assets/sfx/key-press.mp3" data-volume="0.7" data-track-index="29"></audio>
+      <audio id="x18" class="clip" data-start="22.1" data-duration="0.7" src="assets/sfx/notification.mp3" data-volume="0.5" data-track-index="30"></audio>
+      <audio id="x19" class="clip" data-start="23.36" data-duration="2.1" src="assets/sfx/impact-bass-2.mp3" data-volume="0.5" data-track-index="31"></audio>
+    </div>
+    <script>
+      let seed = 7; const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(30, 1080 / 1920, 0.1, 300);
+      const hemi = new THREE.HemisphereLight('#fff6e6', '#4b5552', 1.2);
+      const sun = new THREE.DirectionalLight('#fff1dc', 1.6);
+      sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -10, right: 10, top: 14, bottom: -6, far: 50 }); sun.shadow.bias = -0.0004;
+      scene.add(hemi, sun, sun.target);
+      const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85 }, o));
+      const glow = (color) => new THREE.MeshBasicMaterial({ color, toneMapped: false });
+      const geo = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+      function box(p, w, h, d, m, x, y, z) { const mesh = new THREE.Mesh(geo(w, h, d), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; }
+      function cyl(p, rt, rb, h, m, x, y, z, seg = 24) { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; }
+      const ease = (p) => { p = Math.min(1, Math.max(0, p)); const c = 1.9; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+      const clamp01 = (p) => Math.min(1, Math.max(0, p));
+
+      // Shared materials
+      const M = {
+        wood: mat('#6e4a2c', { roughness: 0.6 }), darkWood: mat('#4a2e1a', { roughness: 0.55 }), white: mat('#f4f1ea'), green: mat('#5f7a4a'),
+        mustard: mat('#c48a3a'), teal: mat('#1f5a5a'), mauve: mat('#a88a86'), wicker: mat('#b98a52'), leaf: mat('#4d7a48', { flatShading: true }),
+        pot: mat('#b6724b'), metal: mat('#d9d9d6', { roughness: 0.3, metalness: 0.6 }), black: mat('#1d2523'), ac: mat('#f2f2ef', { roughness: 0.4 }),
+        yellow: mat('#d9a92b', { roughness: 0.5 }), solar: mat('#3b5a80', { roughness: 0.35, metalness: 0.2, emissive: new THREE.Color('#0d1a2c'), emissiveIntensity: 0.6 }), concrete: mat('#bdb7aa'),
+        tub: mat('#f7f7f5', { roughness: 0.35 }), shelf: mat('#3a2a1f'), cord: mat('#111')
+      };
+      const COLD_WALL = new THREE.Color('#8b8e8b'), COLD_FLOOR = new THREE.Color('#5e5d59');
+
+      // Tile texture for the bathroom walls
+      const tileTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+        g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 256); g.strokeStyle = '#c9c9c4'; g.lineWidth = 4;
+        for (let i = 0; i <= 256; i += 64) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 256); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(256, i); g.stroke(); }
+        const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 2); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+
+      // ---------- Rooms: cut-away corners that start bare and get furnished ----------
+      const RW = 6, RD = 5, RH = 3.0, SPACING = 16;
+      const rooms = [];
+      function makeRoom(i, o) {
+        const g = new THREE.Group(); g.position.x = i * SPACING; scene.add(g);
+        const wallM = mat(COLD_WALL.clone(), o.tiles ? { map: tileTex } : {}), floorM = mat(COLD_FLOOR.clone(), { roughness: 0.5 });
+        const wh = o.open ? 0.85 : RH;
+        box(g, RW + 0.3, 0.2, RD + 0.3, floorM, 0, -0.1, 0);
+        box(g, RW + 0.3, wh, 0.15, wallM, 0, wh / 2, -RD / 2 - 0.075);
+        box(g, 0.15, wh, RD + 0.3, wallM, -RW / 2 - 0.075, wh / 2, 0);
+        // bare bulb on a cord, the only light in the empty room
+        const bulb = new THREE.Group(); bulb.position.set(0.3, o.open ? 2.4 : RH, 0);
+        box(bulb, 0.02, 0.9, 0.02, M.cord, 0, -0.45, 0);
+        const bulbM = glow('#ffe2a8'); const b = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 10), bulbM); b.position.y = -0.95; bulb.add(b);
+        if (!o.open) g.add(bulb);
+        const cold = new THREE.PointLight('#cfe0ff', 6, 9, 1.6); cold.position.set(0.3, 1.9, 0.4); g.add(cold);
+        const warm = new THREE.PointLight('#ffc27a', 0, 12, 1.4); warm.position.set(0.8, 2.4, 1.2); g.add(warm);
+        // dust motes
+        const N = 90, dpos = new Float32Array(N * 3), seeds = [];
+        for (let k = 0; k < N; k++) seeds.push([rnd() * RW - RW / 2, rnd() * 2.6 + 0.1, rnd() * RD - RD / 2, rnd() * 6.28]);
+        const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
+        const dm = new THREE.PointsMaterial({ color: '#e8e2d2', size: 0.05, transparent: true, opacity: 0.7, depthWrite: false });
+        g.add(new THREE.Points(dg, dm));
+        const items = [];
+        const add = (obj, delay) => { obj.userData.home = obj.position.clone(); obj.userData.delay = delay; obj.scale.setScalar(0.0001); g.add(obj); items.push(obj); return obj; };
+        const grp = () => new THREE.Group();
+        const r = { g, wallM, floorM, after: o, bulb, bulbM, cold, warm, dg, dm, seeds, items, add, grp, fan: null, bulbs: null, bulbsM: null };
+        rooms.push(r); return r;
+      }
+      const piece = (r, delay, build) => { const p = r.grp(); build(p); return r.add(p, delay); };
+
+      // Room 1: bedroom (2nd-floor master: green bed, mustard rug, dark wardrobe, teal curtain)
+      const R1 = makeRoom(0, { wall: '#f2ece0', floor: '#e3dccd', light: 7 });
+      piece(R1, 0.0, (p) => { box(p, 2.6, 0.02, 2.0, M.mustard, 0, 0.01, 0); p.position.set(-0.4, 0, 0.9); });
+      piece(R1, 0.08, (p) => { box(p, 2.2, 0.42, 2.6, M.wood, 0, 0.21, 0); box(p, 2.1, 0.22, 2.5, M.white, 0, 0.53, 0); box(p, 2.16, 0.1, 1.7, M.green, 0, 0.66, 0.42);
+        box(p, 0.7, 0.14, 0.4, M.white, -0.5, 0.71, -1.0); box(p, 0.7, 0.14, 0.4, M.white, 0.5, 0.71, -1.0); box(p, 2.3, 1.1, 0.12, M.wood, 0, 0.75, -1.33); p.position.set(0.9, 0, -0.95); });
+      piece(R1, 0.18, (p) => { box(p, 1.4, 2.3, 0.65, M.darkWood, 0, 1.15, 0); box(p, 0.02, 2.1, 0.02, M.metal, 0, 1.15, 0.33); p.position.set(-2.1, 0, -2.1); });
+      piece(R1, 0.26, (p) => { box(p, 0.5, 0.5, 0.45, M.wood, 0, 0.25, 0); cyl(p, 0.04, 0.06, 0.35, M.wood, 0, 0.67, 0); cyl(p, 0.14, 0.2, 0.22, glow('#ffd59a'), 0, 0.92, 0); p.position.set(2.45, 0, -2.0); });
+      piece(R1, 0.32, (p) => { cyl(p, 0.17, 0.13, 0.32, M.pot, 0, 0.16, 0); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.34, 0), M.leaf); l.position.y = 0.55; p.add(l); p.position.set(-2.55, 0, 0.0); });
+      piece(R1, 0.36, (p) => { box(p, 0.08, 2.2, 1.0, M.teal, 0, 1.4, 0); p.position.set(-2.95, 0, 1.0); });
+      piece(R1, 0.42, (p) => { box(p, 1.3, 0.08, 0.06, glow('#fff4dd'), 0, 2.4, 0); p.position.set(0.6, 0, -2.4); });
+      const ac1 = piece(R1, 0.5, (p) => { box(p, 0.3, 0.38, 1.3, M.ac, 0, 2.55, 0); box(p, 0.02, 0.04, 1.0, glow('#7fd6ff'), 0.16, 2.42, 0); p.position.set(-2.85, 0, -1.0); });
+      R1.fan = piece(R1, 0.55, (p) => { box(p, 0.02, 0.4, 0.02, M.cord, 0, 2.8, 0); cyl(p, 0.12, 0.12, 0.1, M.black, 0, 2.6, 0);
+        for (let k = 0; k < 3; k++) { const bl = box(p, 1.2, 0.02, 0.18, M.black, 0, 2.58, 0); bl.geometry.translate(0.6, 0, 0); bl.rotation.y = k * 2.094; } p.position.set(0.4, 0, 0.3); });
+
+      // Room 2: living hall (sofa, round wicker table, rug, floor lamp, art)
+      const R2 = makeRoom(1, { wall: '#f3eee4', floor: '#e2dccf', light: 7 });
+      piece(R2, 0.0, (p) => { box(p, 3.0, 0.02, 2.2, M.mustard, 0, 0.01, 0); p.position.set(0.2, 0, 0.3); });
+      piece(R2, 0.1, (p) => { box(p, 2.6, 0.35, 0.95, M.wood, 0, 0.3, 0); box(p, 2.4, 0.22, 0.85, M.mauve, 0, 0.58, 0.02); box(p, 2.4, 0.6, 0.22, M.mauve, 0, 0.95, -0.36);
+        box(p, 0.16, 0.7, 0.95, M.wood, -1.3, 0.5, 0); box(p, 0.16, 0.7, 0.95, M.wood, 1.3, 0.5, 0); box(p, 0.4, 0.4, 0.12, M.mustard, -0.8, 0.85, -0.2); p.position.set(0.5, 0, -1.8); });
+      piece(R2, 0.2, (p) => { cyl(p, 0.55, 0.55, 0.06, mat('#d8e4e6', { roughness: 0.1, metalness: 0.2, transparent: true, opacity: 0.7 }), 0, 0.55, 0); cyl(p, 0.45, 0.5, 0.5, M.wicker, 0, 0.27, 0, 14); p.position.set(0.3, 0, 0.4); });
+      piece(R2, 0.28, (p) => { cyl(p, 0.03, 0.03, 1.5, M.wood, 0, 0.75, 0); cyl(p, 0.2, 0.3, 0.4, glow('#ffd28c'), 0, 1.6, 0); p.position.set(-1.6, 0, -1.9); });
+      piece(R2, 0.34, (p) => { cyl(p, 0.2, 0.15, 0.36, M.pot, 0, 0.18, 0); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.4, 0), M.leaf); l.position.y = 0.65; p.add(l); p.position.set(2.5, 0, -1.9); });
+      piece(R2, 0.4, (p) => { [[-0.5, '#c0583c'], [0, '#3d6f8c'], [0.5, '#d9a92b']].forEach(([x, c]) => box(p, 0.38, 0.5, 0.04, mat(c), x, 0, 0)); p.position.set(0.6, 1.9, -2.47); });
+      piece(R2, 0.44, (p) => { box(p, 0.08, 2.4, 1.1, M.teal, 0, 1.4, 0); p.position.set(-2.95, 0, -0.4); });
+      piece(R2, 0.48, (p) => { box(p, 1.3, 0.08, 0.06, glow('#fff4dd'), 0, 2.5, 0); p.position.set(-1.0, 0, -2.4); });
+      R2.fan = piece(R2, 0.52, (p) => { box(p, 0.02, 0.4, 0.02, M.cord, 0, 2.8, 0); cyl(p, 0.12, 0.12, 0.1, M.black, 0, 2.6, 0);
+        for (let k = 0; k < 3; k++) { const bl = box(p, 1.2, 0.02, 0.18, M.black, 0, 2.58, 0); bl.geometry.translate(0.6, 0, 0); bl.rotation.y = k * 2.094; } p.position.set(0.3, 0, 0.3); });
+
+      // Room 3: bathroom (round tub, pedestal basin, shower, shelves, dark floor, white tiles)
+      const R3 = makeRoom(2, { wall: '#ffffff', floor: '#33373b', light: 6, tiles: true });
+      piece(R3, 0.0, (p) => { cyl(p, 1.0, 1.0, 0.75, M.tub, 0, 0.375, 0, 40); cyl(p, 0.86, 0.86, 0.02, mat('#bfe0e6', { roughness: 0.1 }), 0, 0.72, 0, 40); p.position.set(-1.6, 0, -1.3); });
+      piece(R3, 0.12, (p) => { cyl(p, 0.12, 0.16, 0.8, M.tub, 0, 0.4, 0); box(p, 0.6, 0.18, 0.45, M.tub, 0, 0.88, 0.05); p.position.set(1.9, 0, -2.1); });
+      piece(R3, 0.2, (p) => { cyl(p, 0.025, 0.025, 2.2, M.metal, 0, 1.1, 0, 8); cyl(p, 0.16, 0.12, 0.05, M.metal, 0.12, 2.2, 0, 16); p.position.set(-1.2, 0, -2.4); });
+      piece(R3, 0.28, (p) => { box(p, 0.9, 0.05, 0.25, M.shelf, 0, 1.5, 0); box(p, 0.9, 0.05, 0.25, M.shelf, 0.3, 2.0, 0); p.position.set(0.5, 0, -2.38); });
+      piece(R3, 0.34, (p) => { box(p, 0.7, 0.9, 0.04, M.black, 0, 0, 0); for (let k = 0; k < 6; k++) box(p, 0.66, 0.04, 0.08, M.metal, 0, -0.38 + k * 0.15, 0.03); p.position.set(-0.2, 2.1, -2.47); });
+      piece(R3, 0.42, (p) => { box(p, 0.05, 0.7, 0.4, mat('#e7d6b8'), 0, 1.3, 0); p.position.set(-2.95, 0, 0.6); });
+      piece(R3, 0.48, (p) => { box(p, 1.2, 0.08, 0.06, glow('#fff4dd'), 0, 2.6, 0); p.position.set(1.4, 0, -2.4); });
+
+      // Room 4: terrace (open air, yellow pergola, solar panels, benches, plants, string lights)
+      const R4 = makeRoom(3, { wall: '#efe8da', floor: '#e6e0d3', light: 5, open: true });
+      const PX = [-2.4, 0, 2.4], PZ = [-1.9, 1.3];
+      PX.forEach((x, a) => PZ.forEach((z, b) => piece(R4, 0.02 + (a + b) * 0.05, (p) => { box(p, 0.14, 2.5, 0.14, M.yellow, 0, 1.25, 0); box(p, 0.3, 0.3, 0.3, M.concrete, 0, 0.15, 0); p.position.set(x, 0, z); })));
+      piece(R4, 0.3, (p) => { box(p, 5.4, 0.1, 0.14, M.yellow, 0, 2.5, -1.9); box(p, 5.4, 0.1, 0.14, M.yellow, 0, 2.5, 1.3); for (let k = 0; k < 5; k++) box(p, 0.08, 0.08, 3.6, M.yellow, -2.4 + k * 1.2, 2.6, -0.3); });
+      piece(R4, 0.38, (p) => { const s = box(p, 5.6, 0.06, 3.8, M.solar, 0, 2.72, -0.3); s.rotation.x = -0.06; });
+      piece(R4, 0.44, (p) => { box(p, 2.2, 0.1, 0.5, M.concrete, 0, 0.45, 0); box(p, 0.3, 0.4, 0.4, M.concrete, -0.8, 0.2, 0); box(p, 0.3, 0.4, 0.4, M.concrete, 0.8, 0.2, 0); p.position.set(-0.8, 0, -1.4); });
+      piece(R4, 0.5, (p) => { box(p, 1.8, 0.1, 0.5, M.concrete, 0, 0.45, 0); box(p, 0.3, 0.4, 0.4, M.concrete, -0.6, 0.2, 0); box(p, 0.3, 0.4, 0.4, M.concrete, 0.6, 0.2, 0); p.rotation.y = Math.PI / 2; p.position.set(-2.3, 0, 0.6); });
+      piece(R4, 0.55, (p) => { box(p, 1.8, 0.1, 0.5, M.wood, 0, 0.45, 0); box(p, 0.3, 0.4, 0.4, M.concrete, -0.6, 0.2, 0); box(p, 0.3, 0.4, 0.4, M.concrete, 0.6, 0.2, 0); p.position.set(0.9, 0, 0.5); });
+      [[-2.7, -2.2], [-1.6, -2.25], [1.0, -2.2], [2.6, -2.1], [-2.7, 2.0], [2.6, 1.9]].forEach(([x, z], k) => piece(R4, 0.6 + k * 0.03, (p) => {
+        cyl(p, 0.2, 0.15, 0.36, M.pot, 0, 0.18, 0); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.36, 0), M.leaf); l.position.y = 0.58; l.rotation.set(x, z, 0); p.add(l); p.position.set(x, 0, z); }));
+      (() => {
+        const n = 4 * 14; R4.bulbsM = []; const bulbsG = R4.grp(); bulbsG.userData.home = new THREE.Vector3(); bulbsG.userData.delay = 0.7; bulbsG.scale.setScalar(0.0001);
+        for (let rI = 0; rI < 4; rI++) {
+          const z = -1.7 + rI * 0.95, pts = [];
+          for (let k = 0; k <= 30; k++) { const t = k / 30; pts.push(new THREE.Vector3(-2.4 + 4.8 * t, 2.4 - Math.sin(Math.PI * t) * 0.35, z)); }
+          bulbsG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: '#222' })));
+          for (let b = 0; b < 14; b++) { const t = (b + 0.5) / 14, m = glow('#3a3226'); const s = new THREE.Mesh(new THREE.SphereGeometry(0.075, 8, 6), m);
+            s.position.set(-2.4 + 4.8 * t, 2.34 - Math.sin(Math.PI * t) * 0.35, z); bulbsG.add(s); R4.bulbsM.push([m, (rI * 14 + b) / n]); }
+        }
+        R4.g.add(bulbsG); R4.items.push(bulbsG);
+      })();
+
+      // ---------- The whole house, for the pull-back at the end ----------
+      const HX = 4 * SPACING + 12;
+      const house = new THREE.Group(); house.position.x = HX; scene.add(house);
+      const HW = 6, HD = 4.6, HH = 1.7, SLAB = 0.16;
+      const levels = [], glassMats = [];
+      (function build() {
+        const wall = mat('#efe8da'), trim = mat('#d8cdb9'), slab = mat('#cbc1ae'), shutter = mat('#2f5b55', { roughness: 0.6 }), iron = mat('#28302e', { roughness: 0.5, metalness: 0.3 });
+        box(house, HW + 0.8, 0.22, HD + 0.8, mat('#ddd3c2'), 0, 0.11, 0);
+        for (let i = 0; i < 3; i++) {
+          const lvl = new THREE.Group();
+          const glass = mat('#1d2523', { emissive: new THREE.Color('#ffb860'), emissiveIntensity: 0.3, roughness: 0.25, metalness: 0.1 });
+          glassMats.push(glass);
+          const wallH = HH - SLAB, winY = SLAB + 0.78;
+          box(lvl, HW + 0.3, SLAB, HD + 0.3, slab, 0, SLAB / 2, 0);
+          box(lvl, HW, wallH, 0.14, wall, 0, SLAB + wallH / 2, HD / 2 - 0.07); box(lvl, HW, wallH, 0.14, wall, 0, SLAB + wallH / 2, -HD / 2 + 0.07);
+          box(lvl, 0.14, wallH, HD, wall, -HW / 2 + 0.07, SLAB + wallH / 2, 0); box(lvl, 0.14, wallH, HD, wall, HW / 2 - 0.07, SLAB + wallH / 2, 0);
+          box(lvl, HW + 0.12, 0.08, HD + 0.12, trim, 0, HH - 0.04, 0);
+          const win = (x, h, w = 0.7) => { box(lvl, w, h, 0.05, glass, x, winY, HD / 2 + 0.01);
+            box(lvl, w / 2, h, 0.04, shutter, x - w * 0.75 - 0.04, winY, HD / 2 + 0.03); box(lvl, w / 2, h, 0.04, shutter, x + w * 0.75 + 0.04, winY, HD / 2 + 0.03); };
+          if (i === 0) { box(lvl, 0.92, 1.25, 0.06, shutter, 0, SLAB + 0.63, HD / 2 + 0.02); win(-1.9, 0.85); win(1.9, 0.85); }
+          else { win(-1.9, 1.0); win(0, 1.1); win(1.9, 1.0); box(lvl, HW, 0.12, 0.8, slab, 0, 0.06, HD / 2 + 0.4); box(lvl, HW, 0.04, 0.05, iron, 0, 0.82, HD / 2 + 0.78); }
+          lvl.position.y = 0.22 + i * HH; levels.push(lvl); house.add(lvl);
+        }
+        const roof = new THREE.Group(); roof.position.y = 0.22 + 3 * HH;
+        box(roof, HW + 0.3, SLAB, HD + 0.3, slab, 0, SLAB / 2, 0);
+        box(roof, HW + 0.3, 0.45, 0.14, wall, 0, SLAB + 0.22, HD / 2 + 0.08); box(roof, 0.14, 0.45, HD + 0.3, wall, -HW / 2 - 0.08, SLAB + 0.22, 0);
+        box(roof, 0.14, 0.45, HD + 0.3, wall, HW / 2 + 0.08, SLAB + 0.22, 0); box(roof, HW + 0.3, 0.45, 0.14, wall, 0, SLAB + 0.22, -HD / 2 - 0.08);
+        for (const [x, z] of [[-2.5, -1.5], [1.2, -1.5], [-2.5, 1.7], [1.2, 1.7]]) box(roof, 0.12, 1.55, 0.12, M.yellow, x, SLAB + 0.78, z);
+        box(roof, 4.0, 0.05, 3.5, M.solar, -0.65, SLAB + 1.6, 0.1);
+        house.add(roof);
+      })();
+      // gold outline that marks "this floor"
+      const markM = new THREE.LineBasicMaterial({ color: '#f0c987', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const mark = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(HW + 0.6, HH + 0.1, HD + 1.2)), markM);
+      mark.position.set(0, 0.22 + 2 * HH + HH / 2, 0.3); house.add(mark);
+      const markFill = new THREE.Mesh(new THREE.BoxGeometry(HW + 0.6, HH + 0.1, HD + 1.2), new THREE.MeshBasicMaterial({ color: '#e0ad4f', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
+      markFill.position.copy(mark.position); house.add(markFill);
+      const coins = [];
+      const coinM = new THREE.MeshStandardMaterial({ color: '#e7b450', roughness: 0.25, metalness: 0.85, emissive: new THREE.Color('#7a5410'), emissiveIntensity: 0.4 });
+      for (let k = 0; k < 12; k++) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.09, 32), coinM); c.rotation.x = Math.PI / 2; c.visible = false; house.add(c); coins.push(c); }
+
+      // State the paused GSAP timeline fills in for any time t.
+      const S = { cx: 0, yaw: 0.55, r: 21, ty: 1.1, polar: 1.12, shift: -230, time: 0, f: [0, 0, 0, 0], lights: 0, night: 0, mark: 0, hglow: 0.1, coin: 0, flick: 1 };
+      const tmpC = new THREE.Color();
+      function draw() {
+        rooms.forEach((r, i) => {
+          const f = S.f[i], a = r.after;
+          r.wallM.color.copy(COLD_WALL).lerp(tmpC.set(a.wall), clamp01(f * 1.6));
+          r.floorM.color.copy(COLD_FLOOR).lerp(tmpC.set(a.floor), clamp01(f * 1.6));
+          r.items.forEach((it) => { const p = clamp01((f - it.userData.delay * 0.55) / 0.42); const e = ease(p);
+            it.scale.setScalar(Math.max(0.0001, p <= 0 ? 0.0001 : Math.min(1.12, e)));
+            it.position.set(it.userData.home.x, it.userData.home.y + (1 - Math.min(1, e)) * 3.5, it.userData.home.z); });
+          const flicker = 0.75 + 0.25 * Math.sin(S.time * 37 + i) * Math.sin(S.time * 13.3 + i * 2) * S.flick;
+          r.cold.intensity = (1 - clamp01(f * 1.4)) * 7 * flicker;
+          r.warm.intensity = clamp01(f * 1.3) * a.light * (i === 3 ? S.lights : 1);
+          r.bulbM.color.setRGB(flicker, 0.88 * flicker, 0.65 * flicker);
+          r.bulb.visible = f < 0.5; r.bulb.rotation.z = Math.sin(S.time * 2.2 + i) * 0.12;
+          r.dm.opacity = 0.7 * (1 - clamp01(f * 2));
+          const pa = r.dg.attributes.position.array;
+          r.seeds.forEach((s, k) => { pa[k * 3] = s[0] + Math.sin(S.time * 0.4 + s[3]) * 0.3; pa[k * 3 + 1] = s[1] + Math.sin(S.time * 0.6 + s[3] * 2) * 0.2; pa[k * 3 + 2] = s[2]; });
+          r.dg.attributes.position.needsUpdate = true;
+          if (r.fan) r.fan.rotation.y = S.time * 9 * clamp01(f);
+        });
+        R4.bulbsM.forEach(([m, k]) => { const on = clamp01((S.lights - k * 0.8) / 0.2); m.color.setRGB(0.23 + on * 0.77, 0.2 + on * 0.62, 0.15 + on * 0.4); });
+        glassMats.forEach((g, i) => { g.emissiveIntensity = i === 2 ? 0.2 + S.hglow * 1.6 : 0.15 + S.hglow * 0.3; });
+        markM.opacity = S.mark * (0.8 + 0.2 * Math.sin(S.time * 6)); markFill.opacity = S.mark * 0.16;
+        coins.forEach((c, k) => { const p = clamp01((S.coin * 14 - k) / 2.2); c.visible = p > 0 && p < 1;
+          c.position.set(-2.2 + (k % 4) * 1.5, 12 - p * 7.5, 2.6 + Math.floor(k / 4) * 0.2); c.rotation.z = p * 8; });
+        hemi.intensity = 1.2 - S.night * 0.75; sun.intensity = 1.6 - S.night * 1.3;
+        hemi.color.set(S.night > 0.5 ? '#9fb3e0' : '#fff6e6');
+        sun.position.set(S.cx - 8, 14, 10); sun.target.position.set(S.cx, 0, 0);
+        camera.position.set(S.cx + Math.sin(S.yaw) * Math.sin(S.polar) * S.r, S.ty + Math.cos(S.polar) * S.r, Math.cos(S.yaw) * Math.sin(S.polar) * S.r);
+        camera.lookAt(S.cx, S.ty, 0);
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920);
+        renderer.render(scene, camera);
+      }
+
+      const st = gsap.timeline({ paused: true });   // drives S (the 3D rooms and house)
+      const tl = gsap.timeline({ paused: true });   // drives the HTML layers
+      // The voiceover is split into phrases; w() maps a word's time in vo.wav onto the reel's clock.
+      const SEG = [[0, 0.2], [3.245, 0.3], [5.285, 0.7], [6.9, 0.9], [8.17, 1.0], [9.46, 1.3], [11.21, 1.6], [12.95, 1.8], [13.665, 2.3], [17.665, 2.5], [19.45, 2.6]];
+      const w = (t) => { let o = 0; SEG.forEach(([s, off]) => { if (t >= s) o = off; }); return t + o; };
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.5, filter: 'blur(12px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.3, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t);
+      const pop = (el, t) => tl.fromTo(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, t);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.35, ease: 'power2.out' }, t + 0.01); };
+      const out = (el, t) => tl.to(el, { opacity: 0, y: -24, duration: 0.2, ease: 'power2.in' }, t - 0.2);
+      const fS = (i, v) => { const o = {}; o['f' + i] = v; return o; };
+      // GSAP tweens plain keys, so mirror S.f[i] through f0..f3
+      ['f0', 'f1', 'f2', 'f3'].forEach((k, i) => Object.defineProperty(S, k, { get: () => S.f[i], set: (v) => { S.f[i] = v; } }));
+
+      // One room: BEFORE label, furniture build, AFTER label, then the real photo swings in.
+      function room(n, tBefore, tBuild, tAfter, tPhoto, tOut, name) {
+        const i = n - 1;
+        tl.set('#kk', { textContent: (n + ' / 4 · ' + name) }, tBefore); rise('#kk', tBefore);
+        tl.set('#r' + n, { color: '#f6f2ea', borderColor: '#f6f2ea' }, tBefore);
+        show('#sb', tBefore); tl.fromTo('#sb', { rotationX: -90 }, { rotationX: 0, duration: 0.3, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, tBefore);
+        show('#m0', tBefore); tl.set('#m0 span', { textContent: 'Rent this month: ₹0' }, tBefore);
+        st.to(S, Object.assign(fS(i, 1), { duration: 0.85, ease: 'none' }), tBuild);
+        st.to(S, { r: '-=2.2', duration: 1.2, ease: 'power2.out' }, tBuild);
+        flash(tBuild, 0.15);
+        tl.to('#sb', { rotationX: 90, duration: 0.14, ease: 'power2.in', transformPerspective: 900 }, tAfter - 0.14);
+        hide('#sb', tAfter); hide('#m0', tAfter);
+        show('#sa', tAfter); tl.fromTo('#sa', { rotationX: -90 }, { rotationX: 0, duration: 0.32, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, tAfter);
+        pop('#m1', tAfter);
+        tl.set('#r' + n, { backgroundColor: '#e0ad4f', borderColor: '#e0ad4f', color: '#1d1610' }, tAfter);
+        tl.fromTo('#r' + n, { scale: 1.35 }, { scale: 1, duration: 0.4, ease: 'elastic.out(1, 0.5)', immediateRender: false }, tAfter);
+        const p = '#p' + n;
+        show(p, tPhoto);
+        tl.fromTo(p, { rotationY: -80, z: -400, scale: 0.6 }, { rotationY: 0, z: 0, scale: 1, duration: 0.4, ease: 'power3.out', transformPerspective: 1600, immediateRender: false }, tPhoto);
+        tl.to(p, { scale: 1.04, duration: tOut - tPhoto, ease: 'none' }, tPhoto + 0.4);
+        tl.to(p, { x: -1100, rotation: -10, duration: 0.3, ease: 'power3.in' }, tOut - 0.3);
+        out('#sa', tOut); out('#m1', tOut); out('#kk', tOut);
+      }
+      function truck(n, t) {   // camera slides to the next room
+        st.to(S, { cx: n * SPACING, duration: 0.45, ease: 'power3.inOut' }, t);
+        st.to(S, { r: 21, yaw: n % 2 ? 0.75 : 0.45, duration: 0.45, ease: 'power3.inOut' }, t);
+      }
+
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 26, ease: 'steps(312)' }, 0);
+      st.to(S, { time: 26, duration: 26, ease: 'none' }, 0);
+
+      // A. Hook: a bare, cold room with a swinging bulb. "Watch this one change" flickers it furnished.
+      st.fromTo(S, { r: 23, yaw: 0.35 }, { r: 19.5, yaw: 0.6, duration: 3.3, ease: 'sine.inOut', immediateRender: false }, 0);
+      tl.fromTo('#a-1', { scale: 1.12 }, { scale: 1, duration: 0.5, ease: 'expo.out', immediateRender: false }, 0);
+      tl.fromTo('#m0', { scale: 1 }, { scale: 1.08, duration: 0.3, yoyo: true, repeat: 5, ease: 'sine.inOut', immediateRender: false }, 0.6);
+      tl.to('#a-2', { opacity: 0, duration: 0.15 }, w(1.78));
+      rise('#a-3', w(1.81));
+      [2.62, 2.78, 2.92, 3.06].forEach((t, k) => { st.set(S, { f0: k % 2 ? 0 : 1 }, w(t)); tl.set('#bgCold', { opacity: k % 2 ? 1 : 0 }, w(t)); });
+      st.set(S, { f0: 0 }, w(3.2)); tl.set('#bgCold', { opacity: 1 }, w(3.2));
+      flash(w(2.62), 0.2);
+      out('#gA', w(3.25)); out('#m0', w(3.25));
+      rise('#prog', w(3.25));
+
+      // B. Bedroom (times below are on the reel's clock)
+      room(1, 3.55, 5.99, 7.18, 7.4, 7.95, 'Bedroom');
+      tl.to('#bgCold', { opacity: 0, duration: 0.8 }, 5.99);
+      pop('#c1a', 5.99); pop('#c1b', 6.69); pop('#c1c', 7.18);
+      ['#c1a', '#c1b', '#c1c'].forEach((c) => out(c, 7.6));
+      truck(1, 7.65);
+      tl.set('#bgCold', { opacity: 1 }, 7.95);
+
+      // C. Living hall
+      room(2, 8.0, 9.21, 9.98, 10.12, 10.75, 'Living hall');
+      tl.to('#bgCold', { opacity: 0, duration: 0.6 }, 9.21);
+      pop('#c2a', 9.21); pop('#c2b', 9.56); pop('#c2c', 9.98);
+      ['#c2a', '#c2b', '#c2c'].forEach((c) => out(c, 10.35));
+      truck(2, 10.45);
+      tl.set('#bgCold', { opacity: 1 }, 10.75);
+
+      // D. Bathroom
+      room(3, 10.78, 11.38, 11.82, 12.2, 12.85, 'Bathroom');
+      tl.to('#bgCold', { opacity: 0, duration: 0.6 }, 11.38);
+      pop('#c3a', 11.38); pop('#c3b', 11.82);
+      ['#c3a', '#c3b'].forEach((c) => out(c, 12.4));
+      truck(3, 12.7);
+      tl.set('#bgCold', { opacity: 0 }, 12.85);
+      tl.to('#bgNight', { opacity: 1, duration: 0.5 }, 12.75);
+      st.to(S, { night: 1, duration: 0.5 }, 12.75);
+
+      // E. Terrace, the big reveal: pergola rises, then the string lights come on.
+      tl.set('#kk', { textContent: '4 / 4 · Terrace' }, 12.95); rise('#kk', 12.95);
+      tl.set('#r4', { color: '#f6f2ea', borderColor: '#f6f2ea' }, 12.95);
+      show('#sb', 12.95); tl.fromTo('#sb', { rotationX: -90, scale: 1.3 }, { rotationX: 0, scale: 1, duration: 0.32, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, 12.95); show('#m0', 12.95); tl.set('#m0 span', { textContent: 'Rent this month: ₹0' }, 12.95);
+      st.to(S, { f3: 1, duration: 1.0, ease: 'none' }, 13.8);
+      st.to(S, { r: 19, yaw: 0.95, polar: 1.28, ty: 1.3, duration: 2.8, ease: 'sine.inOut' }, 13.2);
+      flash(13.8, 0.15);
+      st.to(S, { lights: 1, duration: 0.55, ease: 'none' }, 14.82);
+      flash(14.82, 0.3);
+      tl.to('#sb', { rotationX: 90, duration: 0.14, ease: 'power2.in', transformPerspective: 900 }, 14.82 - 0.14);
+      hide('#sb', 14.82); hide('#m0', 14.82);
+      show('#sa', 14.82); tl.fromTo('#sa', { rotationX: -90 }, { rotationX: 0, duration: 0.32, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, 14.82);
+      pop('#c4a', 14.9);
+      tl.set('#r4', { backgroundColor: '#e0ad4f', borderColor: '#e0ad4f', color: '#1d1610' }, 14.82);
+      out('#c4a', 15.3);
+      show('#p4', 15.25);
+      tl.fromTo('#p4', { rotationY: -70, rotationX: 15, z: -600, scale: 0.5 }, { rotationY: 0, rotationX: 0, z: 0, scale: 1, duration: 0.45, ease: 'power3.out', transformPerspective: 1800, immediateRender: false }, 15.25);
+      tl.to('#p4', { scale: 1.05, duration: 0.4, ease: 'none' }, 15.7);
+      tl.to('#p4', { y: -1500, duration: 0.35, ease: 'power3.in' }, 16.0);
+      out('#sa', 16.2); out('#kk', 16.2); out('#prog', 16.2);
+
+      // H. Pull back to the whole house: this floor glows gold, then the months fill in.
+      const tH = 16.0;
+      st.to(S, { cx: HX, r: 50, ty: 3.6, polar: 1.3, yaw: -0.35, shift: 120, night: 0.35, duration: 1.0, ease: 'power3.inOut' }, tH);
+      tl.to('#bgNight', { opacity: 0.5, duration: 1.0 }, tH);
+      st.to(S, { yaw: 0.35, duration: 6.5, ease: 'sine.inOut' }, tH + 1.0);
+      show('#gH', tH);
+      slam('#h-1', tH);
+      st.to(S, { mark: 1, hglow: 0.9, duration: 0.5 }, w(14.54));
+      flash(w(14.54), 0.2);
+      rise('#h-2', w(14.97));
+      tl.to(['#h-1', '#h-2'], { opacity: 0, y: -20, duration: 0.2 }, w(15.79) - 0.2);
+      slam('#h-3', w(15.79));
+      rise('#h-4', w(16.82));
+      rise('#months', w(15.79) + 0.1);
+      for (let k = 0; k < 12; k++) {
+        const t = w(16.33) + k * 0.11;
+        tl.set('#mo' + k, { backgroundColor: '#e0ad4f', borderColor: '#e0ad4f', color: '#1d1610' }, t);
+        tl.set('#mo' + k + ' i', { opacity: 1 }, t);
+        tl.fromTo('#mo' + k, { scale: 1.3 }, { scale: 1, duration: 0.3, ease: 'back.out(2.5)', immediateRender: false }, t);
+      }
+
+      // I. Comment FLOOR
+      const tI = w(17.67);
+      out('#gH', tI);
+      tl.to('#gl', { opacity: 0.25, duration: 0.3 }, tI - 0.2);
+      show('#gI', tI);
+      ['#k1', '#k2', '#k3', '#k4', '#k5'].forEach((k, i) => {
+        show(k, tI + i * 0.07);
+        tl.fromTo(k, { y: -260, rotationX: 60 }, { y: 0, rotationX: 0, duration: 0.35, ease: 'back.out(1.8)', transformPerspective: 900, immediateRender: false }, tI + i * 0.07);
+        tl.to(k, { y: 14, boxShadow: '0 2px 0 #b9ab8c, 0 10px 20px -6px rgba(0,0,0,0.7)', backgroundColor: '#e0ad4f', duration: 0.08 }, w(18.62) + i * 0.06);
+        tl.to(k, { y: 0, boxShadow: '0 16px 0 #8f7d50, 0 30px 50px -10px rgba(0, 0, 0, 0.7)', duration: 0.15 }, w(18.62) + i * 0.06 + 0.1);
+      });
+
+      // J. WhatsApp, the site, and the loop line over the glowing house.
+      const tJ = w(19.48);
+      out('#gI', tJ);
+      tl.to('#gl', { opacity: 1, duration: 0.4 }, tJ);
+      st.set(S, { shift: 90, r: 54, yaw: -0.2 }, tJ);
+      st.to(S, { yaw: 0.4, duration: 4.3, ease: 'sine.inOut' }, tJ);
+      show('#gJ', tJ);
+      rise('#j-0', tJ);
+      tl.fromTo('#j-ph', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, w(19.52));
+      tl.fromTo('#j-web', { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, w(19.52) + 0.25);
+      slam('#j-1', w(20.41));
+      tl.fromTo('#j-2', { opacity: 0, scale: 0.4, rotationX: -70 }, { opacity: 1, scale: 1, rotationX: 0, duration: 0.45, ease: 'back.out(2)', transformPerspective: 900, immediateRender: false }, w(21.11));
+      flash(w(21.11), 0.3);
+
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
