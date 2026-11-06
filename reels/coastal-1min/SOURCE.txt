@@ -1,0 +1,6 @@
+Concept: user's brief, Reel 1 "1 minute to the sea" (6 Nov 2026). One unbroken 3D POV walk: gate opens from inside, turn into St. Francis Assisi Street, clock runs 0:00 to 1:00, shutters and bougainvillea react as we pass, Rock Beach and two wave crashes, end card.
+Distance: "1-minute walk" is from thecoastalcalm.com and the user's brief. Older captions and voice.md say two minutes.
+Address: No.15, St. Francis Assisi Street (thecoastalcalm.com). The street, gate and beach are stylised 3D, not a survey of the real places.
+Hook: "Your beach stay in Pondy shouldn't cost you an auto fare." hookscore 65.8. No "Stop", no "Losing".
+Voice: Kokoro am_michael, speed 1.1, atempo 1.04. Music: MusicGen (musicgen_mps.py). Sea: synthesized pink noise.
+Render: hyperframes render --quality delivery --gpu --browser-gpu, then h264_videotoolbox 9M.

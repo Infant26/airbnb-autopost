@@ -1,0 +1,413 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>One minute to Rock Beach</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #6fb0dd; font-family: Inter; }
+      #sky { position: absolute; inset: 0; background: linear-gradient(180deg, #3f93d0 0%, #8cc4e6 42%, #f7ead0 62%, #f7ead0 100%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .scrim { position: absolute; left: 0; right: 0; pointer-events: none; }
+      #scrimT { top: 0; height: 800px; opacity: 1; background: linear-gradient(180deg, rgba(8, 14, 13, 0.8) 0%, rgba(8, 14, 13, 0.5) 55%, rgba(8, 14, 13, 0) 100%); }
+      #scrimE { inset: 0; opacity: 0; background: linear-gradient(180deg, rgba(8, 20, 24, 0.78) 0%, rgba(8, 20, 24, 0.5) 50%, rgba(8, 20, 24, 0.82) 100%); }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .kick { position: absolute; left: 0; right: 0; text-align: center; font-weight: 700; font-size: 30px; letter-spacing: 7px; text-transform: uppercase; color: #f0c56a; }
+      .big { position: absolute; left: 50px; right: 50px; text-align: center; font-weight: 800; letter-spacing: -3px; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; letter-spacing: 0; }
+      .it { font-style: italic; }
+      .cream { color: #f6f2ea; } .gold { color: #f0c56a; }
+      .x3d { text-shadow: 0 2px 0 #c9b98f, 0 4px 0 #ad9b6e, 0 6px 0 #8f7d50, 0 8px 0 #6f5f34, 0 10px 0 #4f421f, 0 26px 40px rgba(0, 0, 0, 0.55); }
+      .x3c { text-shadow: 0 2px 0 #cfc6b4, 0 4px 0 #b0a690, 0 6px 0 #8e846e, 0 8px 0 #6b624f, 0 24px 40px rgba(0, 0, 0, 0.6); }
+      /* the clock */
+      #tm { position: absolute; left: 56px; top: 250px; width: 356px; opacity: 0; border-radius: 34px; background: rgba(10, 18, 17, 0.86); border: 3px solid #f0c56a;
+        box-shadow: 0 26px 60px -16px rgba(0, 0, 0, 0.75); padding: 16px 0 18px; text-align: center; }
+      #tmD { font-weight: 800; font-size: 118px; line-height: 1; letter-spacing: -3px; color: #f6f2ea; font-variant-numeric: tabular-nums; }
+      #tmL, #tmL2 { font-weight: 800; font-size: 28px; letter-spacing: 2px; color: #f0c56a; margin-top: 6px; white-space: nowrap; }
+      #tmB { margin: 12px auto 0; width: 300px; height: 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.18); overflow: hidden; }
+      #tmF { width: 100%; height: 100%; background: #f0c56a; transform-origin: left center; transform: scaleX(0); }
+      .pill { display: inline-flex; align-items: center; gap: 16px; font-weight: 800; font-size: 46px; padding: 20px 38px 16px; border-radius: 999px; white-space: nowrap; }
+      #sign { position: absolute; left: 56px; top: 1270px; opacity: 0; }
+      #flash { position: absolute; inset: 0; background: #fffdf6; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.045; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="16"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="sky"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div id="scrimT" class="scrim"></div>
+
+      <!-- A. Hook, on screen from frame 1, over the closed gate -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div id="a-1" class="big cream x3c" style="top: 262px; font-size: 112px; left: 0; right: 0; white-space: nowrap">YOUR BEACH STAY</div>
+        <div id="a-2" class="big serif it gold" style="top: 386px; font-size: 84px; text-shadow: 0 6px 26px rgba(0,0,0,0.75)">shouldn't cost an auto fare.</div>
+      </div>
+      <!-- B. Step out -->
+      <div id="gB" class="grp">
+        <div id="b-1" class="big gold x3d" style="top: 480px; font-size: 118px; left: 0; right: 0; white-space: nowrap">STEP OUT</div>
+        <div id="b-2" class="big serif it cream" style="top: 604px; font-size: 88px; text-shadow: 0 6px 26px rgba(0,0,0,0.8)">of our gate…</div>
+      </div>
+      <!-- The clock runs for the whole walk -->
+      <div id="tm">
+        <div id="tmD">0:00</div>
+        <div style="position: relative"><div id="tmL">FROM OUR GATE</div><div id="tmL2" style="position: absolute; left: 0; right: 0; top: 0; opacity: 0">ONE MINUTE</div></div>
+        <div id="tmB"><div id="tmF"></div></div>
+      </div>
+      <div id="sign"><span class="pill" style="background: #1f4f8f; color: #fff; font-size: 42px; border: 4px solid #fff">St. Francis Assisi Street</span></div>
+
+      <!-- C. Arrival -->
+      <div id="gC" class="grp">
+        <div id="c-1" class="big serif it cream" style="top: 256px; font-size: 80px">…and you're at</div>
+        <div id="c-2" class="big gold x3d" style="top: 346px; font-size: 138px; left: 0; right: 0; white-space: nowrap; opacity: 0">ROCK BEACH</div>
+      </div>
+
+      <div id="scrimE" class="scrim"></div>
+      <!-- D. End card -->
+      <div id="gD" class="grp">
+        <div id="d-0" class="kick" style="top: 400px">White Town, Pondicherry</div>
+        <div id="d-1" class="big serif cream" style="top: 462px; font-size: 128px; letter-spacing: -2px; left: 0; right: 0; white-space: nowrap">The Coastal Calm</div>
+        <div id="d-2" class="big gold x3d" style="top: 628px; font-size: 76px; letter-spacing: -2px; left: 0; right: 0; white-space: nowrap">1 MINUTE TO ROCK BEACH</div>
+        <div id="d-3" style="position: absolute; left: 0; right: 0; top: 860px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #f0c56a; color: #1d1610; font-size: 56px; padding: 26px 48px 20px">Book direct · link in bio</span></div>
+        <div id="d-4" style="position: absolute; left: 0; right: 0; top: 1010px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #f6f2ea; color: #1d1610">thecoastalcalm.com</span></div>
+        <div id="d-5" style="position: absolute; left: 0; right: 0; top: 1130px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #25d366; color: #0b2a17">+91 88704 67560</span></div>
+      </div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.1" data-duration="2.85" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="3.0" data-duration="2.13" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="5.35" data-duration="3.02" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="10.1" data-duration="1.12" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="11.35" data-duration="0.62" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="12.55" data-duration="3.05" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="15.94" src="assets/bgm/track.wav" data-volume="0.24" data-fade-in="0.1" data-fade-out="1.2" data-track-index="7"></audio>
+      <audio id="sea" class="clip" data-start="9.05" data-duration="6" src="assets/sfx/sea.wav" data-volume="0.6" data-track-index="8"></audio>
+      <audio id="x1" class="clip" data-start="2.0" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.9" data-track-index="9"></audio>
+      <audio id="x2" class="clip" data-start="2.1" data-duration="1.9" src="assets/sfx/whoosh-cinematic.mp3" data-volume="0.5" data-track-index="10"></audio>
+      <audio id="x3" class="clip" data-start="8.6" data-duration="1.6" src="assets/sfx/riser.mp3" data-volume="0.35" data-track-index="11"></audio>
+      <audio id="x4" class="clip" data-start="10.0" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.6" data-track-index="12"></audio>
+      <audio id="x5" class="clip" data-start="11.35" data-duration="1.8" src="assets/sfx/chime.mp3" data-volume="0.35" data-track-index="13"></audio>
+      <audio id="x6" class="clip" data-start="12.5" data-duration="0.57" src="assets/sfx/whoosh-short.mp3" data-volume="0.45" data-track-index="14"></audio>
+      <audio id="x7" class="clip" data-start="13.3" data-duration="0.7" src="assets/sfx/pop.mp3" data-volume="0.5" data-track-index="15"></audio>
+      <audio id="t0" class="clip" data-start="3.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="16"></audio>
+      <audio id="t1" class="clip" data-start="4.0" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="17"></audio>
+      <audio id="t2" class="clip" data-start="4.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="18"></audio>
+      <audio id="t3" class="clip" data-start="5.0" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="19"></audio>
+      <audio id="t4" class="clip" data-start="5.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="20"></audio>
+      <audio id="t5" class="clip" data-start="6.0" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="21"></audio>
+      <audio id="t6" class="clip" data-start="6.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="22"></audio>
+      <audio id="t7" class="clip" data-start="7.0" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="23"></audio>
+      <audio id="t8" class="clip" data-start="7.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="24"></audio>
+      <audio id="t9" class="clip" data-start="8.0" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="25"></audio>
+      <audio id="t10" class="clip" data-start="8.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="26"></audio>
+      <audio id="t11" class="clip" data-start="9.0" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="27"></audio>
+      <audio id="t12" class="clip" data-start="9.5" data-duration="0.3" src="assets/sfx/click-soft.mp3" data-volume="0.5" data-track-index="28"></audio>
+    </div>
+    <script>
+      let seed = 23; const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.08;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(new THREE.Color('#f7ead0'), 70, 300);
+      const camera = new THREE.PerspectiveCamera(50, 1080 / 1920, 0.1, 700);
+      const hemi = new THREE.HemisphereLight('#fff6e6', '#8a7a62', 1.3);
+      const sun = new THREE.DirectionalLight('#fff1dc', 2.1);
+      sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+      Object.assign(sun.shadow.camera, { left: -30, right: 30, top: 30, bottom: -30, far: 130 }); sun.shadow.bias = -0.0005;
+      scene.add(hemi, sun, sun.target);
+      const mat = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.85 }, o));
+      const glow = (color) => new THREE.MeshBasicMaterial({ color, toneMapped: false });
+      function box(p, w, h, d, m, x, y, z) { const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; }
+      function cyl(p, rt, rb, h, m, x, y, z, seg = 16) { const mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), m); mesh.position.set(x, y, z); mesh.castShadow = mesh.receiveShadow = true; p.add(mesh); return mesh; }
+      const clamp01 = (p) => Math.min(1, Math.max(0, p));
+      const back = (p) => { p = clamp01(p); const c = 1.9; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+      const smooth = (p) => { p = clamp01(p); return p * p * (3 - 2 * p); };
+
+      // Walk timing: where along the street the camera is at time t, so things can react just ahead of it
+      const WALK0 = 3.0, WALK1 = 10.0, Z0 = -3, Z1 = -58.2;
+      const tAtZ = (z) => WALK0 + (Z0 - z) / (Z0 - Z1) * (WALK1 - WALK0);
+
+      function textPlane(txt, w, h, color, px, shadow) {
+        const c = document.createElement('canvas'); c.width = 2048; c.height = Math.round(2048 * h / w); const g = c.getContext('2d');
+        g.font = '900 ' + px + 'px Helvetica, Arial, sans-serif'; const fit = (c.width - 60) / g.measureText(txt).width;
+        if (fit < 1) { px = Math.floor(px * fit); g.font = '900 ' + px + 'px Helvetica, Arial, sans-serif'; }
+        g.textAlign = 'center'; g.textBaseline = 'middle';
+        if (shadow) { g.fillStyle = shadow; g.fillText(txt, c.width / 2 + 10, c.height / 2 + 16); }
+        g.fillStyle = color; g.fillText(txt, c.width / 2, c.height / 2);
+        const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+        return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, depthWrite: false, fog: false }));
+      }
+
+      // ---------- Street, promenade ----------
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 121.6), mat('#cdbf9f')); ground.rotation.x = -Math.PI / 2; ground.position.set(0, 0, -0.8); ground.receiveShadow = true; scene.add(ground);
+      const lane = new THREE.Mesh(new THREE.PlaneGeometry(7, 70), mat('#a99a7d')); lane.rotation.x = -Math.PI / 2; lane.position.set(0, 0.01, -20); lane.receiveShadow = true; scene.add(lane);
+      for (let k = 0; k < 34; k++) box(scene, 6.6, 0.012, 0.09, mat('#94866b'), 0, 0.016, 2 - k * 1.65);
+      const curbM = mat('#e7ddc8');
+      for (const sx of [-3.35, 3.35]) box(scene, 0.3, 0.12, 62, curbM, sx, 0.06, -25);
+      const prom = new THREE.Mesh(new THREE.PlaneGeometry(400, 7), mat('#e6dccb')); prom.rotation.x = -Math.PI / 2; prom.position.set(0, 0.02, -58); prom.receiveShadow = true; scene.add(prom);
+      box(scene, 400, 0.45, 0.4, mat('#f7f2e8'), 0, 0.22, -61.6);
+
+      // ---------- Heritage houses ----------
+      const FH = 3.2, W = 5.8, D = 6;
+      const WALLS = ['#e9b949', '#f4efe3', '#e3a63a', '#efe6cf', '#e8c25c', '#d98f5c', '#f2e9d2', '#e6b448'];
+      const SHUTS = ['#2f6f63', '#3d5f7a', '#6b3f2a', '#2f5b55', '#5b6e3a'];
+      const trimM = mat('#fbf7ee'), doorM = mat('#5a321d');
+      const dominos = [];
+      function buildHouse(o) {
+        const g = new THREE.Group(), H = o.floors * FH, wm = mat(o.wall);
+        for (let f = 0; f < o.floors; f++) box(g, W, FH, D, wm, 0, f * FH + FH / 2, 0);
+        const shutM = mat(o.shut, { roughness: 0.6 }), glassM = mat('#2a2f33', { roughness: 0.3 });
+        for (let f = 1; f <= o.floors; f++) box(g, W + 0.14, 0.2, 0.3, trimM, 0, f * FH - 0.06, D / 2 + 0.08);
+        box(g, W + 0.14, 0.16, 0.34, trimM, 0, H + 0.92, D / 2 - 0.1);
+        for (let k = 0; k < 9; k++) box(g, 0.14, 0.72, 0.14, trimM, -W / 2 + 0.35 + k * (W - 0.7) / 8, H + 0.48, D / 2 - 0.1);
+        for (let f = 0; f < o.floors; f++) {
+          const xs = f === 0 ? [-1.9, 1.9] : [-1.9, 0, 1.9], h = f === 0 ? 1.5 : 1.85, wdt = 0.9, y = f * FH + (f === 0 ? 1.55 : 1.7);
+          xs.forEach((x) => {
+            box(g, wdt + 0.26, h + 0.26, 0.08, trimM, x, y, D / 2 + 0.03);
+            box(g, wdt + 0.46, 0.14, 0.22, trimM, x, y + h / 2 + 0.2, D / 2 + 0.1);
+            box(g, wdt, h, 0.06, glassM, x, y, D / 2 + 0.06);
+            [-1, 1].forEach((sgn) => {
+              const piv = new THREE.Group(); piv.position.set(x + sgn * wdt / 2, y, D / 2 + 0.1);
+              box(piv, wdt / 2, h, 0.05, shutM, -sgn * wdt / 4, 0, 0);
+              for (let s = 0; s < 6; s++) box(piv, wdt / 2 - 0.06, 0.03, 0.07, shutM, -sgn * wdt / 4, -h / 2 + 0.2 + s * (h - 0.4) / 5, 0.02);
+              g.add(piv); dominos.push([piv, sgn, o.t + f * 0.08 + rnd() * 0.12]);
+            });
+          });
+        }
+        box(g, 1.5, 2.6, 0.08, trimM, 0, 1.3, D / 2 + 0.03); box(g, 1.2, 2.35, 0.08, doorM, 0, 1.18, D / 2 + 0.07);
+        box(g, 1.7, 0.16, 0.3, trimM, 0, 2.7, D / 2 + 0.1);
+        return { g, H };
+      }
+      const blooms = [];
+      const pinkMs = [mat('#d63384', { flatShading: true }), mat('#e8559c', { flatShading: true }), mat('#c2185b', { flatShading: true })], leafM = mat('#3f7a3c', { flatShading: true });
+      function bloom(p, x, y, z, n, tg, spread = 1) {
+        const g = new THREE.Group(); g.position.set(x, y, z);
+        for (let k = 0; k < n; k++) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16 + rnd() * 0.2, 0), rnd() < 0.25 ? leafM : pinkMs[k % 3]);
+          const a = rnd() * 6.28; m.position.set(Math.cos(a) * rnd() * 0.9 * spread, -rnd() * 1.6 * spread + 0.3, Math.sin(a) * 0.25 + 0.15); m.castShadow = true; g.add(m); }
+        g.scale.setScalar(0.0001); p.add(g); blooms.push([g, tg]); return g;
+      }
+      const SLOT = (k) => -3 - k * 6.1;
+      for (let side = -1; side <= 1; side += 2) {
+        for (let k = 0; k < 9; k++) {
+          if (side === 1 && k === 0) continue;   // our courtyard sits here
+          const tg = tAtZ(SLOT(k)) - 1.15;
+          const h = buildHouse({ floors: rnd() < 0.45 ? 3 : 2, wall: WALLS[(k * 3 + (side > 0 ? 1 : 0)) % WALLS.length], shut: SHUTS[(k + (side > 0 ? 2 : 0)) % SHUTS.length], t: tg });
+          h.g.position.set(side * (3.5 + D / 2), 0, SLOT(k)); h.g.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2; scene.add(h.g);
+          if ((k + (side > 0 ? 1 : 0)) % 2 === 0) bloom(h.g, -W / 2 + 0.4, h.H + 0.6, D / 2 + 0.2, 28, tg - 0.1);
+          if (k % 3 === 1) bloom(h.g, W / 2 - 0.4, FH + 0.4, D / 2 + 0.15, 22, tg);
+        }
+      }
+      // back rows so no sky shows through the gaps
+      const blockM = WALLS.map((c) => mat(c));
+      for (const bx of [-13, 13]) for (let z = 3; z > -54; z -= 6.1) { const h = (rnd() < 0.5 ? 3 : 4) * FH; box(scene, 7, h, 6.2, blockM[Math.floor(rnd() * blockM.length)], bx, h / 2, z - 3); }
+      // street lamps and pots
+      for (let k = 0; k < 6; k++) { const side = k % 2 ? 1 : -1, z = -8 - k * 8.6;
+        cyl(scene, 0.06, 0.09, 4.2, mat('#1d2523'), side * 3.2, 2.1, z); box(scene, 0.7, 0.06, 0.06, mat('#1d2523'), side * 2.9, 4.15, z);
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 10), glow('#fff3d0')); b.position.set(side * 2.6, 3.98, z); scene.add(b); }
+      for (let k = 0; k < 9; k++) { const side = k % 2 ? -1 : 1, z = -10 - k * 5.7; cyl(scene, 0.26, 0.18, 0.5, mat('#b6724b'), side * 3.2, 0.25, z); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.46, 0), leafM); l.position.set(side * 3.2, 0.82, z); l.castShadow = true; scene.add(l); }
+
+      // ---------- Our courtyard and gate (the street's right side, facing -x) ----------
+      const YARD = new THREE.Group(); scene.add(YARD);
+      const yardWall = mat('#f2e6c8'), GZ = SLOT(0);
+      const yf = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), mat('#b5764f')); yf.rotation.x = -Math.PI / 2; yf.position.set(8.5, 0.03, GZ); yf.receiveShadow = true; YARD.add(yf);
+      for (let k = 0; k < 9; k++) box(YARD, 0.03, 0.01, 7, mat('#9c6240'), 4.2 + k, 0.04, GZ);
+      for (let k = 0; k < 7; k++) box(YARD, 10, 0.01, 0.03, mat('#9c6240'), 8.5, 0.04, GZ - 3 + k);
+      box(YARD, 0.4, 4.4, 2.2, yardWall, 3.5, 2.2, GZ + 2.7); box(YARD, 0.4, 4.4, 2.2, yardWall, 3.5, 2.2, GZ - 2.7);
+      box(YARD, 0.5, 1.2, 3.4, yardWall, 3.5, 3.8, GZ);
+      box(YARD, 0.7, 0.2, 7.6, trimM, 3.5, 4.5, GZ);
+      box(YARD, 10, 4.4, 0.4, yardWall, 8.5, 2.2, GZ + 3.6); box(YARD, 10, 4.4, 0.4, yardWall, 8.5, 2.2, GZ - 3.6);
+      for (const dz of [2.4, -2.4]) { cyl(YARD, 0.34, 0.24, 0.7, mat('#b6724b'), 4.6, 0.35, GZ + dz); const l = new THREE.Mesh(new THREE.IcosahedronGeometry(0.62, 0), leafM); l.position.set(4.6, 1.15, GZ + dz); l.castShadow = true; YARD.add(l); }
+      const gateM = mat('#2f6f63', { roughness: 0.5 }), railM = mat('#26584f', { roughness: 0.5 }), brass = mat('#c79a3f', { metalness: 0.8, roughness: 0.3 });
+      const gates = [];
+      [1, -1].forEach((sgn) => {
+        const piv = new THREE.Group(); piv.position.set(3.5, 0, GZ + sgn * 1.65); YARD.add(piv);
+        box(piv, 0.12, 3.15, 1.62, gateM, 0, 1.58, -sgn * 0.81);
+        for (const y of [0.45, 1.58, 2.7]) box(piv, 0.16, 0.14, 1.62, railM, 0.02, y, -sgn * 0.81);
+        for (const y of [0.45, 1.58, 2.7]) for (let k = 0; k < 5; k++) { const s = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 8), brass); s.position.set(0.11, y, -sgn * (0.2 + k * 0.32)); piv.add(s); }
+        const hd = new THREE.Mesh(new THREE.TorusGeometry(0.1, 0.022, 8, 18), brass); hd.rotation.y = Math.PI / 2; hd.position.set(0.12, 1.3, -sgn * 1.38); piv.add(hd);
+        gates.push([piv, sgn]);
+      });
+      bloom(YARD, 3.2, 4.8, GZ + 2.2, 44, -1, 1.4); bloom(YARD, 3.2, 4.8, GZ - 2.2, 44, -1, 1.4);
+      // light spilling through once the gate opens
+      const beamM = new THREE.MeshBasicMaterial({ color: '#fff0c4', transparent: true, opacity: 0, depthWrite: false, toneMapped: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+      const beam = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 3.2), beamM); beam.rotation.y = Math.PI / 2; beam.position.set(3.45, 1.6, GZ); YARD.add(beam);
+
+      // ---------- The auto we're not taking ----------
+      const auto = new THREE.Group(); auto.position.set(2.05, 0, -33); scene.add(auto);
+      const autoY = mat('#f2c014', { roughness: 0.4 }), autoK = mat('#1b1f1e', { roughness: 0.5 });
+      box(auto, 1.15, 0.75, 2.1, autoY, 0, 0.75, 0); box(auto, 1.2, 0.1, 2.3, autoK, 0, 1.98, 0);
+      box(auto, 1.0, 0.08, 0.08, autoK, 0, 1.45, 1.0);
+      for (const [x, z] of [[-0.55, 1.05], [0.55, 1.05], [-0.55, -0.95], [0.55, -0.95]]) box(auto, 0.06, 0.85, 0.06, autoK, x, 1.55, z);
+      box(auto, 1.1, 0.72, 0.1, autoK, 0, 1.54, -1.05);
+      const hl = new THREE.Mesh(new THREE.SphereGeometry(0.1, 10, 8), glow('#fff6cf')); hl.position.set(0, 0.95, -1.08); auto.add(hl);
+      for (const [x, z] of [[0, -0.95], [-0.55, 0.75], [0.55, 0.75]]) { const w = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.16, 18), autoK); w.rotation.z = Math.PI / 2; w.position.set(x, 0.26, z); w.castShadow = true; auto.add(w); }
+
+      // ---------- Type the walk flies through ----------
+      const flyers = [
+        { p: textPlane('NO AUTO', 4.3, 1.2, '#fffaf2', 330, 'rgba(50,30,5,0.6)'), z: -38.5, y: 2.3 },
+        { p: textPlane('JUST YOUR FEET', 4.4, 0.86, '#ffd27a', 250, 'rgba(50,30,5,0.6)'), z: -48.7, y: 2.3 },
+      ];
+      flyers.forEach((f) => { f.p.position.set(0, f.y, f.z); f.p.scale.x = 0.0001; scene.add(f.p); });
+      // golden footprints appear under the walk
+      const steps = []; const stepM = glow('#f0c56a');
+      for (let k = 0; k < 44; k++) { const s = new THREE.Mesh(new THREE.CircleGeometry(0.095, 14), stepM); s.scale.set(0.8, 1.5, 1); s.rotation.x = -Math.PI / 2;
+        s.position.set(k % 2 ? 0.34 : -0.34, 0.04, -5 - k * 1.25); s.visible = false; scene.add(s); steps.push(s); }
+
+      // ---------- The sea ----------
+      const SHORE = -64;
+      const seaFar = new THREE.Mesh(new THREE.PlaneGeometry(1400, 700), mat('#2f85ad', { roughness: 0.2, metalness: 0.2 })); seaFar.rotation.x = -Math.PI / 2; seaFar.position.set(0, -1.1, -200 - 350); scene.add(seaFar);
+      const seaGeo = new THREE.PlaneGeometry(240, 140, 170, 130); seaGeo.rotateX(-Math.PI / 2); seaGeo.translate(0, -0.9, SHORE - 70);
+      const seaBase = Float32Array.from(seaGeo.attributes.position.array);
+      seaGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(seaBase.length), 3));
+      const seaMesh = new THREE.Mesh(seaGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.28, metalness: 0.08 })); seaMesh.receiveShadow = false; scene.add(seaMesh);
+      const cDeep = new THREE.Color('#2279a6'), cNear = new THREE.Color('#39b0b4'), cFoam = new THREE.Color('#ffffff'), cTmp = new THREE.Color();
+      const CRASH = [10.0, 11.5];
+      function seaAt(x, d, t) {
+        const s = Math.sin(d * 0.36 + t * 2.3 + Math.sin(x * 0.045) * 1.1), crest = Math.pow(0.5 + 0.5 * s, 4);
+        let h = crest * (0.28 + 0.85 * Math.exp(-d / 26)) + Math.sin(x * 0.72 + t * 2.1) * Math.sin(d * 0.6 - t * 1.4) * 0.07;
+        let foam = crest * Math.exp(-d / 34) * 1.3;
+        for (let c = 0; c < CRASH.length; c++) {
+          const tau = t - (CRASH[c] - 1.2);   // the big wave rolls in over 1.2 s, then collapses
+          if (tau < 0 || tau > 2.2) continue;
+          const front = 4 + 28 * Math.max(0, 1 - tau / 1.2) + Math.sin(x * 0.11 + c) * 1.2, band = Math.exp(-Math.pow((d - front) / 2.4, 2));
+          const rise = tau < 1.2 ? smooth(tau / 1.2) : Math.max(0, 1 - (tau - 1.2) / 0.5);
+          h += band * rise * 2.5; foam += band * rise * (0.62 + 0.38 * Math.sin(x * 0.9 + d * 0.8));
+          if (tau > 1.1) foam += Math.exp(-d / 3.5) * clamp01(1 - (tau - 1.1) / 1.1) * 1.2;
+        }
+        foam += Math.exp(-d / 1.4) * (0.55 + 0.45 * Math.sin(x * 1.3 + t * 3.2));
+        return [h, clamp01(foam)];
+      }
+      function updateSea(t) {
+        const pos = seaGeo.attributes.position.array, col = seaGeo.attributes.color.array;
+        for (let i = 0; i < pos.length; i += 3) {
+          const x = seaBase[i], z = seaBase[i + 2], d = SHORE - z, r = seaAt(x, d, t);
+          pos[i + 1] = -0.9 + r[0];
+          cTmp.copy(cDeep).lerp(cNear, Math.exp(-d / 22)).lerp(cFoam, r[1]);
+          col[i] = cTmp.r; col[i + 1] = cTmp.g; col[i + 2] = cTmp.b;
+        }
+        seaGeo.attributes.position.needsUpdate = true; seaGeo.attributes.color.needsUpdate = true; seaGeo.computeVertexNormals();
+      }
+      // the rocks Rock Beach is named for
+      const rockMs = [mat('#6f6a63', { flatShading: true }), mat('#5a5650', { flatShading: true }), mat('#7f7971', { flatShading: true })];
+      for (let k = 0; k < 130; k++) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5 + rnd() * 0.75, 0), rockMs[k % 3]); r.position.set(-42 + rnd() * 84, -0.75 + rnd() * 0.25, -62.3 - rnd() * 3.8); r.rotation.set(rnd() * 3, rnd() * 3, 0); r.scale.y = 0.75; r.castShadow = true; scene.add(r); }
+      const bed = new THREE.Mesh(new THREE.PlaneGeometry(400, 14), mat('#4a4640')); bed.rotation.x = -Math.PI / 2; bed.position.set(0, -1.0, -68.5); scene.add(bed);
+      for (let k = 0; k < 46; k++) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(1.0 + rnd() * 0.75, 0), rockMs[k % 3]); r.position.set(-15 + rnd() * 30, -0.95 + rnd() * 0.3, -62.4 - rnd() * 2.6); r.rotation.set(rnd() * 3, rnd() * 3, 0); r.scale.y = 0.72; r.castShadow = true; scene.add(r); }
+      // spray: each crash throws droplets up and at the lens
+      const dropC = document.createElement('canvas'); dropC.width = dropC.height = 64; { const g = dropC.getContext('2d'), rg = g.createRadialGradient(32, 32, 2, 32, 32, 32); rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(0.5, 'rgba(255,255,255,0.65)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(0, 0, 64, 64); }
+      const dropT = new THREE.CanvasTexture(dropC);
+      const SPN = 9000, spPos = new Float32Array(SPN * 3), sp = [];
+      for (let k = 0; k < SPN; k++) { const jet = [-13, -8.5, -4, -1, 2.5, 6, 10, 14.5][k % 8], u = rnd(); sp.push({ c: k % 16 < 8 ? 0 : 1, x: jet + (rnd() - 0.5) * 3.2, z: -64.2 - rnd() * 1.4, vx: (rnd() - 0.5) * 3.4, vy: 3 + u * u * 15 + rnd() * 2, vz: rnd() * 1.1, d: rnd() * 0.3, life: 0.8 + rnd() * 1.3 }); }
+      const spGeo = new THREE.BufferGeometry(); spGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
+      const spMesh = new THREE.Points(spGeo, new THREE.PointsMaterial({ map: dropT, color: '#ffffff', size: 0.15, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false, fog: false })); spMesh.frustumCulled = false; scene.add(spMesh);
+      function updateSpray(t) {
+        for (let k = 0; k < SPN; k++) { const s = sp[k], tau = t - CRASH[s.c] - s.d; const i = k * 3;
+          if (tau < 0 || tau > s.life) { spPos[i + 1] = -80; spPos[i] = 0; spPos[i + 2] = 0; continue; }
+          spPos[i] = s.x + s.vx * tau; spPos[i + 1] = 0.3 + s.vy * tau - 6.5 * tau * tau; spPos[i + 2] = s.z + s.vz * tau; }
+        spGeo.attributes.position.needsUpdate = true;
+      }
+
+      // ---------- State ----------
+      const S = { time: 0, px: 11.8, py: 1.62, pz: GZ, yaw: Math.PI / 2, pitch: 0.06, fov: 50, shake: 0, bob: 0, gate: 0, clock: 0, foot: 0 };
+      const tv = new THREE.Vector3();
+      const tmD = document.getElementById('tmD'), tmF = document.getElementById('tmF');
+      let lastClock = -1;
+      function draw() {
+        const t = S.time;
+        gates.forEach(([piv, sgn]) => { piv.rotation.y = -sgn * 1.95 * back(S.gate); });
+        beamM.opacity = clamp01(S.gate * 3) * (1 - clamp01((t - 2.4) / 0.5)) * 0.22;
+        dominos.forEach(([piv, sgn, tg]) => { piv.rotation.y = sgn * 1.95 * back((t - tg) / 0.42); });
+        blooms.forEach(([g, tg]) => g.scale.setScalar(Math.max(0.0001, Math.min(1.1, tg < 0 ? 1 : back((t - tg) / 0.45)))));
+        steps.forEach((s) => { s.visible = s.position.z >= S.pz - 9 && s.position.z < S.pz - 2.6 && t > 3.0 && t < 9.9; });
+        flyers.forEach((f) => { const tz = tAtZ(f.z); f.p.scale.x = Math.max(0.0001, back((t - (tz - 1.6)) / 0.35)); f.p.material.opacity = clamp01((S.pz - f.z - 3.5) / 1.5); f.p.visible = S.pz > f.z + 3.5; });
+        updateSea(t); updateSpray(t);
+        // clock
+        const secs = Math.floor(S.clock + 0.0001);
+        if (secs !== lastClock) { tmD.textContent = secs >= 60 ? '1:00' : '0:' + String(secs).padStart(2, '0'); lastClock = secs; }
+        tmF.style.transform = 'scaleX(' + (S.clock / 60).toFixed(4) + ')';
+        // camera
+        const stride = t * 13.0, bobY = S.bob * Math.abs(Math.sin(stride)) * 0.11, sway = S.bob * Math.sin(stride) * 0.05;
+        const shk = S.shake;
+        camera.position.set(S.px + sway + Math.sin(t * 61) * 0.09 * shk, S.py + bobY + Math.sin(t * 47) * 0.09 * shk, S.pz);
+        sun.position.set(-16, 42, S.pz + 20); sun.target.position.set(0, 0, S.pz - 8);
+        camera.fov = S.fov; camera.updateProjectionMatrix();
+        tv.set(camera.position.x - Math.sin(S.yaw), camera.position.y + S.pitch, camera.position.z - Math.cos(S.yaw));
+        camera.lookAt(tv); camera.rotateZ(sway * 0.12 + Math.sin(t * 53) * 0.012 * shk);
+        renderer.render(scene, camera);
+      }
+
+      const st = gsap.timeline({ paused: true });
+      const tl = gsap.timeline({ paused: true });
+      st.to(S, { time: 16, duration: 16, ease: 'none' }, 0);
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const hide = (el, t) => tl.set(el, { opacity: 0 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', immediateRender: false }, t);
+      const pop = (el, t) => tl.fromTo(el, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'back.out(2.4)', immediateRender: false }, t);
+      const flash = (t, a = 0.5, d = 0.4) => { tl.set('#flash', { opacity: a }, t); tl.to('#flash', { opacity: 0, duration: d, ease: 'power2.out' }, t + 0.01); };
+
+      // 0 - 2: closed gate, slow push in
+      st.to(S, { px: 8.2, duration: 2.0, ease: 'sine.inOut' }, 0);
+      tl.fromTo('#a-1', { scale: 1.08 }, { scale: 1, duration: 0.5, ease: 'expo.out', immediateRender: false }, 0);
+      // 2: the gate swings out
+      st.to(S, { gate: 1, duration: 0.85, ease: 'none' }, 2.0);
+      flash(2.15, 0.18, 0.4);
+      tl.to('#a-1', { opacity: 0, y: -30, duration: 0.2 }, 2.3); tl.to('#a-2', { opacity: 0, y: -30, duration: 0.2 }, 2.3);
+      // 2.4 - 3.4: through the gate and turn into the street
+      st.to(S, { px: 0, duration: 1.15, ease: 'power1.inOut' }, 2.25);
+      st.to(S, { yaw: 0, duration: 0.95, ease: 'power2.inOut' }, 2.65);
+      st.to(S, { bob: 1, duration: 0.5 }, 2.4);
+      show('#gB', 2.95); slam('#b-1', 2.95); rise('#b-2', 3.1); tl.to('#gB', { opacity: 0, duration: 0.25 }, 4.6);
+      // 3 - 10: the street, one unbroken walk, clock running 0:00 to 1:00
+      st.to(S, { pz: Z1, duration: WALK1 - WALK0, ease: 'none' }, WALK0);
+      st.to(S, { clock: 60, duration: WALK1 - WALK0, ease: 'none' }, WALK0);
+      st.to(S, { fov: 74, duration: 1.0, ease: 'power2.out' }, 3.0);
+      show('#tm', 3.0); tl.fromTo('#tm', { scale: 0.5, y: -40 }, { scale: 1, y: 0, duration: 0.35, ease: 'back.out(2.2)', immediateRender: false }, 3.0);
+      tl.to('#scrimT', { opacity: 0.4, duration: 0.5 }, 4.6); tl.to('#scrimT', { opacity: 1, duration: 0.3 }, 9.9);
+      rise('#sign', 5.35); tl.to('#sign', { opacity: 0, duration: 0.2 }, 6.5);
+      [4, 5, 6, 7, 8, 9].forEach((s) => tl.fromTo('#tmD', { scale: 1.1 }, { scale: 1, duration: 0.3, ease: 'power2.out', immediateRender: false }, s));
+      // sea opens up: lens widens as the street ends
+      st.to(S, { fov: 84, duration: 1.1, ease: 'power2.in' }, 8.9);
+      // 10: 1:00. The wave hits.
+      st.to(S, { bob: 0, duration: 0.25 }, 9.8);
+      st.to(S, { py: 3.6, pitch: -0.16, duration: 0.5, ease: 'power2.out' }, 9.9);
+      st.to(S, { pz: -58.8, duration: 2.5, ease: 'power2.out' }, 10.0);
+      st.to(S, { fov: 64, duration: 0.35, ease: 'expo.out' }, 10.0);
+      st.fromTo(S, { shake: 1 }, { shake: 0, duration: 0.9, ease: 'power2.out', immediateRender: false }, 10.0);
+      st.fromTo(S, { shake: 0.8 }, { shake: 0, duration: 0.8, ease: 'power2.out', immediateRender: false }, 11.5);
+      flash(10.0, 0.75, 0.5); flash(11.5, 0.5, 0.45);
+      tl.to('#tm', { x: 306, y: 350, scale: 1.45, duration: 0.3, ease: 'back.out(1.6)' }, 10.0);
+      tl.set('#tmL', { opacity: 0 }, 11.35); tl.set('#tmL2', { opacity: 1 }, 11.35); tl.fromTo('#tm', { boxShadow: '0 0 0 0 rgba(240,197,106,0.9)' }, { boxShadow: '0 0 0 34px rgba(240,197,106,0)', duration: 0.6, ease: 'power2.out', immediateRender: false }, 11.35);
+      tl.set('#tmD', { color: '#f0c56a' }, 10.0);
+      tl.fromTo('#tmD', { scale: 1.5 }, { scale: 1, duration: 0.3, ease: 'back.out(2.4)', immediateRender: false }, 10.0);
+      show('#gC', 10.15); rise('#c-1', 10.15); slam('#c-2', 10.45);
+      // 12.4: rise over the water to the end card
+      st.to(S, { py: 7.5, pitch: -0.02, fov: 50, duration: 3.2, ease: 'sine.inOut' }, 12.4);
+      tl.to('#gC', { opacity: 0, duration: 0.25 }, 12.4); tl.to('#tm', { opacity: 0, duration: 0.25 }, 12.4); tl.to('#scrimT', { opacity: 0, duration: 0.3 }, 12.4);
+      tl.to('#scrimE', { opacity: 1, duration: 0.4 }, 12.4);
+      show('#gD', 12.5); rise('#d-0', 12.5); slam('#d-1', 12.6); slam('#d-2', 12.9);
+      tl.set('#d-0', { opacity: 0 }, 0); tl.set('#d-1', { opacity: 0 }, 0); tl.set('#d-2', { opacity: 0 }, 0);
+      pop('#d-3', 13.3); pop('#d-4', 13.6); pop('#d-5', 13.85);
+      tl.fromTo('#d-3', { scale: 1 }, { scale: 1.05, duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut', immediateRender: false }, 14.4);
+      tl.set('#grain', { opacity: 0.045 }, 15.99);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>
