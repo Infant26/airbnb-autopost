@@ -1,0 +1,303 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Map pins</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #cfc8bd; font-family: Inter; }
+      #bg { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 60% at 50% 42%, #efe9df 0%, #d6cec2 55%, #a89f92 100%); }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .big { position: absolute; left: 50px; right: 50px; text-align: center; line-height: 1; }
+      .serif { font-family: 'EB Garamond'; font-weight: 500; }
+      .it { font-style: italic; }
+      .ink { color: #1a2327; text-shadow: 0 0 26px rgba(255, 250, 242, 0.95), 0 0 8px rgba(255, 250, 242, 0.9); }
+      .terra { color: #b9472a; text-shadow: 0 0 26px rgba(255, 250, 242, 0.95), 0 0 8px rgba(255, 250, 242, 0.9); }
+      .white { color: #fffaf2; text-shadow: 0 3px 0 rgba(0,0,0,0.25), 0 16px 40px rgba(0, 0, 0, 0.55); }
+      .sans { font-weight: 900; letter-spacing: -3px; }
+      .lab { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+      .chip { position: absolute; left: 0; bottom: 0; transform-origin: 50% 100%; opacity: 0; white-space: nowrap;
+              display: flex; align-items: center; gap: 18px; padding: 16px 28px 16px 18px; border-radius: 22px;
+              background: rgba(255, 252, 246, 0.96); box-shadow: 0 22px 44px -14px rgba(40, 30, 20, 0.55), 0 0 0 2px rgba(185, 71, 42, 0.25); }
+      .ico { width: 74px; height: 74px; border-radius: 16px; background: #b9472a; display: flex; align-items: center; justify-content: center; }
+      .ico svg { width: 50px; height: 50px; }
+      .t1 { font-weight: 800; font-size: 40px; color: #1a2327; letter-spacing: -0.5px; }
+      .t2 { font-weight: 700; font-size: 30px; color: #b9472a; margin-top: 4px; }
+      .stem { position: absolute; left: -2px; top: 0; width: 4px; height: 36px; background: rgba(26, 35, 39, 0.55); opacity: 0; transform-origin: 50% 0%; }
+      #ph { position: absolute; inset: 0; overflow: hidden; opacity: 0; }
+      #ph img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; object-position: 58% 50%; }
+      #ph .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,18,32,0.72) 0%, rgba(8,18,32,0.45) 22%, rgba(0,0,0,0) 38%, rgba(0,0,0,0) 62%, rgba(15,10,5,0.55) 100%); }
+      .pill { display: inline-flex; align-items: center; gap: 16px; font-weight: 800; font-size: 46px; padding: 20px 38px 16px; border-radius: 999px; white-space: nowrap; }
+      #flash { position: absolute; inset: 0; background: #fffaf0; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+      #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 80% 62% at 50% 46%, rgba(0,0,0,0) 58%, rgba(40,28,15,0.38) 100%); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="22.6"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="bg"></div>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div id="vig"></div>
+
+      <!-- pin labels, positioned from the 3D pins every frame -->
+      <div id="L0" class="lab"><div class="stem"></div><div class="chip"><div class="ico"><svg viewBox="0 0 50 50" fill="none" stroke="#fffaf2" stroke-width="4" stroke-linecap="round"><path d="M5 20c5-6 10-6 15 0s10 6 15 0 8-5 10-3"/><path d="M5 31c5-6 10-6 15 0s10 6 15 0 8-5 10-3"/><path d="M5 42c5-6 10-6 15 0s10 6 15 0 8-5 10-3"/></svg></div><div><div class="t1">Rock Beach</div><div class="t2">1 min walk</div></div></div></div>
+      <div id="L1" class="lab"><div class="stem"></div><div class="chip"><div class="ico"><svg viewBox="0 0 50 50" fill="none" stroke="#fffaf2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20h26v10a11 11 0 0 1-11 11h-4A11 11 0 0 1 8 30z"/><path d="M34 23h3a6 6 0 0 1 0 12h-4"/><path d="M15 6c-2 3 2 5 0 9M23 6c-2 3 2 5 0 9"/></svg></div><div><div class="t1">White Town cafés</div><div class="t2">5 min</div></div></div></div>
+      <div id="L2" class="lab"><div class="stem"></div><div class="chip"><div class="ico"><svg viewBox="0 0 50 50" fill="none" stroke="#fffaf2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><circle cx="25" cy="22" r="13"/><path d="M14 30c3 4 7 6 11 6s8-2 11-6"/><path d="M6 44h38"/><path d="M25 3v4"/></svg></div><div><div class="t1">Auroville</div><div class="t2">15 min</div></div></div></div>
+      <div id="L3" class="lab"><div class="stem"></div><div class="chip"><div class="ico"><svg viewBox="0 0 50 50" fill="none" stroke="#fffaf2" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="11" y="5" width="28" height="30" rx="7"/><path d="M11 21h28"/><circle cx="18" cy="28" r="1.5" fill="#fffaf2"/><circle cx="32" cy="28" r="1.5" fill="#fffaf2"/><path d="M16 35l-6 9M34 35l6 9M13 41h24"/></svg></div><div><div class="t1">Railway station</div><div class="t2">~10 min</div></div></div></div>
+      <div id="LH" class="lab"><div class="chip" style="padding: 14px 30px; background: #b9472a; box-shadow: 0 22px 44px -14px rgba(60, 20, 10, 0.6)"><div class="t1" style="color: #fffaf2; font-size: 38px">The Coastal Calm</div></div></div>
+
+      <!-- A. Hook -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div id="a-1" class="big serif it ink" style="top: 290px; font-size: 70px; left: 0; right: 0; white-space: nowrap">Book the wrong street in Pondy…</div>
+        <div id="a-2" class="big sans terra" style="top: 392px; font-size: 118px; left: 0; right: 0; opacity: 0">HALF YOUR TRIP</div>
+        <div id="a-3" class="big sans ink" style="top: 512px; font-size: 118px; left: 0; right: 0; opacity: 0">IN AUTOS.</div>
+      </div>
+      <!-- B. Ours -->
+      <div id="gB" class="grp">
+        <div id="b-1" class="big sans ink" style="top: 270px; font-size: 112px">HERE'S OURS.</div>
+        <div id="b-2" class="big serif it terra" style="top: 396px; font-size: 64px; opacity: 0">No.15, White Town, Pondy</div>
+      </div>
+      <!-- D. Middle -->
+      <div id="gD" class="grp">
+        <div id="d-1" class="big serif ink" style="top: 1220px; font-size: 96px; font-weight: 600">The Coastal Calm.</div>
+        <div id="d-2" class="big serif it terra" style="top: 1326px; font-size: 84px; opacity: 0">Right in the middle of it.</div>
+      </div>
+
+      <!-- E. The real house -->
+      <div id="ph"><img src="assets/img/outside.jpg" alt="The Coastal Calm, front of the house in White Town"><div class="shade"></div></div>
+      <div id="gE" class="grp">
+        <div id="e-1" class="big serif white" style="top: 262px; font-size: 104px; font-weight: 600">The Coastal Calm</div>
+        <div id="e-2" class="big serif it white" style="top: 372px; font-size: 62px; opacity: 0">White Town, Pondicherry</div>
+        <div id="e-3" style="position: absolute; left: 0; right: 0; top: 1290px; text-align: center; opacity: 0">
+          <span class="pill" style="background: #b9472a; color: #fffaf2; box-shadow: 0 24px 50px -16px rgba(0,0,0,0.7)">Book direct · link in bio</span></div>
+        <div id="e-4" style="position: absolute; left: 0; right: 0; top: 1408px; text-align: center; opacity: 0">
+          <span class="pill" style="background: rgba(255,250,242,0.94); color: #1a2327; font-size: 40px; box-shadow: 0 24px 50px -16px rgba(0,0,0,0.6)">thecoastalcalm.com · +91 88704 67560</span></div>
+      </div>
+
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.15" data-duration="1.72" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="2.0" data-duration="1.85" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="4.25" data-duration="1.71" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="6.35" data-duration="1.72" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="8.45" data-duration="1.74" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="10.55" data-duration="1.71" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="12.65" data-duration="1.81" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="14.95" data-duration="2.12" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="vo8" class="clip" data-start="18.9" data-duration="1.62" src="assets/vo/s8.wav" data-volume="1" data-track-index="9"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="22.6" src="assets/bgm/track.wav" data-volume="0.24" data-fade-in="0.1" data-fade-out="1.4" data-track-index="10"></audio>
+      <audio id="w0" class="clip" data-start="0" data-duration="1.9" src="assets/sfx/whoosh-cinematic.mp3" data-volume="0.35" data-track-index="11"></audio>
+      <audio id="i0" class="clip" data-start="4.45" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.45" data-track-index="12"></audio>
+      <audio id="p0" class="clip" data-start="6.25" data-duration="0.5" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="13"></audio>
+      <audio id="p1" class="clip" data-start="8.35" data-duration="0.5" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="14"></audio>
+      <audio id="p2" class="clip" data-start="10.45" data-duration="0.5" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="15"></audio>
+      <audio id="p3" class="clip" data-start="12.55" data-duration="0.5" src="assets/sfx/pop.mp3" data-volume="0.6" data-track-index="16"></audio>
+      <audio id="w1" class="clip" data-start="14.6" data-duration="1.9" src="assets/sfx/whoosh-cinematic.mp3" data-volume="0.35" data-track-index="17"></audio>
+      <audio id="w2" class="clip" data-start="17.1" data-duration="0.57" src="assets/sfx/whoosh-short.mp3" data-volume="0.5" data-track-index="18"></audio>
+      <audio id="c0" class="clip" data-start="17.75" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.35" data-track-index="19"></audio>
+      <audio id="n0" class="clip" data-start="19.4" data-duration="0.7" src="assets/sfx/notification.mp3" data-volume="0.4" data-track-index="20"></audio>
+    </div>
+    <script>
+      let seed = 1515; const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1); renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.82;
+      renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      const scene = new THREE.Scene();
+      scene.fog = new THREE.Fog('#d9d1c5', 26, 60);
+      { const es = new THREE.Scene(); const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.45, '#e9dfcf'); gr.addColorStop(0.6, '#8a7f70'); gr.addColorStop(1, '#3a332b'); g.fillStyle = gr; g.fillRect(0, 0, 64, 256);
+        const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; es.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), new THREE.MeshBasicMaterial({ map: tx, side: THREE.BackSide })));
+        for (const [x, y, z, w, h] of [[8, 6, 2, 5, 4], [-6, 5, -4, 3, 3]]) { const p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: '#ffffff' })); p.position.set(x, y, z); p.lookAt(0, 0, 0); es.add(p); }
+        scene.environment = new THREE.PMREMGenerator(renderer).fromScene(es, 0.04).texture; }
+      const camera = new THREE.PerspectiveCamera(34, 1080 / 1920, 0.05, 200);
+      const hemi = new THREE.HemisphereLight('#f4f0ff', '#8a7a66', 0.55);
+      // low morning sun from the sea (east)
+      const sun = new THREE.DirectionalLight('#ffe0b8', 2.4); sun.position.set(14, 9, -5); sun.castShadow = true;
+      sun.shadow.mapSize.set(4096, 4096); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; sun.shadow.radius = 4;
+      Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 50 });
+      scene.add(hemi, sun, sun.target);
+      const clamp01 = (p) => Math.min(1, Math.max(0, p));
+      const back = (p, c = 1.7) => { p = clamp01(p); return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+      const smooth = (p) => { p = clamp01(p); return p * p * (3 - 2 * p); };
+      function cv(w, h, fn) { const c = document.createElement('canvas'); c.width = w; c.height = h; fn(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; }
+
+      // ---------- table, plinth, sea, canal ----------
+      const table = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.MeshStandardMaterial({ color: '#c9c0b3', roughness: 0.92 }));
+      table.rotation.x = -Math.PI / 2; table.position.y = -0.42; table.receiveShadow = true; scene.add(table);
+      const card = new THREE.MeshStandardMaterial({ color: '#efebe3', roughness: 0.88 });
+      const cardEdge = new THREE.MeshStandardMaterial({ color: '#e2dccf', roughness: 0.9 });
+      const box = (w, h, d, x, y, z, m = card) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = true; b.receiveShadow = true; scene.add(b); return b; };
+      // land: Tamil quarter (west of the canal) and White Town (east of it)
+      box(4.9, 0.4, 19, -4.25, -0.2, 0, cardEdge); box(5.1, 0.4, 19, 1.0, -0.2, 0, cardEdge);
+      // canal and sea in frosted blue acrylic
+      const engraved = cv(512, 512, (g, w, h) => { g.fillStyle = '#9fc2cb'; g.fillRect(0, 0, w, h); g.strokeStyle = 'rgba(255,255,255,0.22)'; g.lineWidth = 2; for (let y = 8; y < h; y += 16) { g.beginPath(); for (let x = 0; x <= w; x += 16) g.lineTo(x, y + Math.sin(x / 38 + y) * 3); g.stroke(); } });
+      engraved.wrapS = engraved.wrapT = THREE.RepeatWrapping; engraved.repeat.set(2, 6);
+      const acrylic = new THREE.MeshPhysicalMaterial({ map: engraved, roughness: 0.12, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.1 });
+      box(0.5, 0.26, 19, -1.55, -0.29, 0, acrylic);
+      const sea = box(5, 0.26, 19, 6.15, -0.29, 0, acrylic); sea.castShadow = false;
+      // the promenade in basswood, with seawall boulders
+      const bass = cv(512, 64, (g, w, h) => { g.fillStyle = '#d8c3a0'; g.fillRect(0, 0, w, h); for (let i = 0; i < 40; i++) { g.strokeStyle = 'rgba(150,110,60,' + (0.08 + rnd() * 0.12).toFixed(2) + ')'; g.lineWidth = 1 + rnd() * 2; const y = rnd() * h; g.beginPath(); g.moveTo(0, y); g.lineTo(w, y + rnd() * 6 - 3); g.stroke(); } });
+      const prom = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.06, 19), new THREE.MeshStandardMaterial({ map: bass, roughness: 0.7 })); prom.position.set(3.25, 0.03, 0); prom.receiveShadow = true; scene.add(prom);
+      const stone = new THREE.MeshStandardMaterial({ color: '#a39d94', roughness: 0.95 });
+      for (let i = 0; i < 150; i++) { const r = 0.08 + rnd() * 0.12; const s = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), stone); s.position.set(3.62 + rnd() * 0.22, -0.08 + rnd() * 0.08, -9.3 + i * 0.125 + rnd() * 0.05); s.scale.set(1, 0.7 + rnd() * 0.4, 1 + rnd() * 0.5); s.castShadow = true; s.receiveShadow = true; scene.add(s); }
+
+      // ---------- the street grid in white card ----------
+      const facade = cv(256, 256, (g, w, h) => { g.fillStyle = '#f3efe7'; g.fillRect(0, 0, w, h); g.fillStyle = 'rgba(120,110,95,0.20)';
+        for (let y = 30; y < h - 20; y += 64) for (let x = 18; x < w - 20; x += 46) g.fillRect(x, y, 20, 32); });
+      facade.wrapS = facade.wrapT = THREE.RepeatWrapping;
+      const roofM = new THREE.MeshStandardMaterial({ color: '#f5f2ec', roughness: 0.85 });
+      const mustard = new THREE.MeshStandardMaterial({ color: '#e9cf8e', roughness: 0.85 });
+      const sage = new THREE.MeshStandardMaterial({ color: '#c3ccb4', roughness: 0.9 });
+      const HOUSE = new THREE.Vector3(2.15, 0, 0.6);
+      function building(x, z, w, d, h, tint) {
+        const tex = facade.clone(); tex.needsUpdate = true; tex.repeat.set(Math.max(1, Math.round(w * 2.2)), Math.max(1, Math.round(h * 2.6)));
+        const side = tint || new THREE.MeshStandardMaterial({ map: tex, roughness: 0.88 });
+        const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, tint || roofM, roofM, side, side]);
+        b.position.set(x, h / 2 + 0.03, z); b.castShadow = true; b.receiveShadow = true; scene.add(b);
+        // parapet lip
+        const lip = new THREE.Mesh(new THREE.BoxGeometry(w + 0.04, 0.035, d + 0.04), tint || roofM); lip.position.set(x, h + 0.045, z); lip.castShadow = true; scene.add(lip);
+      }
+      function blocks(x0, x1, z0, z1, sx, sz, hMin, hMax) {
+        const street = 0.26;
+        for (let bx = x0; bx < x1 - 0.3; bx += sx) for (let bz = z0; bz < z1 - 0.3; bz += sz) {
+          const bw = Math.min(sx, x1 - bx) - street, bd = Math.min(sz, z1 - bz) - street; const cx = bx + bw / 2 + street / 2, cz = bz + bd / 2 + street / 2;
+          if (Math.abs(cx - HOUSE.x) < sx * 0.6 && Math.abs(cz - HOUSE.z) < sz * 0.6) { houseBlock(cx, cz, bw, bd); continue; }
+          // pavement pad
+          const pad = new THREE.Mesh(new THREE.BoxGeometry(bw, 0.03, bd), cardEdge); pad.position.set(cx, 0.015, cz); pad.receiveShadow = true; scene.add(pad);
+          if (rnd() < 0.08) { for (let k = 0; k < 5; k++) tree(cx + (rnd() - 0.5) * bw * 0.8, cz + (rnd() - 0.5) * bd * 0.8); continue; }
+          // split the block into 2-3 houses along z, 2 along x
+          const nz = 2 + (rnd() < 0.5 ? 1 : 0), nx = 2;
+          for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+            const w = bw / nx - 0.05, d = bd / nz - 0.05; const h = hMin + rnd() * (hMax - hMin);
+            const tint = rnd() < 0.1 ? mustard : null;
+            building(cx - bw / 2 + (i + 0.5) * bw / nx, cz - bd / 2 + (j + 0.5) * bd / nz, w, d, h, tint);
+          }
+        }
+      }
+      function tree(x, z) { const r = 0.11 + rnd() * 0.07; const t = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 14), sage); t.position.set(x, 0.03 + r * 0.9 + 0.12, z); t.castShadow = true; scene.add(t);
+        const st = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.14, 6), cardEdge); st.position.set(x, 0.1, z); scene.add(st); }
+      // the house: white with terracotta bands, yellow neighbours (as on the street)
+      const terra = new THREE.MeshStandardMaterial({ color: '#c4532f', roughness: 0.6 });
+      const houseGlow = new THREE.MeshStandardMaterial({ color: '#f7f2ea', roughness: 0.8, emissive: '#ffb27a', emissiveIntensity: 0 });
+      let houseMesh;
+      function houseBlock(cx, cz, bw, bd) {
+        const pad = new THREE.Mesh(new THREE.BoxGeometry(bw, 0.03, bd), cardEdge); pad.position.set(cx, 0.015, cz); pad.receiveShadow = true; scene.add(pad);
+        building(cx - bw * 0.25, cz - bd * 0.3, bw * 0.45, bd * 0.36, 0.62, mustard);
+        building(cx - bw * 0.25, cz + bd * 0.3, bw * 0.45, bd * 0.36, 0.55, null);
+        building(cx + bw * 0.25, cz + bd * 0.3, bw * 0.45, bd * 0.36, 0.7, mustard);
+        building(cx + bw * 0.25, cz - bd * 0.3, bw * 0.45, bd * 0.36, 0.5, null);
+        // our house in the middle of the block
+        const w = bw * 0.34, d = bd * 0.22, h = 0.95; HOUSE.set(cx, 0, cz);
+        houseMesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), houseGlow); houseMesh.position.set(cx, h / 2 + 0.03, cz); houseMesh.castShadow = true; houseMesh.receiveShadow = true; scene.add(houseMesh);
+        for (const y of [0.36, 0.68]) { const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.06, 0.05, d + 0.06), terra); band.position.set(cx, y, cz); band.castShadow = true; scene.add(band); }
+        const roofT = new THREE.Mesh(new THREE.BoxGeometry(w + 0.05, 0.04, d + 0.05), terra); roofT.position.set(cx, h + 0.05, cz); scene.add(roofT);
+      }
+      blocks(-6.6, -1.85, -9.4, 9.4, 1.18, 1.3, 0.35, 0.72);
+      blocks(-1.25, 2.95, -9.4, 9.4, 1.4, 1.25, 0.4, 0.85);
+      // a few trees along the promenade side and the canal
+      for (let z = -9; z < 9.2; z += 0.9) tree(-1.15 + rnd() * 0.06, z + rnd() * 0.3);
+
+      // ---------- pins ----------
+      const steel = new THREE.MeshStandardMaterial({ color: '#c9ccd0', metalness: 1, roughness: 0.25 });
+      const enamel = new THREE.MeshPhysicalMaterial({ color: '#c7362a', roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.05 });
+      const enamelH = new THREE.MeshPhysicalMaterial({ color: '#1f3b44', roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.05 });
+      function makePin(m, s) { const P = new THREE.Group(); const head = new THREE.Mesh(new THREE.SphereGeometry(0.17 * s, 32, 24), m); head.position.y = 0.72 * s; head.castShadow = true;
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * s, 0.03 * s, 0.14 * s, 16), m); neck.position.y = 0.56 * s; neck.castShadow = true;
+        const needle = new THREE.Mesh(new THREE.CylinderGeometry(0.012 * s, 0.004, 0.55 * s, 8), steel); needle.position.y = 0.26 * s; needle.castShadow = true;
+        P.add(head, neck, needle); scene.add(P); P.userData.headY = 0.72 * s; return P; }
+      // Rock Beach on the promenade, cafés inside White Town, Auroville at the north edge, the station to the south-west
+      const SPOTS = [[3.25, 0.03, 0.25], [0.55, 0.03, -1.9], [-0.3, 0.03, -8.9], [-4.6, 0.03, 7.6]];
+      const pins = SPOTS.map(() => makePin(enamel, 1));
+      const hPin = makePin(enamelH, 1.35);
+      // ripples where a pin lands
+      const ringGeo = new THREE.RingGeometry(0.9, 1.0, 48); ringGeo.rotateX(-Math.PI / 2);
+      const ripples = SPOTS.concat([[0, 0, 0]]).map(() => { const r = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: '#c7362a', transparent: true, opacity: 0, depthWrite: false })); scene.add(r); return r; });
+      // red threads from our pin to each place
+      const threadM = new THREE.MeshStandardMaterial({ color: '#b52a1f', roughness: 0.6 });
+      const threads = SPOTS.map(() => { const m = new THREE.Mesh(new THREE.BufferGeometry(), threadM); m.castShadow = true; scene.add(m); return m; });
+      function threadGeo(a, b) { const mid = a.clone().lerp(b, 0.5); mid.y -= a.distanceTo(b) * 0.035; return new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(a, mid, b), 80, 0.022, 6, false); }
+
+      // ---------- State ----------
+      const S = { time: 0, az: -2.5, r: 8.5, h: 3.2, lx: 2.2, ly: 0.2, lz: -2.5, fov: 34, shift: 0, hp: 0, glow: 0, p0: 0, p1: 0, p2: 0, p3: 0, t0: 0, t1: 0, t2: 0, t3: 0, lab: 0 };
+      const tv = new THREE.Vector3(), pv = new THREE.Vector3();
+      const labs = ['L0', 'L1', 'L2', 'L3'].map((id) => document.getElementById(id)); const labH = document.getElementById('LH');
+      let threadsBuilt = false;
+      function place(el, v, lift) { pv.copy(v); pv.project(camera); const x = (pv.x + 1) / 2 * 1080, y = (1 - pv.y) / 2 * 1920; el.style.left = Math.min(820, Math.max(260, x)) + 'px'; el.style.top = (y - lift) + 'px'; }
+      function draw() {
+        const t = S.time;
+        // our pin
+        const hd = clamp01(S.hp), hf = 1 - back(hd, 2.2);
+        hPin.position.set(HOUSE.x, 0.98 + hf * 7, HOUSE.z); hPin.visible = S.hp > 0.001; hPin.rotation.z = hf * 0.6;
+        const hHead = new THREE.Vector3(HOUSE.x, 0.98 + hPin.userData.headY, HOUSE.z);
+        houseGlow.emissiveIntensity = S.glow * (0.32 + Math.sin(t * 4) * 0.05);
+        if (!threadsBuilt) { threads.forEach((m, k) => { m.geometry.dispose(); m.geometry = threadGeo(hHead, new THREE.Vector3(SPOTS[k][0], SPOTS[k][1] + 0.72, SPOTS[k][2])); }); threadsBuilt = true; }
+        pins.forEach((P, k) => { const v = S['p' + k], f = 1 - back(v, 2.2); const [x, y, z] = SPOTS[k];
+          P.position.set(x, y + f * 6, z); P.rotation.z = f * 0.5; P.visible = v > 0.001;
+          const rp = ripples[k], rr = clamp01((v - 0.55) / 0.9); rp.position.set(x, 0.07, z); rp.scale.setScalar(0.05 + rr * 0.9); rp.material.opacity = rr > 0 && rr < 1 ? (1 - rr) * 0.8 : 0;
+          const tm = threads[k]; const tp = clamp01(S['t' + k]); tm.visible = tp > 0.001; tm.geometry.setDrawRange(0, Math.floor(tm.geometry.index.count * tp / 3) * 3); });
+        { const rp = ripples[4], rr = clamp01((S.hp - 0.55) / 0.9); rp.position.set(HOUSE.x, 0.07, HOUSE.z); rp.scale.setScalar(0.05 + rr * 1.3); rp.material.opacity = rr > 0 && rr < 1 ? (1 - rr) * 0.8 : 0; rp.material.color.set('#1f3b44'); }
+        camera.position.set(S.lx + Math.sin(S.az) * S.r, S.ly + S.h, S.lz + Math.cos(S.az) * S.r);
+        camera.fov = S.fov; camera.updateProjectionMatrix(); camera.lookAt(tv.set(S.lx, S.ly, S.lz));
+        camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920); camera.updateMatrixWorld();
+        labs.forEach((el, k) => { const [x, y, z] = SPOTS[k]; place(el, tv.set(x, y + 0.95, z), 0); });
+        place(labH, tv.set(HOUSE.x, 1.0 + 1.35 * 0.95, HOUSE.z), 0);
+        renderer.render(scene, camera);
+      }
+
+      const st = gsap.timeline({ paused: true });
+      const tl = gsap.timeline({ paused: true });
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', immediateRender: false }, t);
+      const out = (el, t) => tl.to(el, { opacity: 0, y: -20, duration: 0.22, ease: 'power2.in' }, t - 0.22);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.4, ease: 'power2.out' }, t + 0.01); };
+      const cam = (t, d, o, ease = 'sine.inOut') => st.to(S, Object.assign({ duration: d, ease }, o), t);
+      const chipIn = (id, t) => { tl.fromTo('#' + id + ' .chip', { opacity: 0, scale: 0.4, y: 30, xPercent: -50 }, { opacity: 1, scale: 1, y: 0, xPercent: -50, duration: 0.45, ease: 'back.out(2.4)', immediateRender: false }, t); };
+      const chipOut = (id, t) => tl.to('#' + id + ' .chip', { opacity: 0, scale: 0.7, duration: 0.25, ease: 'power2.in' }, t);
+      st.to(S, { time: 22.6, duration: 22.6, ease: 'none' }, 0);
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 22.6, ease: 'steps(300)' }, 0);
+
+      // A. 0 - 4.1: a low glide over the rooftops of the model
+      cam(0, 4.1, { az: -1.45, r: 6.8, h: 3.4, lx: 2.2, ly: 0.2, lz: 0.4, shift: -120 }, 'sine.inOut');
+      rise('#a-1', 0.1); slam('#a-2', 2.05); slam('#a-3', 2.6); out('#gA', 4.15);
+      // B. 4.1 - 6.2: rise over White Town, our pin lands, the house warms up
+      cam(4.1, 1.6, { az: -0.75, r: 7.5, h: 8.6, lx: HOUSE.x - 0.3, ly: 0, lz: HOUSE.z - 0.2, shift: -220 }, 'power3.inOut');
+      st.to(S, { hp: 1, duration: 0.7, ease: 'none' }, 4.35); st.to(S, { glow: 1, duration: 0.6 }, 4.9);
+      show('#gB', 4.3); slam('#b-1', 4.3); rise('#b-2', 4.55); out('#gB', 6.25);
+      chipIn('LH', 5.0); chipOut('LH', 6.1);
+      flash(4.95, 0.18);
+      // C. the four pins, the camera circling around our house
+      const PINS = [[6.25, 'L0', { az: -0.35, r: 8.2, h: 7.6, lx: 2.6, lz: 0.4, shift: 120 }], [8.35, 'L1', { az: 0.35, r: 8.4, h: 8.0, lx: 1.4, lz: -0.6, shift: 160 }],
+        [10.45, 'L2', { az: 1.2, r: 13.5, h: 11.5, lx: 1.0, lz: -4.0, shift: 120 }], [12.55, 'L3', { az: 2.35, r: 14.5, h: 11.5, lx: -1.2, lz: 4.2, shift: 120 }]];
+      PINS.forEach(([a, id, c], k) => {
+        cam(a - 0.15, 1.9, c, 'power2.inOut');
+        st.to(S, { ['p' + k]: 1, duration: 0.65, ease: 'none' }, a);
+        st.to(S, { ['t' + k]: 1, duration: 0.7, ease: 'power2.out' }, a + 0.45);
+        chipIn(id, a + 0.55); chipOut(id, a + 1.95);
+      });
+      // D. 14.6 - 17.1: straight above. Every thread runs back to our house
+      cam(14.5, 1.6, { az: 6.283, r: 0.5, h: 34, lx: 0.3, ly: 0, lz: 0.0, fov: 38, shift: 0 }, 'power3.inOut');
+      cam(16.1, 1.0, { h: 32 }, 'sine.inOut');
+      show('#gD', 14.95); rise('#d-1', 14.95); slam('#d-2', 15.5); out('#gD', 17.15);
+      chipIn('LH', 15.3); chipOut('LH', 16.9);
+      // E. dive into the roof, cut to the real house
+      cam(17.1, 0.75, { lx: HOUSE.x, lz: HOUSE.z, ly: 0.9, h: 0.6, r: 0.01, fov: 50, shift: 0 }, 'power3.in');
+      flash(17.8, 1.0);
+      show('#ph', 17.8); tl.fromTo('#ph img', { scale: 1.16 }, { scale: 1.0, duration: 4.8, ease: 'power1.out', immediateRender: false }, 17.8);
+      show('#gE', 18.1); rise('#e-1', 18.1); rise('#e-2', 18.5);
+      tl.fromTo('#e-3', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, 19.3);
+      tl.fromTo('#e-4', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, 19.55);
+      tl.fromTo('#e-3', { scale: 1 }, { scale: 1.05, duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut', immediateRender: false }, 20.4);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+Guest reel for The Coastal Calm (24 Nov 2026), user's brief "3. 3D map with distance pins".
+Distances exactly as the user's brief (user chose to keep them over Google Maps times): Rock Beach 1 min walk, White Town cafés 5 min, Auroville 15 min, Railway station ~10 min.
+Concept (new, user picked): white card architect's scale model of White Town and the Tamil quarter, frosted acrylic sea and canal, basswood promenade with seawall stones, mustard neighbours; red enamel map pins drop with ripples, red thread runs from our pin to each place; top-down shows every thread meeting at the house; dive into the roof and cut to the real front of the house.
+Photo: real (outside.jpg, front of the house).
+Hook: "Book the wrong street in Pondy and you'll spend half the trip in autos." hookscore 78.7 STRONG (consequence warning, not used before).
+Voice: Kokoro af_nova, speed 1.08, atempo 1.03 (first use). Music: MusicGen bossa nova guitar + vibraphone.
