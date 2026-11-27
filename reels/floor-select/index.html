@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"><title>Floor select</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+    <style>
+      #root { position: absolute; inset: 0; overflow: hidden; background: #1a0b2e; font-family: Inter; }
+      #sky { position: absolute; inset: 0; background: linear-gradient(180deg, #160a33 0%, #3b1260 26%, #8e2a78 46%, #e2506a 60%, #ff8a4c 70%, #ffc27a 76%, #2a0f3f 76.2%, #12081f 100%); }
+      #sun { position: absolute; left: 290px; top: 1000px; width: 500px; height: 500px; border-radius: 50%;
+             background: linear-gradient(180deg, #fff1b8 0%, #ffc15e 45%, #ff6d6d 100%);
+             -webkit-mask: linear-gradient(180deg, #000 0 52%, transparent 52% 56%, #000 56% 64%, transparent 64% 69%, #000 69% 76%, transparent 76% 82%, #000 82% 88%, transparent 88% 100%);
+             box-shadow: 0 0 160px 40px rgba(255, 140, 90, 0.35); }
+      .palm { position: absolute; bottom: 440px; }
+      #gl { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+      .grp { position: absolute; inset: 0; opacity: 0; }
+      .big { position: absolute; left: 40px; right: 40px; text-align: center; line-height: 0.95; }
+      .hud { font-weight: 900; font-style: italic; text-transform: uppercase; letter-spacing: -2px; color: #fff6e8;
+             text-shadow: 4px 4px 0 #2a0b3a, 0 0 30px rgba(255, 90, 160, 0.55); }
+      .pink { color: #ff5fa8; } .gold { color: #ffd46b; }
+      .obj { position: absolute; left: 50px; top: 250px; width: 560px; padding: 18px 26px; border-left: 8px solid #ffd46b;
+             background: linear-gradient(90deg, rgba(10, 5, 20, 0.78), rgba(10, 5, 20, 0)); }
+      .obj .k { font-weight: 800; font-size: 26px; letter-spacing: 6px; color: #ffd46b; }
+      .obj .v { font-weight: 700; font-size: 38px; color: #fff6e8; margin-top: 6px; }
+      .vote { position: absolute; display: flex; align-items: center; gap: 14px; padding: 14px 24px 14px 14px; border-radius: 16px; opacity: 0;
+              background: rgba(16, 8, 30, 0.82); box-shadow: 0 0 0 2px rgba(255,255,255,0.12), 0 20px 40px -12px rgba(0,0,0,0.7); white-space: nowrap; }
+      .vote .p { width: 64px; height: 64px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 30px; color: #12081f; }
+      .vote .t { font-weight: 800; font-size: 36px; color: #fff6e8; font-style: italic; }
+      #map { position: absolute; right: 60px; top: 236px; width: 220px; height: 220px; border-radius: 50%; overflow: hidden; opacity: 0;
+             background: #1b1030; box-shadow: 0 0 0 6px rgba(16, 8, 30, 0.9), 0 0 0 9px rgba(255, 212, 107, 0.7), 0 20px 40px rgba(0,0,0,0.6); }
+      #cursor { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; }
+      #cursor svg { position: absolute; left: -6px; top: -4px; width: 78px; height: 96px; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.55)); }
+      #cursor .rip { position: absolute; left: -60px; top: -60px; width: 120px; height: 120px; border-radius: 50%; border: 6px solid #fff6e8; opacity: 0; }
+      #unlock { position: absolute; left: 0; right: 0; top: 300px; text-align: center; opacity: 0; }
+      #unlock .bar { display: inline-block; padding: 22px 50px 18px; background: linear-gradient(90deg, rgba(255,212,107,0), rgba(255,212,107,0.95) 20%, rgba(255,212,107,0.95) 80%, rgba(255,212,107,0)); }
+      #unlock .bar div { font-weight: 900; font-style: italic; font-size: 66px; color: #1b0b28; letter-spacing: -1px; }
+      .pill { display: inline-flex; align-items: center; gap: 16px; font-weight: 800; font-size: 46px; padding: 20px 38px 16px; border-radius: 999px; white-space: nowrap; }
+      #flash { position: absolute; inset: 0; background: #fff4e0; opacity: 0; }
+      #grain { position: absolute; inset: -100px; opacity: 0.05; pointer-events: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+      #vig { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 80% 62% at 50% 46%, rgba(0,0,0,0) 55%, rgba(10,0,20,0.6) 100%); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="21.6"
+         data-width="1080" data-height="1920" data-motion-blur="on">
+      <div id="sky"></div>
+      <div id="sun"></div>
+      <svg id="palmL" class="palm" style="left: -60px; width: 420px; height: 900px" viewBox="0 0 420 900"><g fill="#12061f"><path d="M150 900 C160 700 175 520 205 330 L222 333 C196 520 186 700 182 900 Z"/><path d="M210 330 C150 270 80 270 10 310 C80 250 160 245 212 318 Z"/><path d="M210 330 C170 230 110 190 40 190 C120 170 190 220 218 320 Z"/><path d="M214 328 C240 230 300 180 380 175 C300 205 250 250 222 330 Z"/><path d="M216 330 C280 280 350 290 410 340 C340 310 280 310 220 336 Z"/><path d="M212 332 C190 380 150 420 100 440 C150 400 180 370 206 326 Z"/></g></svg>
+      <svg id="palmR" class="palm" style="right: -40px; width: 360px; height: 1000px" viewBox="0 0 420 900"><g fill="#12061f"><path d="M260 900 C250 700 235 520 205 330 L188 333 C214 520 228 700 232 900 Z"/><path d="M200 330 C260 270 330 270 400 310 C330 250 250 245 198 318 Z"/><path d="M200 330 C240 230 300 190 370 190 C290 170 220 220 192 320 Z"/><path d="M196 328 C170 230 110 180 30 175 C110 205 160 250 188 330 Z"/><path d="M194 330 C130 280 60 290 0 340 C70 310 130 310 190 336 Z"/></g></svg>
+      <canvas id="gl" width="1080" height="1920"></canvas>
+      <div id="vig"></div>
+
+      <!-- A. Hook: the squad disagrees -->
+      <div id="gA" class="grp" style="opacity: 1">
+        <div id="a-1" class="big hud" style="top: 280px; font-size: 92px">Your squad can't agree<br>on a Pondy stay?</div>
+        <div id="v1" class="vote" style="left: 90px; top: 620px"><div class="p" style="background: #3ddc97">P1</div><div class="t">"The garden one"</div></div>
+        <div id="v2" class="vote" style="right: 260px; top: 760px"><div class="p" style="background: #5ab8ff">P2</div><div class="t">"Bathtub. Final."</div></div>
+        <div id="v3" class="vote" style="left: 140px; top: 900px"><div class="p" style="background: #ffb547">P3</div><div class="t">"Verandah??"</div></div>
+        <div id="v4" class="vote" style="right: 250px; top: 1040px"><div class="p" style="background: #ff5fa8">P4</div><div class="t">"All of it!!"</div></div>
+      </div>
+      <!-- B. Select screen title -->
+      <div id="gB" class="grp">
+        <div id="b-1" class="big hud" style="top: 480px; font-size: 92px; white-space: nowrap; left: 0; right: 0">Choose <span class="pink">your floor</span></div>
+      </div>
+      <div id="gO" class="grp"><div class="obj"><div class="k">OBJECTIVE</div><div class="v">Fit the whole squad in Pondy</div></div></div>
+      <div id="map"><svg viewBox="0 0 220 220" width="220" height="220">
+        <rect x="150" y="0" width="70" height="220" fill="#2b5c8f"/><rect x="138" y="0" width="12" height="220" fill="#c9a878"/>
+        <g stroke="#3a2a55" stroke-width="5">
+          <line x1="20" y1="0" x2="20" y2="220"/><line x1="55" y1="0" x2="55" y2="220"/><line x1="90" y1="0" x2="90" y2="220"/><line x1="122" y1="0" x2="122" y2="220"/>
+          <line x1="0" y1="30" x2="150" y2="30"/><line x1="0" y1="70" x2="150" y2="70"/><line x1="0" y1="110" x2="150" y2="110"/><line x1="0" y1="150" x2="150" y2="150"/><line x1="0" y1="190" x2="150" y2="190"/></g>
+        <circle id="mapPing" cx="108" cy="104" r="26" fill="none" stroke="#ffd46b" stroke-width="4"/>
+        <circle cx="108" cy="104" r="10" fill="#ffd46b"/>
+        <text x="110" y="214" fill="#fff6e8" font-family="Inter" font-weight="800" font-size="16" text-anchor="middle" letter-spacing="2">WHITE TOWN</text></svg></div>
+      <div id="unlock"><div class="bar"><div>NEW LEVEL UNLOCKED</div></div></div>
+      <div id="cursor"><div class="rip"></div><svg viewBox="0 0 26 32"><path d="M2 2 L2 26 L8.5 20 L13 30 L17 28.2 L12.6 18.6 L21.5 18.6 Z" fill="#fff6e8" stroke="#12081f" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+
+      <!-- E. End -->
+      <div id="gE" class="grp">
+        <div id="e-1" class="big hud" style="top: 300px; font-size: 92px; white-space: nowrap; left: 0; right: 0">Choose <span class="pink">your floor</span></div>
+        <div id="e-3" style="position: absolute; left: 0; right: 0; top: 1290px; text-align: center; opacity: 0">
+          <span class="pill" style="background: linear-gradient(180deg, #ffd46b, #ff9f43); color: #1b0b28; box-shadow: 0 0 40px rgba(255, 180, 80, 0.55)">Book direct · link in bio</span></div>
+        <div id="e-4" style="position: absolute; left: 0; right: 0; top: 1408px; text-align: center; opacity: 0">
+          <span class="pill" style="background: rgba(16, 8, 30, 0.85); color: #fff6e8; border: 2px solid rgba(255, 246, 232, 0.4); font-size: 40px">thecoastalcalm.com · +91 88704 67560</span></div>
+      </div>
+
+      <div style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0.01"><img id="im-g1" src="assets/img/g1.jpg" alt=""><img id="im-g2" src="assets/img/g2.jpg" alt=""><img id="im-v1" src="assets/img/v1.jpg" alt=""><img id="im-v2" src="assets/img/v2.jpg" alt=""><img id="im-h1" src="assets/img/h1.jpg" alt=""><img id="im-h2" src="assets/img/h2.jpg" alt=""><img id="im-w1" src="assets/img/w1.jpg" alt=""><img id="im-u1" src="assets/img/u1.jpg" alt=""></div>
+      <div id="flash"></div>
+      <div id="grain"></div>
+
+      <audio id="vo0" class="clip" data-start="0.15" data-duration="1.94" src="assets/vo/s0.wav" data-volume="1" data-track-index="1"></audio>
+      <audio id="vo1" class="clip" data-start="2.3" data-duration="0.97" src="assets/vo/s1.wav" data-volume="1" data-track-index="2"></audio>
+      <audio id="vo2" class="clip" data-start="3.75" data-duration="2.21" src="assets/vo/s2.wav" data-volume="1" data-track-index="3"></audio>
+      <audio id="vo3" class="clip" data-start="6.45" data-duration="2.3" src="assets/vo/s3.wav" data-volume="1" data-track-index="4"></audio>
+      <audio id="vo4" class="clip" data-start="9.2" data-duration="2.32" src="assets/vo/s4.wav" data-volume="1" data-track-index="5"></audio>
+      <audio id="vo5" class="clip" data-start="12.0" data-duration="1.37" src="assets/vo/s5.wav" data-volume="1" data-track-index="6"></audio>
+      <audio id="vo6" class="clip" data-start="13.75" data-duration="2.92" src="assets/vo/s6.wav" data-volume="1" data-track-index="7"></audio>
+      <audio id="vo7" class="clip" data-start="17.55" data-duration="2.29" src="assets/vo/s7.wav" data-volume="1" data-track-index="8"></audio>
+      <audio id="bgm" class="clip" data-start="0" data-duration="21.6" src="assets/bgm/track.wav" data-volume="0.24" data-fade-in="0.1" data-fade-out="1.4" data-track-index="9"></audio>
+      <audio id="k1" class="clip" data-start="0.55" data-duration="0.4" src="assets/sfx/pop.mp3" data-volume="0.5" data-track-index="10"></audio>
+      <audio id="k2" class="clip" data-start="0.8" data-duration="0.4" src="assets/sfx/pop.mp3" data-volume="0.5" data-track-index="11"></audio>
+      <audio id="k3" class="clip" data-start="1.05" data-duration="0.4" src="assets/sfx/pop.mp3" data-volume="0.5" data-track-index="12"></audio>
+      <audio id="k4" class="clip" data-start="1.3" data-duration="0.4" src="assets/sfx/pop.mp3" data-volume="0.5" data-track-index="13"></audio>
+      <audio id="w0" class="clip" data-start="2.1" data-duration="0.57" src="assets/sfx/whoosh-short.mp3" data-volume="0.5" data-track-index="14"></audio>
+      <audio id="i0" class="clip" data-start="2.4" data-duration="2.1" src="assets/sfx/impact-bass-2.mp3" data-volume="0.45" data-track-index="15"></audio>
+      <audio id="c1" class="clip" data-start="3.55" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.7" data-track-index="16"></audio>
+      <audio id="c2" class="clip" data-start="6.3" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.7" data-track-index="17"></audio>
+      <audio id="c3" class="clip" data-start="9.05" data-duration="0.4" src="assets/sfx/click.mp3" data-volume="0.7" data-track-index="18"></audio>
+      <audio id="g1" class="clip" data-start="12.2" data-duration="0.6" src="assets/sfx/glitch-2.mp3" data-volume="0.4" data-track-index="19"></audio>
+      <audio id="r0" class="clip" data-start="11.95" data-duration="1.4" src="assets/sfx/riser.mp3" data-volume="0.45" data-track-index="20"></audio>
+      <audio id="i1" class="clip" data-start="13.3" data-duration="2.1" src="assets/sfx/impact-bass-1.mp3" data-volume="0.55" data-track-index="21"></audio>
+      <audio id="s1" class="clip" data-start="13.35" data-duration="1.8" src="assets/sfx/sparkle.mp3" data-volume="0.45" data-track-index="22"></audio>
+      <audio id="h0" class="clip" data-start="13.4" data-duration="1.5" src="assets/sfx/chime.mp3" data-volume="0.4" data-track-index="23"></audio>
+      <audio id="w1" class="clip" data-start="17.3" data-duration="0.57" src="assets/sfx/whoosh-short.mp3" data-volume="0.5" data-track-index="24"></audio>
+      <audio id="n0" class="clip" data-start="18.4" data-duration="0.7" src="assets/sfx/notification.mp3" data-volume="0.4" data-track-index="25"></audio>
+    </div>
+    <script>
+      let seed = 4242; const rnd = () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+      const canvas = document.getElementById('gl');
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+      renderer.setPixelRatio(1); renderer.setSize(1080, 1920, false);
+      renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+      const scene = new THREE.Scene();
+      { const es = new THREE.Scene(); const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#3b1260'); gr.addColorStop(0.45, '#ff6d8a'); gr.addColorStop(0.55, '#ffc27a'); gr.addColorStop(1, '#12081f'); g.fillStyle = gr; g.fillRect(0, 0, 64, 256);
+        const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; es.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), new THREE.MeshBasicMaterial({ map: tx, side: THREE.BackSide })));
+        scene.environment = new THREE.PMREMGenerator(renderer).fromScene(es, 0.04).texture; }
+      const camera = new THREE.PerspectiveCamera(40, 1080 / 1920, 0.1, 200);
+      scene.add(new THREE.AmbientLight('#ffffff', 0.6));
+      const key = new THREE.DirectionalLight('#ffd2b0', 1.6); key.position.set(-3, 5, 8); scene.add(key);
+      const clamp01 = (p) => Math.min(1, Math.max(0, p));
+      const back = (p, c = 1.7) => { p = clamp01(p); return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
+      const smooth = (p) => { p = clamp01(p); return p * p * (3 - 2 * p); };
+
+      // ---------- neon grid floor ----------
+      const gridC = document.createElement('canvas'); gridC.width = gridC.height = 512; { const g = gridC.getContext('2d'); g.fillStyle = '#14071f'; g.fillRect(0, 0, 512, 512); g.strokeStyle = 'rgba(255, 95, 168, 0.85)'; g.lineWidth = 5; g.shadowColor = '#ff5fa8'; g.shadowBlur = 14; g.strokeRect(0, 0, 512, 512); }
+      const gridT = new THREE.CanvasTexture(gridC); gridT.colorSpace = THREE.SRGBColorSpace; gridT.wrapS = gridT.wrapT = THREE.RepeatWrapping; gridT.repeat.set(40, 40); gridT.anisotropy = 8;
+      const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshBasicMaterial({ map: gridT, transparent: true, opacity: 0.9 }));
+      floor.rotation.x = -Math.PI / 2; floor.position.y = -3.3; scene.add(floor);
+      scene.fog = new THREE.Fog('#5a1a5a', 10, 34);
+
+      // ---------- photos ----------
+      const IMGS = {}; ['g1', 'g2', 'v1', 'v2', 'h1', 'h2', 'w1', 'u1'].forEach((k) => { IMGS[k] = document.getElementById('im-' + k); });
+      const CARDS = [
+        { name: 'GARDEN FLOOR', lvl: 'GROUND FLOOR', c: '#3ddc97', a: 'g1', b: 'g2', stats: [['GUESTS', 3, 11], ['BEDROOMS', 1, 5]], perk: 'GARDEN-LEVEL CALM' },
+        { name: 'VERANDAH FLOOR', lvl: '1ST FLOOR', c: '#ffb547', a: 'v1', b: 'v2', stats: [['GUESTS', 4, 11], ['BEDROOMS', 2, 5]], perk: 'ROOM FOR FOUR' },
+        { name: 'HORIZON SUITE', lvl: '2ND FLOOR', c: '#5ab8ff', a: 'h1', b: 'h2', stats: [['GUESTS', 4, 11], ['BEDROOMS', 2, 5]], perk: 'BATHTUB UNLOCKED' },
+        { name: 'THE WHOLE COASTAL CALM', lvl: 'ALL FLOORS', c: '#ffd46b', a: 'w1', b: 'u1', stats: [['GUESTS', 11, 11], ['BEDROOMS', 5, 5]], perk: 'THE WHOLE HOUSE' },
+      ];
+      function cover(g, im, x, y, w, h, z, px) { if (!im.complete || !im.naturalWidth) return; const s = Math.max(w / im.naturalWidth, h / im.naturalHeight) * z; const iw = im.naturalWidth * s, ih = im.naturalHeight * s; g.drawImage(im, x + (w - iw) / 2 + px * (iw - w) / 2, y + (h - ih) / 2, iw, ih); }
+      const CW = 720, CH = 1080;
+      function paint(k, st) { const C = CARDS[k], g = st.g; const W = CW, H = CH; g.clearRect(0, 0, W, H);
+        g.save(); g.beginPath(); g.roundRect(0, 0, W, H, 46); g.clip();
+        g.fillStyle = '#120a20'; g.fillRect(0, 0, W, H);
+        if (k === 3 && st.lock > 0.001) { // locked card
+          const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#2a1440'); gr.addColorStop(1, '#0d0618'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+          g.fillStyle = 'rgba(255,212,107,0.9)'; g.font = '900 360px Inter, sans-serif'; g.textAlign = 'center'; g.fillText('?', W / 2, 560);
+          g.fillStyle = 'rgba(255,246,232,0.75)'; g.font = 'italic 900 64px Inter, sans-serif'; g.fillText('LOCKED', W / 2, 760);
+          g.font = '800 34px Inter, sans-serif'; g.fillStyle = 'rgba(255,246,232,0.45)'; g.fillText('??? GUESTS · ??? BEDROOMS', W / 2, 840);
+          g.restore(); return; }
+        // the clip: two real photos, slow push and a cut
+        const ph = 640, t = st.clip; const cut = t > 0.5; const im = IMGS[cut ? C.b : C.a]; const lt = cut ? (t - 0.5) * 2 : t * 2;
+        cover(g, im, 0, 0, W, ph, 1.12 - lt * 0.1, cut ? 0.5 - lt : -0.5 + lt);
+        const sh = g.createLinearGradient(0, ph - 260, 0, ph); sh.addColorStop(0, 'rgba(18,10,32,0)'); sh.addColorStop(1, 'rgba(18,10,32,1)'); g.fillStyle = sh; g.fillRect(0, ph - 260, W, 260);
+        if (st.play > 0.01) { g.fillStyle = 'rgba(255,60,90,' + (0.9 * st.play) + ')'; g.beginPath(); g.arc(46, 46, 12, 0, 6.283); g.fill(); g.fillStyle = 'rgba(255,246,232,' + (0.9 * st.play) + ')'; g.font = '800 26px Inter, sans-serif'; g.textAlign = 'left'; g.fillText('PREVIEW', 68, 56); }
+        // name and level
+        g.textAlign = 'left'; g.fillStyle = C.c; g.font = '800 30px Inter, sans-serif'; g.fillText(C.lvl, 48, ph + 10);
+        g.fillStyle = '#fff6e8'; let fs = 74; g.font = 'italic 900 ' + fs + 'px Inter, sans-serif'; while (g.measureText(C.name).width > W - 90 && fs > 30) { fs -= 2; g.font = 'italic 900 ' + fs + 'px Inter, sans-serif'; } g.fillText(C.name, 44, ph + 90);
+        // stat bars
+        C.stats.forEach(([lab, v, max], i) => { const y = ph + 150 + i * 92; g.fillStyle = 'rgba(255,246,232,0.7)'; g.font = '800 28px Inter, sans-serif'; g.fillText(lab, 48, y);
+          g.textAlign = 'right'; g.fillStyle = '#fff6e8'; g.font = 'italic 900 44px Inter, sans-serif'; g.fillText(String(v), W - 48, y + 4); g.textAlign = 'left';
+          g.fillStyle = 'rgba(255,255,255,0.1)'; g.beginPath(); g.roundRect(48, y + 18, W - 96, 22, 11); g.fill();
+          g.fillStyle = C.c; g.beginPath(); g.roundRect(48, y + 18, Math.max(22, (W - 96) * (v / max) * st.fill), 22, 11); g.fill(); });
+        g.fillStyle = C.c; g.font = 'italic 900 32px Inter, sans-serif'; g.fillText('★ ' + C.perk, 48, H - 52);
+        { const sx = ((st.time * 0.55 + k * 0.37) % 1.8) * (W + 900) - 600; const sg = g.createLinearGradient(sx, 0, sx + 420, H * 0.4); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(0.5, 'rgba(255,255,255,0.16)'); sg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = sg; g.fillRect(0, 0, W, H); }
+        g.restore();
+        g.strokeStyle = C.c; g.lineWidth = 8; g.beginPath(); g.roundRect(4, 4, W - 8, H - 8, 44); g.stroke(); }
+      function rrect(w, h, r) { const s = new THREE.Shape(); s.moveTo(-w / 2 + r, -h / 2); s.lineTo(w / 2 - r, -h / 2); s.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r); s.lineTo(w / 2, h / 2 - r); s.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2); s.lineTo(-w / 2 + r, h / 2); s.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r); s.lineTo(-w / 2, -h / 2 + r); s.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2); return s; }
+      const glowC = document.createElement('canvas'); glowC.width = glowC.height = 256; { const g = glowC.getContext('2d'), rg = g.createRadialGradient(128, 128, 30, 128, 128, 128); rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(0.5, 'rgba(255,255,255,0.35)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(0, 0, 256, 256); }
+      const glowT = new THREE.CanvasTexture(glowC);
+      const CWW = 1.8, CHH = 2.7;
+      const cards = CARDS.map((C, k) => {
+        const cvs = document.createElement('canvas'); cvs.width = CW; cvs.height = CH; const tex = new THREE.CanvasTexture(cvs); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+        const geo = new THREE.ExtrudeGeometry(rrect(CWW, CHH, 0.13), { depth: 0.05, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 3 });
+        geo.computeBoundingBox(); const bb = geo.boundingBox, uv = geo.attributes.uv, pos = geo.attributes.position;
+        for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) - bb.min.x) / (bb.max.x - bb.min.x), (pos.getY(i) - bb.min.y) / (bb.max.y - bb.min.y));
+        const face = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false });
+        const side = new THREE.MeshPhysicalMaterial({ color: C.c, roughness: 0.25, metalness: 0.6, emissive: C.c, emissiveIntensity: 0.5, transparent: true });
+        const G = new THREE.Group(); const m = new THREE.Mesh(geo, [face, side]); m.position.z = -0.03; G.add(m);
+        const glow = new THREE.Mesh(new THREE.PlaneGeometry(CWW * 1.9, CHH * 1.6), new THREE.MeshBasicMaterial({ map: glowT, color: C.c, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); glow.position.z = -0.12; G.add(glow);
+        scene.add(G);
+        // reflection
+        const R = new THREE.Group(); const rm = new THREE.Mesh(geo, [face.clone(), side.clone()]); rm.material.forEach((mm) => { mm.opacity = 0.22; mm.side = THREE.DoubleSide; }); rm.position.z = -0.03; R.add(rm); R.scale.y = -1; scene.add(R);
+        return { G, R, rm, glow, face, side, cvs, g: cvs.getContext('2d'), tex, st: { clip: 0, fill: 0.0, play: 0, lock: k === 3 ? 1 : 0 } };
+      });
+      // sparks for the unlock
+      const SN = 220, sPos = new Float32Array(SN * 3), sSeed = []; for (let i = 0; i < SN; i++) { const a = rnd() * 6.283, b = rnd() * 3.14; sSeed.push([Math.cos(a) * Math.sin(b), Math.cos(b), Math.sin(a) * Math.sin(b), 0.5 + rnd()]); }
+      const sGeo = new THREE.BufferGeometry(); sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+      const sparks = new THREE.Points(sGeo, new THREE.PointsMaterial({ map: glowT, color: '#ffd46b', size: 0.16, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })); scene.add(sparks);
+
+      // ---------- State ----------
+      const GRID = [[-0.98, 1.38], [0.98, 1.38], [-0.98, -1.5], [0.98, -1.5]];
+      const S = { time: 0, cx: 0, cy: -0.2, cz: 21, ly: -0.1, in0: 0, in1: 0, in2: 0, in3: 0, a0: 0, a1: 0, a2: 0, a3: 0, hov: -1, unl: 0, line: 0, curX: 540, curY: 1500, shift: -50 };
+      const ACTIVE = new THREE.Vector3(0, 0.25, 4.4), LINE = [[-2.6, 0.2], [-0.87, 0.2], [0.87, 0.2], [2.6, 0.2]];
+      const tv = new THREE.Vector3(), q = new THREE.Quaternion(), e = new THREE.Euler();
+      const cursor = document.getElementById('cursor');
+      function draw() {
+        const t = S.time;
+        const anyActive = Math.max(S.a0, S.a1, S.a2, S.a3);
+        cards.forEach((K, k) => {
+          const inn = clamp01(S['in' + k]), b = back(inn, 1.6), act = smooth(S['a' + k]);
+          const [gx, gy] = GRID[k], [lx2, ly2] = LINE[k];
+          const L = smooth(S.line);
+          const base = new THREE.Vector3(gx + (1 - b) * (k % 2 ? 6 : -6), gy + Math.sin(t * 1.4 + k) * 0.05, (1 - inn) * -4);
+          base.lerp(new THREE.Vector3(lx2, ly2, 0.6), L);
+          const sc = (1 - L) * 1 + L * 0.92;
+          const pos = base.clone().lerp(ACTIVE, act);
+          // others step back while one card is chosen
+          const dim = anyActive > 0.01 && act < 0.5 ? anyActive : 0;
+          pos.z -= dim * 1.6;
+          K.G.position.copy(pos); K.G.scale.setScalar(sc * (1 + act * 0.81));
+          // hover tilt follows the cursor, plus an idle sway
+          e.set(Math.sin(t * 1.1 + k) * 0.05 - act * 0.08 + (1 - inn) * 0.8, Math.sin(t * 0.9 + k * 2) * 0.08 + act * Math.sin(t * 1.6) * 0.14 + (1 - b) * (k % 2 ? -1.4 : 1.4) + (k === 3 ? S.unl * Math.PI * 2 : 0), 0);
+          K.G.quaternion.setFromEuler(e);
+          K.G.visible = inn > 0.001;
+          const op = 1 - dim * 0.6; K.face.opacity = op; K.side.opacity = op; K.face.color.setScalar(1 - dim * 0.45);
+          K.glow.material.opacity = (0.25 + act * 0.6 + (S.hov === k ? 0.3 : 0)) * (0.8 + Math.sin(t * 5) * 0.2) * inn * (1 - dim * 0.8);
+          // reflection under the floor line
+          K.R.position.set(pos.x, -3.3 * 2 - pos.y, pos.z); K.R.quaternion.copy(K.G.quaternion); K.R.scale.set(K.G.scale.x, -K.G.scale.y, K.G.scale.z); K.R.visible = K.G.visible;
+          K.st.clip = act > 0.01 ? (t * 0.45) % 1 : 0.1; K.st.play = act; K.st.fill = Math.max(act, L, 0.0) ; if (S.time > 2.6 && act < 0.01 && L < 0.01) K.st.fill = 0.35;
+          K.st.g = K.g; K.st.time = t; paint(k, K.st); K.tex.needsUpdate = true;
+        });
+        cards[3].st.lock = S.unl < 0.5 ? 1 : 0;
+        // sparks burst
+        const sp = clamp01((t - 13.3) / 1.6); const spP = sGeo.attributes.position.array; sSeed.forEach((s, i) => { const r = sp * 4.5 * s[3]; spP[i * 3] = ACTIVE.x + s[0] * r; spP[i * 3 + 1] = ACTIVE.y + s[1] * r - sp * sp * 1.2; spP[i * 3 + 2] = ACTIVE.z - 0.5 + s[2] * r; });
+        sGeo.attributes.position.needsUpdate = true; sparks.material.opacity = sp > 0 && sp < 1 ? (1 - sp) : 0;
+        floor.material.map.offset.y = -t * 0.35;
+        camera.position.set(S.cx, S.cy, S.cz); camera.lookAt(tv.set(0, S.ly, 0)); camera.setViewOffset(1080, 1920, 0, S.shift, 1080, 1920); camera.updateMatrixWorld();
+        cursor.style.left = S.curX + 'px'; cursor.style.top = S.curY + 'px';
+        renderer.render(scene, camera);
+      }
+      // screen position of a grid card, for the cursor
+      function cardPx(k) { const [gx, gy] = GRID[k]; camera.position.set(0, -0.2, 18); camera.lookAt(0, -0.1, 0); camera.setViewOffset(1080, 1920, 0, -50, 1080, 1920); camera.updateMatrixWorld(); const v = new THREE.Vector3(gx + 0.25, gy - 0.35, 0).project(camera); return [(v.x + 1) / 2 * 1080, (1 - v.y) / 2 * 1920]; }
+
+      const st = gsap.timeline({ paused: true });
+      const tl = gsap.timeline({ paused: true });
+      const show = (el, t) => tl.set(el, { opacity: 1 }, t);
+      const slam = (el, t) => tl.fromTo(el, { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.35, ease: 'expo.out', immediateRender: false }, t);
+      const rise = (el, t) => tl.fromTo(el, { opacity: 0, y: 36 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out', immediateRender: false }, t);
+      const out = (el, t) => tl.to(el, { opacity: 0, y: -20, duration: 0.22, ease: 'power2.in' }, t - 0.22);
+      const flash = (t, p) => { tl.set('#flash', { opacity: p }, t); tl.to('#flash', { opacity: 0, duration: 0.4, ease: 'power2.out' }, t + 0.01); };
+      const click = (t) => tl.fromTo('#cursor .rip', { opacity: 0.9, scale: 0.2 }, { opacity: 0, scale: 1.4, duration: 0.45, ease: 'power2.out', immediateRender: false }, t);
+      st.to(S, { time: 21.6, duration: 21.6, ease: 'none' }, 0);
+      tl.fromTo('#grain', { backgroundPosition: '0px 0px' }, { backgroundPosition: '2400px 1700px', duration: 21.6, ease: 'steps(300)' }, 0);
+      tl.fromTo('#sun', { y: 120 }, { y: -40, duration: 21.6, ease: 'none' }, 0);
+      tl.fromTo('#palmL', { x: -40 }, { x: 10, duration: 21.6, ease: 'none' }, 0);
+      tl.fromTo('#palmR', { x: 40 }, { x: -10, duration: 21.6, ease: 'none' }, 0);
+
+      // A. 0 - 2.2: the squad can't agree
+      st.to(S, { cz: 20, duration: 2.2, ease: 'sine.inOut' }, 0);
+      rise('#a-1', 0.05);
+      ['#v1', '#v2', '#v3', '#v4'].forEach((v, i) => tl.fromTo(v, { opacity: 0, scale: 0.4, rotation: i % 2 ? 6 : -6 }, { opacity: 1, scale: 1, rotation: i % 2 ? 2 : -2, duration: 0.35, ease: 'back.out(2.6)', immediateRender: false }, 0.5 + i * 0.25));
+      out('#gA', 2.2);
+      // B. 2.2 - 3.6: the select screen slams in
+      st.to(S, { cz: 18, duration: 1.0, ease: 'power3.out' }, 2.15);
+      [0, 1, 2, 3].forEach((k) => st.to(S, { ['in' + k]: 1, duration: 0.6, ease: 'none' }, 2.2 + k * 0.1));
+      show('#gB', 2.25); slam('#b-1', 2.25); flash(2.35, 0.25);
+      show('#gO', 2.9); tl.fromTo('#gO .obj', { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.4, ease: 'power3.out', immediateRender: false }, 2.9);
+      tl.fromTo('#map', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, 3.0);
+      tl.fromTo('#mapPing', { attr: { r: 10 }, opacity: 1 }, { attr: { r: 40 }, opacity: 0, duration: 1.0, repeat: 17, ease: 'power1.out', immediateRender: false }, 3.0);
+      tl.fromTo('#cursor', { opacity: 0 }, { opacity: 1, duration: 0.2, immediateRender: false }, 3.0);
+      // C. one floor at a time: hover, click, the card comes forward and plays
+      const P = [cardPx(0), cardPx(1), cardPx(2), cardPx(3)];
+      S.curX = 700; S.curY = 1560;
+      const FL = [[3.55, 6.3], [6.3, 9.05], [9.05, 11.9]];
+      FL.forEach(([a, b], k) => {
+        st.to(S, { curX: P[k][0], curY: P[k][1], duration: 0.45, ease: 'power3.inOut' }, a - 0.5);
+        st.set(S, { hov: k }, a - 0.1); click(a);
+        st.to(S, { ['a' + k]: 1, duration: 0.55, ease: 'power3.out' }, a + 0.05);
+        st.to(S, { curY: 1560, curX: 860, duration: 0.5, ease: 'power2.inOut' }, a + 0.2);
+        st.to(S, { ['a' + k]: 0, duration: 0.45, ease: 'power2.inOut' }, b - 0.4);
+        st.set(S, { hov: -1 }, b - 0.4);
+      });
+      out('#gB', 3.6);
+      // D. the hidden level
+      st.to(S, { curX: P[3][0], curY: P[3][1], duration: 0.5, ease: 'power3.inOut' }, 11.75);
+      st.set(S, { hov: 3 }, 12.2); click(12.3); click(12.65); click(12.95);
+      st.to(S, { a3: 1, duration: 0.6, ease: 'power3.out' }, 12.6);
+      st.to(S, { unl: 1, duration: 1.0, ease: 'power3.inOut' }, 12.75);
+      tl.to('#cursor', { opacity: 0, duration: 0.2 }, 13.0);
+      flash(13.3, 0.85);
+      tl.fromTo('#unlock', { opacity: 0, scaleX: 0.2 }, { opacity: 1, scaleX: 1, duration: 0.35, ease: 'expo.out', immediateRender: false }, 13.35);
+      tl.to('#unlock', { opacity: 0, duration: 0.25 }, 16.6);
+      tl.to(['#gO', '#map'], { opacity: 0, duration: 0.2 }, 13.2); tl.to(['#gO', '#map'], { opacity: 1, duration: 0.3 }, 16.7);
+      st.to(S, { a3: 0, duration: 0.5, ease: 'power2.inOut' }, 16.9);
+      // E. 17.1 - 21.6: all four in a line, choose your floor
+      st.to(S, { cz: 20.5, shift: 40, duration: 1.0, ease: 'power3.inOut' }, 17.0);
+      tl.to('#map', { opacity: 0, duration: 0.3 }, 17.0); tl.to('#gO', { opacity: 0, duration: 0.3 }, 17.0);
+      show('#gE', 17.4); slam('#e-1', 17.4);
+      tl.fromTo('#e-3', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, 18.3);
+      tl.fromTo('#e-4', { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', immediateRender: false }, 18.55);
+      tl.fromTo('#e-3', { scale: 1 }, { scale: 1.05, duration: 0.3, yoyo: true, repeat: 3, ease: 'sine.inOut', immediateRender: false }, 19.4);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines['main'] = tl;
+      window.addEventListener('hf-seek', (e) => { st.totalTime(e.detail.time); draw(); });
+      st.totalTime(0); draw();
+    </script>
+  </body>
+</html>

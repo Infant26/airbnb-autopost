@@ -1,0 +1,6 @@
+Guest reel for The Coastal Calm (27 Nov 2026), user's brief "1. Choose your floor game-style select screen"; user added "maybe GTA 6 type of game".
+Look: original open-world-game style (sunset neon sky, palm silhouettes, neon grid, objective box, minimap, cursor, "new level unlocked"). No GTA/Rockstar logo, fonts, characters or catchphrases.
+Facts: Garden 1BHK up to 3; Verandah 2BHK up to 4; Horizon 2BHK with the only tub; whole house 5BHK up to 11 (thecoastalcalm.com). Prices left out.
+Photos: real (g1 g2 v1 v2 h1 h2 w1 u1). No real floor video exists, so each card "preview" is a push-in and cut between two real photos.
+Hook: "Your squad can't agree on a Pondy stay? Choose your floor." hookscore 80.8 (question + command).
+Voice: Kokoro af_sky, speed 1.08 (first use). Music: MusicGen synthwave arcade 112 bpm.
